@@ -142,6 +142,12 @@
 ---
 
 ## Laengerfristig / Ideen
+- [ ] Eigener ioBroker Adapter mit Installationsassistent
+  - Wizard fuehrt einmalig durch alle benoetigten Werte
+    (Device-IDs, IPs, API Keys, Temperaturschwellen)
+  - Werte werden direkt in ioBroker Datenpunkte geschrieben
+  - Kein manuelles Eintragen mehr in ids_keys.md noetig
+  - Vorbild: klassischer Setup-Wizard, Schritt fuer Schritt
 - [ ] Alles-in-einem Status App/Webapp
   - Heizung + Solar + Wetter + Empfehlung auf einem Bildschirm
 - [ ] Scheitholz Priorisierung (Scheitholz gratis vs Pellets Kosten)
