@@ -142,6 +142,13 @@
 ---
 
 ## Laengerfristig / Ideen
+- [ ] Wasserverbrauch Tracking via AI-on-the-edge-device (ESP32-CAM vorhanden)
+  - ESP32-CAM am digitalen Hausanschluss montieren
+  - AI-on-the-edge-device Firmware flashen (liest Ziffern per neuronales Netz)
+  - HTTP API -> ioBroker Datenpunkt wasser.gesamt.m3
+  - ioBroker Adapter vorhanden
+  - HINWEIS: Hauptzaehler = Gesamtwasser (kalt + warm)
+  - Warmwasser indirekt aus ETA Temperaturverlauf (eta.warmwasser.oben) schaetzen
 - [ ] Eigener ioBroker Adapter mit Installationsassistent
   - Wizard fuehrt einmalig durch alle benoetigten Werte
     (Device-IDs, IPs, API Keys, Temperaturschwellen)
