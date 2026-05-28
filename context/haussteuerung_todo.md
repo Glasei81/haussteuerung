@@ -104,6 +104,13 @@
 ### Puffer 1a/1b
 - [ ] 5 Temperatursensoren einbinden (Schichtung sichtbar machen)
 - [ ] Puffer 1b Temperatur erfassen
+- [ ] Fühler 2-4 URIs per curl testen (am PC, nicht Termius):
+        curl http://192.168.178.5:8080/user/var/272/10601/0/11328/0
+        curl http://192.168.178.5:8080/user/var/272/10601/0/11329/0
+        curl http://192.168.178.5:8080/user/var/272/10601/0/11330/0
+        curl http://192.168.178.5:8080/user/var/272/10601/0/11331/0
+  -> Wenn strValue mit Temperatur zurueckkommt: URI in eta.js eintragen
+  -> Alternativ direkt im Browser aufrufen (gibt XML zurueck)
 
 ### Solarthermie
 - [ ] Wärmemengenzähler URI in ETA finden
