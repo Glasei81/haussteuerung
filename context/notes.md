@@ -1,4 +1,51 @@
-# Beobachtung 28.05.2026 — ETA vs. myPV WW Konflikt
+# ETA REST API — Analyse /user/menu (28.05.2026)
+# Firmware 4.65.0, Release 20260413
+
+## Bestätigte URIs (aus menu XML)
+
+### Warmwasser (/121/10111)
+- WW oben:  /121/10111/0/0/12271  (war schon bekannt)
+- WW unten: /121/10111/0/0/12272  (NEU bestätigt)
+- WW Soll:  /121/10111/0/0/12132  (NEU bestätigt -> WW/myPV Optimierung möglich)
+
+### Puffer 1a/1b (/272/10601) — 5 Fühler
+- Fühler 1 oben:  /272/10601/0/0/13191  (bekannt)
+- Fühler 2:       TODO testen: /272/10601/0/11328/0
+- Fühler 3:       TODO testen: /272/10601/0/11329/0
+- Fühler 4:       TODO testen: /272/10601/0/11330/0
+- Fühler 5 unten: /272/10601/0/0/13192  (bekannt)
+- Ladezustand:    /272/10601/0/0/12528  (bekannt)
+
+### Puffer 2 (600L Keller = /121/10601) — nach Umbau
+- Fühler 1 oben:  /121/10601/0/0/13191  (bereit)
+- Fühler 2 mitte: /121/10601/0/0/13934  (testen)
+- Fühler 3 unten: /121/10601/0/0/13192  (bereit)
+HINWEIS: Puffer 2 noch nicht physisch installiert -> null bis Umbau fertig
+
+### Pellets (/264/10891)
+- Zustand:           /264/10891/0/0/12000  (bekannt)
+- Ertrag heute:      /264/10891/14877/0/12350  (NEU)
+- Energie gesamt:    /264/10891/14877/0/2273   (NEU)
+- Leistung aktuell:  /264/10891/14877/0/2287   (NEU)
+- Volllaststunden:   /264/10891/0/0/12153       (NEU)
+- Gesamtverbrauch:   /264/10891/0/0/12016       (NEU)
+- Behälter Inhalt:   /264/10891/0/0/12011       (NEU)
+- Verriegelung:      /264/10891/0/0/12651       (bekannt)
+
+### Scheitholz (/272/10921)
+- Zustand:        /272/10921/0/0/12000   (bekannt)
+- Ertrag heute:   /272/10921/14877/0/12350  (NEU)
+- Energie gesamt: /272/10921/14877/0/2273   (NEU)
+
+### Solarthermie (/121/10221)
+- Solar-Zustand: /121/10221/0/0/12183
+- Kollektor Sensor: /121/10221/0/11139/0  (testen)
+- Kein expliziter Wärmemengenzähler im menu sichtbar
+  -> Wärmemengenzähler kommt nach Umbau, URI dann neu suchen
+
+---
+
+
 
 ## Problem
 ETA heizt Warmwasser per Puffer-Wärme (Vorlauf 58°C), obwohl gleichzeitig
