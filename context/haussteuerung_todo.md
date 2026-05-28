@@ -147,6 +147,9 @@
   - AI-on-the-edge-device Firmware flashen (liest Ziffern per neuronales Netz)
   - HTTP API -> ioBroker Datenpunkt wasser.gesamt.m3
   - ioBroker Adapter vorhanden
+  - TODO: Zaehlertyp feststellen -> Halterung planen
+    (digital: einfacher, analog: praeziser Winkel noetig -> evtl 3D Druck)
+    (Karton mit Lichtschutz als guenstige Alternative moeglich)
   - HINWEIS: Hauptzaehler = Gesamtwasser (kalt + warm)
   - Warmwasser indirekt aus ETA Temperaturverlauf (eta.warmwasser.oben) schaetzen
 - [ ] Eigener ioBroker Adapter mit Installationsassistent
