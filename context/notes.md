@@ -1,4 +1,28 @@
-# Optimierungen 26.05.2026
+# Beobachtung 28.05.2026 — ETA vs. myPV WW Konflikt
+
+## Problem
+ETA heizt Warmwasser per Puffer-Wärme (Vorlauf 58°C), obwohl gleichzeitig
+PV 9613W produziert und Batterie bei 99% ist.
+myPV WW-Heizstab (3kW) könnte das mit gratis PV-Strom erledigen.
+
+## Ursache
+ETA und Solarmanager kennen sich nicht.
+ETA sieht "WW 1°C unter Soll" → lädt sofort über Puffer.
+Solarmanager steuert myPV unabhängig nach eigener Logik.
+
+## Lösungsansatz
+Wenn PV-Überschuss > X kW UND Batterie > 95%:
+  -> ETA WW-Soll per REST API temporär hochsetzen (z.B. 60°C)
+  -> ETA greift dann nicht mehr ein
+  -> myPV Heizstab übernimmt WW-Laden mit PV-Strom
+  -> Bei schlechtem Wetter: WW-Soll wieder auf Normal (55°C)
+
+## Voraussetzung
+URI für "Warmwasser Soll" in ETA REST API finden (noch unbekannt).
+
+---
+
+
 
 ## Geprüfte Bereiche
 - ETA REST Zugriff

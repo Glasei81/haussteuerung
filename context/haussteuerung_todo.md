@@ -124,6 +124,14 @@
 - [ ] Solltemperatur Puffer per ETA REST API setzen
 - [ ] Nachlaufzeit ca. 1h beim Sperren beruecksichtigen
 
+### ETA / myPV Koordination (WW Optimierung)
+- [ ] URI fuer "Warmwasser Soll" in ETA REST API finden
+- [ ] Logik: wenn PV > X kW UND Batterie > 95%
+        -> ETA WW-Soll per REST hochsetzen (z.B. 60°C)
+        -> ETA laed WW nicht mehr per Puffer
+        -> myPV Heizstab uebernimmt mit gratis PV-Strom
+  HINWEIS: Beobachtet 28.05.2026 (PV 9613W, Bat 99%, ETA lud trotzdem per Puffer)
+
 ---
 
 ## Nach Datensammlung (Herbst 2026)
