@@ -156,6 +156,70 @@
 
 ---
 
+## Ganzes Haus — Sensorik & Raumklima
+
+### Zigbee Raumthermostate (TRVs)
+- [ ] Sonoff TRVZB (~15€/Stück) oder ähnliche Zigbee-TRVs evaluieren
+  - Zigbee2MQTT Adapter in ioBroker (bereits für Thermometer genutzt -> gleicher Weg)
+  - Datenpunkte: zigbee.wohnzimmer.soll / ist / ventil_position
+  - Logik: Ventil zu wenn Fenster offen (Fensterkontakt-Integration)
+  - Logik: Eco-Temperatur (z.B. 18°C) wenn niemand zuhause (Anwesenheitserkennung)
+  - Vorteil: Raumweise Steuerung, kein Überheizen, weniger Pufferverbrauch
+  - HINWEIS: ETA steuert Pumpen selbst -> TRV nur Ventil, nicht Pumpe!
+
+### Fensterkontakte
+- [ ] Tür-/Fensterkontakte Zigbee (Aquara, Sonoff ~8€/Stück)
+  - Datenpunkt: zigbee.fenster.wohnzimmer / schlafzimmer / etc.
+  - Logik: TRV Ventil schließen wenn Fenster > 3 Min offen
+  - Logik: Telegram Warnung wenn Fenster offen + Außentemp < 5°C
+
+### Anwesenheitserkennung
+- [ ] Presence Detection Konzept definieren
+  - Option A: Handy-IP im WLAN (ioBroker Network-Checker Adapter)
+  - Option B: Zigbee Bewegungsmelder Haupträume
+  - Option C: Kombination für zuverlässige Erkennung
+  - Logik: Niemand zuhause > 30 Min -> Eco Modus (TRVs auf 18°C)
+  - Logik: Jemand kommt heim -> normale Solltemperatur + Telegram Hinweis
+
+### CO2 / Luftqualität
+- [ ] CO2 Sensor 1-2 Räume (Wohnzimmer, Schlafzimmer)
+  - Zigbee CO2 Sensor (z.B. Sonoff SNZB-06P mit CO2) oder SCD40-basiert
+  - Datenpunkt: zigbee.co2.wohnzimmer (ppm)
+  - Schwellen: >1000ppm Warnung, >1500ppm Telegram Alert
+  - Korrelation mit Heizung: CO2 hoch + Fenster zu = Lüftungsempfehlung
+
+### Feuchte & Taupunkt
+- [ ] Prüfen ob vorhandene Zigbee Thermometer Feuchte messen (viele haben sie!)
+  - Falls ja: Datenpunkte bereits vorhanden, nur noch ioBroker Datenpunkt anlegen
+  - Taupunkt berechnen: dp = T - ((100 - rH) / 5) [vereinfacht]
+  - Datenpunkt: zigbee.taupunkt.wohnzimmer etc.
+  - Alarm: Wandtemperatur < Taupunkt + 2°C -> Schimmelgefahr
+
+### Steckdosen-Verbrauch (Lastverschiebung)
+- [ ] Smarte Steckdosen für große Verbraucher (Zigbee oder Tasmota)
+  - Waschmaschine / Trockner: Einschalten nur bei PV-Überschuss > 2kW
+  - Datenpunkt: solar.pv.watt bereits vorhanden -> direkt nutzbar
+  - Logik: solar.pv.watt > 2000 UND solar.batterie.soc > 80 -> Freigabe
+  - HINWEIS: Klimaanlagen laufen bereits über Solarmanager
+
+### ETA Heizkreis URIs (bereits im menu XML vorhanden)
+- [ ] Heizkreis 1 Vorlauf/Rücklauf Temperaturen aus ETA lesen
+  - URI aus menu XML heraussuchen (Heizkreis 1 und 2 nodes)
+  - Datenpunkte: eta.heizkreis1.vorlauf / rücklauf / soll
+  - Nutzen: Abkühlkurve präziser berechnen, Hydraulik besser verstehen
+- [ ] Heizkreis-Pumpen Status (nur lesen, nicht steuern!)
+
+### Gesamtes Regelkreis-Konzept (Ziel)
+- [ ] Implementierungsreihenfolge festlegen wenn Komponenten bereit:
+  1. Forecast (bereits vorhanden) -> PV-Prognose
+  2. PV-Prognose + Batterie -> Puffer-Lade-Entscheidung (Pellets ja/nein)
+  3. Raumtemperaturen (TRVs) -> Heizbedarfs-Erkennung
+  4. Heizkreis-Vorlauf -> Abkühlkurve dynamisch anpassen
+  5. Anwesenheit -> Eco-Modus automatisch
+  6. Alle Daten -> tägliche Zusammenfassung 18:00 per Telegram
+
+---
+
 ## Laengerfristig / Ideen
 - [ ] Wasserverbrauch Tracking via AI-on-the-edge-device (ESP32-CAM vorhanden)
   - ESP32-CAM am digitalen Hausanschluss montieren
