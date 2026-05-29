@@ -1,4 +1,25 @@
-# ETA REST API — Analyse /user/menu (28.05.2026)
+# Stand Umbau 28.05.2026
+
+## Was noch aussteht (Elektriker)
+- Puffer600 (Puffer 2) Sensoren noch nicht angeschlossen -> alle zeigen 41°C (Phantomwert)
+- Solar Umschaltventil noch nicht fertig verdrahtet
+- ERST DANACH: URIs für Puffer2 und Solarthermie in eta.js eintragen und testen
+
+## Beobachtung Puffer 1a/1b Schichtung (real, 28.05.2026 17:19)
+Fühler 1 oben links:  66°C
+Fühler 2 oben rechts: 64°C
+Fühler 3 mitte links: 53°C  <- Thermokline
+Fühler 4 mitte rechts:47°C
+Fühler 5 unten links: 46°C
+Ladezustand: 36%
+
+## Hydraulik bestätigt
+Manuelles Laden Puffer600 -> lädt über Rücklauf den Puffer 1b
+-> Bestätigt die dokumentierte Hydraulik (Fernwärmeleitung + Rücklauf)
+
+---
+
+
 # Firmware 4.65.0, Release 20260413
 
 ## Bestätigte URIs (aus menu XML)
