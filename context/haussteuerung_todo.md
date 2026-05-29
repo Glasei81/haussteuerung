@@ -182,6 +182,14 @@
   - Solarthermie Ertrag
   - Heizkosten-Tracking (Pellets vs Scheitholz vs PV)
 - [ ] OpenClaw/Sepp Zugang zur Haussteuerung via Telegram
+- [ ] Klimaanlagen in ioBroker einbinden
+  - Tuya Klimaanlage: Tuya Adapter konfigurieren (Local Key besorgen via tuya-cli)
+  - NetHome Plus Klimaanlage: wahrscheinlich Midea-basiert
+    -> ioBroker Adapter: ioBroker.midea-air-conditioner pruefen
+    -> Marke/Modell klaeren fuer passenden Adapter
+  - Solarmanager trackt bereits Verbrauch beider Geraete
+  - Ziel: PV-Ueberschuss -> Klimaanlage automatisch ein
+  - Ziel: Winter-Waermepumpen-Modus bei milden Temps (>5 Grad) effizienter als Pellets
 - [ ] Victron SmartShunt/Multiplus 2 Integration
 - [ ] Hoymiles HMS-1600 Integration (West-Wand Panels)
 - [ ] PV Erweiterung 2029 (ca. 30 kWp) in Logik beruecksichtigen
