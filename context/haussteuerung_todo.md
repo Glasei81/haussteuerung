@@ -158,14 +158,23 @@
 
 ## Ganzes Haus — Sensorik & Raumklima
 
-### Zigbee Raumthermostate (TRVs)
-- [ ] Sonoff TRVZB (~15€/Stück) oder ähnliche Zigbee-TRVs evaluieren
-  - Zigbee2MQTT Adapter in ioBroker (bereits für Thermometer genutzt -> gleicher Weg)
-  - Datenpunkte: zigbee.wohnzimmer.soll / ist / ventil_position
+### Zigbee Raumthermostate — IST-Stand
+- 1. OG Fußbodenheizung: 2 Zigbee-Thermostate bereits in ioBroker sichtbar und schaltbar ✓
+- Einzelne Räume: Zigbee Temperatursensoren vorhanden (nur messen, nicht schalten)
+- Temperatursensoren als Korrekturquelle nützlich (TRV-Sensor sitzt ungünstig direkt am Heizkörper)
+
+### TRVs für EG Heizkörper (niedrige Priorität)
+- [ ] Sonoff TRVZB (~20€/Stück Amazon, ~15€ AliExpress) pro Heizkörper EG
+  - Zigbee2MQTT Adapter in ioBroker (gleicher Weg wie bestehende Thermometer)
+  - Datenpunkte: zigbee.eg.wohnzimmer.soll / ist / ventil_position
   - Logik: Ventil zu wenn Fenster offen (Fensterkontakt-Integration)
   - Logik: Eco-Temperatur (z.B. 18°C) wenn niemand zuhause (Anwesenheitserkennung)
-  - Vorteil: Raumweise Steuerung, kein Überheizen, weniger Pufferverbrauch
   - HINWEIS: ETA steuert Pumpen selbst -> TRV nur Ventil, nicht Pumpe!
+
+### Fußbodenheizung OG Logik (niedrige Priorität)
+- [ ] Eco-Modus Logik für vorhandene Zigbee-Thermostate OG
+  - Anwesenheitserkennung -> Thermostate auf Eco wenn niemand zuhause
+  - Nacht-Absenkung automatisch (z.B. 22:00-06:00)
 
 ### Fensterkontakte
 - [ ] Tür-/Fensterkontakte Zigbee (Aquara, Sonoff ~8€/Stück)
