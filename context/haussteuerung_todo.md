@@ -246,8 +246,17 @@
   - Werte werden direkt in ioBroker Datenpunkte geschrieben
   - Kein manuelles Eintragen mehr in ids_keys.md noetig
   - Vorbild: klassischer Setup-Wizard, Schritt fuer Schritt
-- [ ] Alles-in-einem Status App/Webapp
-  - Heizung + Solar + Wetter + Empfehlung auf einem Bildschirm
+- [ ] ioBroker VIS-2 Dashboard (Drill-Down Konzept)
+  - Statusleiste oben: Außentemperatur, Wind, PV-Leistung immer sichtbar
+  - Hauptnavigation: Heizung | PV | Klima
+  - Heizung-View: Puffer Temp/Ladung, WW, Pellets-Status, Thermostate OG
+  - PV-View: Erzeugung heute, Aktuell, Batterie SOC, Heizstäbe
+  - Klima-View: Außen/Innen Temperaturen, Forecast, Windstatistik
+  - Alle Datenpunkte bereits in ioBroker vorhanden -> direkt lesbar
+  - Läuft im Browser, mobiletauglich (kein eigener Server noetig)
+- [ ] PWA Haussteuerung (Idee, nach VIS-2)
+  - Eigene HTML/JS App auf hauspi wenn VIS-2 zu limitiert
+  - Volle Kontrolle über Design und Logik
 - [ ] Scheitholz Priorisierung (Scheitholz gratis vs Pellets Kosten)
   - Scheitholz + PV maximieren, Pellets nur wenn noetig
 - [ ] Grafana erweitern
