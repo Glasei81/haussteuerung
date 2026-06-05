@@ -15,17 +15,17 @@ var ETA_DATENPUNKTE = [
 
     // --- Puffer 1a/1b (3000L, /272/10601) ---
     ['puffer_fuehler1',         '/272/10601/0/0/13191',      'eta.puffer.fuehler1',          'Puffer Fühler 1 (oben)',      '°C',  'value.temperature', 'number'],
-    ['puffer_fuehler2',         null,                         'eta.puffer.fuehler2',          'Puffer Fühler 2',             '°C',  'value.temperature', 'number'], // testen: /272/10601/0/11328/0
-    ['puffer_fuehler3',         null,                         'eta.puffer.fuehler3',          'Puffer Fühler 3',             '°C',  'value.temperature', 'number'], // testen: /272/10601/0/11329/0
-    ['puffer_fuehler4',         null,                         'eta.puffer.fuehler4',          'Puffer Fühler 4',             '°C',  'value.temperature', 'number'], // testen: /272/10601/0/11330/0
+    ['puffer_fuehler2',         '/272/10601/0/0/13933',      'eta.puffer.fuehler2',          'Puffer Fühler 2',             '°C',  'value.temperature', 'number'],
+    ['puffer_fuehler3',         '/272/10601/0/0/13934',      'eta.puffer.fuehler3',          'Puffer Fühler 3',             '°C',  'value.temperature', 'number'],
+    ['puffer_fuehler4',         '/272/10601/0/0/13935',      'eta.puffer.fuehler4',          'Puffer Fühler 4',             '°C',  'value.temperature', 'number'],
     ['puffer_fuehler5',         '/272/10601/0/0/13192',      'eta.puffer.fuehler5',          'Puffer Fühler 5 (unten)',     '°C',  'value.temperature', 'number'],
     ['puffer_ladung',           '/272/10601/0/0/12528',      'eta.puffer.ladung',            'Puffer Ladung',               '%',   'value',             'number'],
 
     // --- Puffer 2 (600L Keller, /121/10601) — nach Umbau aktivieren ---
-    ['puffer2_oben',            null,                         'eta.puffer2.oben',             'Puffer2 oben',                '°C',  'value.temperature', 'number'], // /121/10601/0/0/13191
-    ['puffer2_mitte',           null,                         'eta.puffer2.mitte',            'Puffer2 mitte',               '°C',  'value.temperature', 'number'], // /121/10601/0/0/13934
-    ['puffer2_unten',           null,                         'eta.puffer2.unten',            'Puffer2 unten',               '°C',  'value.temperature', 'number'], // /121/10601/0/0/13192
-    ['puffer2_ladung',          null,                         'eta.puffer2.ladung',           'Puffer2 Ladung',              '%',   'value',             'number'], // /121/10601/0/0/12528
+    ['puffer2_oben',            '/121/10601/0/0/13191',      'eta.puffer2.oben',             'Puffer2 oben',                '°C',  'value.temperature', 'number'],
+    ['puffer2_mitte',           '/121/10601/0/0/13934',      'eta.puffer2.mitte',            'Puffer2 mitte',               '°C',  'value.temperature', 'number'],
+    ['puffer2_unten',           '/121/10601/0/0/13192',      'eta.puffer2.unten',            'Puffer2 unten',               '°C',  'value.temperature', 'number'],
+    ['puffer2_ladung',          '/121/10601/0/0/12528',      'eta.puffer2.ladung',           'Puffer2 Ladung',              '%',   'value',             'number'],
 
     // --- Warmwasser (/121/10111) ---
     ['warmwasser_oben',         '/121/10111/0/0/12271',      'eta.warmwasser.oben',          'Warmwasser oben',             '°C',  'value.temperature', 'number'],
