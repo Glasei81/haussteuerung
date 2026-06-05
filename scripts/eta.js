@@ -1,8 +1,7 @@
 // ============================================
-// ETA Script
+// ETA Script — Heizungssteuerung
 // Liest ETA REST API alle 5 Minuten
-// Stand: Mai 2026 | Erweitert: 28.05.2026
-// URIs aus /user/menu analysiert: 28.05.2026
+// URIs aus /user/menu analysiert: 05.06.2026
 // ============================================
 
 var http = require('http');
@@ -10,122 +9,107 @@ var http = require('http');
 var ETA_IP   = '192.168.178.5';
 var ETA_PORT = 8080;
 
-var ETA_URIS = {
-    // Puffer 1a/1b (/272/10601) — 5 Fühler
-    puffer_fuehler1:    '/272/10601/0/0/13191',  // oben (bestätigt)
-    puffer_fuehler2:    null,                     // TODO: testen /272/10601/0/11328/0
-    puffer_fuehler3:    null,                     // TODO: testen /272/10601/0/11329/0
-    puffer_fuehler4:    null,                     // TODO: testen /272/10601/0/11330/0
-    puffer_fuehler5:    '/272/10601/0/0/13192',  // unten (bestätigt)
-    puffer_ladung:      '/272/10601/0/0/12528',
+// Spalten: [key, uri|null, statePath, name, unit, role, type]
+// uri=null: URI bekannt, aber noch nicht aktiviert (nach Umbau/Test)
+var ETA_DATENPUNKTE = [
 
-    // Warmwasser (/121/10111) — alle URIs bestätigt via menu
-    warmwasser_oben:    '/121/10111/0/0/12271',
-    warmwasser_unten:   '/121/10111/0/0/12272',
-    warmwasser_soll:    '/121/10111/0/0/12132',
+    // --- Puffer 1a/1b (3000L, /272/10601) ---
+    ['puffer_fuehler1',         '/272/10601/0/0/13191',      'eta.puffer.fuehler1',          'Puffer Fühler 1 (oben)',      '°C',  'value.temperature', 'number'],
+    ['puffer_fuehler2',         null,                         'eta.puffer.fuehler2',          'Puffer Fühler 2',             '°C',  'value.temperature', 'number'], // testen: /272/10601/0/11328/0
+    ['puffer_fuehler3',         null,                         'eta.puffer.fuehler3',          'Puffer Fühler 3',             '°C',  'value.temperature', 'number'], // testen: /272/10601/0/11329/0
+    ['puffer_fuehler4',         null,                         'eta.puffer.fuehler4',          'Puffer Fühler 4',             '°C',  'value.temperature', 'number'], // testen: /272/10601/0/11330/0
+    ['puffer_fuehler5',         '/272/10601/0/0/13192',      'eta.puffer.fuehler5',          'Puffer Fühler 5 (unten)',     '°C',  'value.temperature', 'number'],
+    ['puffer_ladung',           '/272/10601/0/0/12528',      'eta.puffer.ladung',            'Puffer Ladung',               '%',   'value',             'number'],
 
-    // Puffer 2 (600L Keller, /121/10601) — nach Umbau aktivieren
-    puffer2_oben:       null,                     // bereit: /121/10601/0/0/13191
-    puffer2_mitte:      null,                     // bereit: /121/10601/0/0/13934 (testen)
-    puffer2_unten:      null,                     // bereit: /121/10601/0/0/13192
+    // --- Puffer 2 (600L Keller, /121/10601) — nach Umbau aktivieren ---
+    ['puffer2_oben',            null,                         'eta.puffer2.oben',             'Puffer2 oben',                '°C',  'value.temperature', 'number'], // /121/10601/0/0/13191
+    ['puffer2_mitte',           null,                         'eta.puffer2.mitte',            'Puffer2 mitte',               '°C',  'value.temperature', 'number'], // /121/10601/0/0/13934
+    ['puffer2_unten',           null,                         'eta.puffer2.unten',            'Puffer2 unten',               '°C',  'value.temperature', 'number'], // /121/10601/0/0/13192
+    ['puffer2_ladung',          null,                         'eta.puffer2.ladung',           'Puffer2 Ladung',              '%',   'value',             'number'], // /121/10601/0/0/12528
 
-    // Pellets (/264/10891)
-    pellets_zustand:        '/264/10891/0/0/12000',
-    pellets_ertrag_heute:   '/264/10891/14877/0/12350',
-    pellets_energie_gesamt: '/264/10891/14877/0/2273',
-    pellets_leistung:       '/264/10891/14877/0/2287',
-    pellets_volllaststunden:'/264/10891/0/0/12153',
-    pellets_verbrauch:      '/264/10891/0/0/12016',
-    pellets_behaelter:      '/264/10891/0/0/12011',
+    // --- Warmwasser (/121/10111) ---
+    ['warmwasser_oben',         '/121/10111/0/0/12271',      'eta.warmwasser.oben',          'Warmwasser oben',             '°C',  'value.temperature', 'number'],
+    ['warmwasser_unten',        '/121/10111/0/0/12272',      'eta.warmwasser.unten',         'Warmwasser unten',            '°C',  'value.temperature', 'number'],
+    ['warmwasser_soll',         '/121/10111/0/0/12132',      'eta.warmwasser.soll',          'Warmwasser Soll',             '°C',  'value.temperature', 'number'],
+    ['warmwasser_zustand',      '/121/10111/0/0/12129',      'eta.warmwasser.zustand',       'Warmwasser-Zustand',          '',    'text',              'string'],
 
-    // Scheitholz (/272/10921)
-    holz_zustand:           '/272/10921/0/0/12000',
-    holz_ertrag_heute:      '/272/10921/14877/0/12350',
+    // --- Heizkreis HK (/121/10101) — Heizkörper EG ---
+    ['hk_vorlauf',              '/121/10101/0/0/12241',      'eta.hk.vorlauf',               'HK Vorlauf',                  '°C',  'value.temperature', 'number'],
+    ['hk_ruecklauf',            '/121/10101/0/0/12220',      'eta.hk.ruecklauf',             'HK Rücklauf',                 '°C',  'value.temperature', 'number'],
+    ['hk_zustand',              '/121/10101/0/0/12090',      'eta.hk.zustand',               'HK Zustand',                  '',    'text',              'string'],
 
-    // System
-    aussen_temp:            '/121/10241/0/0/12197',
-};
+    // --- Heizkreis FBH (/121/10102) — Fußbodenheizung 1.OG ---
+    ['fbh_vorlauf',             '/121/10102/0/0/12241',      'eta.fbh.vorlauf',              'FBH Vorlauf',                 '°C',  'value.temperature', 'number'],
+    ['fbh_ruecklauf',           '/121/10102/0/0/12220',      'eta.fbh.ruecklauf',            'FBH Rücklauf',                '°C',  'value.temperature', 'number'],
+    ['fbh_zustand',             '/121/10102/0/0/12090',      'eta.fbh.zustand',              'FBH Zustand',                 '',    'text',              'string'],
 
-var MAPPING = {
-    'puffer_fuehler1':       'eta.puffer.fuehler1',
-    'puffer_fuehler2':       'eta.puffer.fuehler2',
-    'puffer_fuehler3':       'eta.puffer.fuehler3',
-    'puffer_fuehler4':       'eta.puffer.fuehler4',
-    'puffer_fuehler5':       'eta.puffer.fuehler5',
-    'puffer_ladung':         'eta.puffer.ladung',
-    'warmwasser_oben':       'eta.warmwasser.oben',
-    'warmwasser_unten':      'eta.warmwasser.unten',
-    'warmwasser_soll':       'eta.warmwasser.soll',
-    'puffer2_oben':          'eta.puffer2.oben',
-    'puffer2_mitte':         'eta.puffer2.mitte',
-    'puffer2_unten':         'eta.puffer2.unten',
-    'pellets_zustand':       'eta.pellets.zustand',
-    'pellets_ertrag_heute':  'eta.pellets.ertrag_heute',
-    'pellets_energie_gesamt':'eta.pellets.energie_gesamt',
-    'pellets_leistung':      'eta.pellets.leistung',
-    'pellets_volllaststunden':'eta.pellets.volllaststunden',
-    'pellets_verbrauch':     'eta.pellets.verbrauch_gesamt',
-    'pellets_behaelter':     'eta.pellets.behaelter_inhalt',
-    'holz_zustand':          'eta.holz.zustand',
-    'holz_ertrag_heute':     'eta.holz.ertrag_heute',
-    'aussen_temp':           'eta.aussen.temperatur',
-};
+    // --- Solar (/121/10221) ---
+    ['solar_zustand',           '/121/10221/0/0/12183',      'eta.solar.zustand',            'Solar Zustand',               '',    'text',              'string'],
+    ['solar_vorlauf',           '/121/10221/0/0/12260',      'eta.solar.vorlauf',            'Solar Vorlauf',               '°C',  'value.temperature', 'number'],
+    ['solar_ruecklauf',         '/121/10221/0/0/12355',      'eta.solar.ruecklauf',          'Solar Rücklauf',              '°C',  'value.temperature', 'number'],
+    ['solar_ertrag_heute',      '/121/10221/0/0/12350',      'eta.solar.ertrag_heute',       'Solar Ertrag heute',          'kWh', 'value',             'number'],
+    ['solar_ertrag_gestern',    '/121/10221/0/0/12769',      'eta.solar.ertrag_gestern',     'Solar Ertrag gestern',        'kWh', 'value',             'number'],
+    ['solar_waermemenge',       '/121/10221/0/0/12349',      'eta.solar.waermemenge',        'Solar Wärmemenge gesamt',     'kWh', 'value',             'number'],
 
-var states = [
-    // Puffer 1a/1b Schichtung
-    ['eta.puffer.fuehler1',        'Puffer Fühler 1 (oben)',    'number', '°C',  'value.temperature'],
-    ['eta.puffer.fuehler2',        'Puffer Fühler 2',           'number', '°C',  'value.temperature'],
-    ['eta.puffer.fuehler3',        'Puffer Fühler 3',           'number', '°C',  'value.temperature'],
-    ['eta.puffer.fuehler4',        'Puffer Fühler 4',           'number', '°C',  'value.temperature'],
-    ['eta.puffer.fuehler5',        'Puffer Fühler 5 (unten)',   'number', '°C',  'value.temperature'],
-    ['eta.puffer.ladung',          'Puffer Ladung',             'number', '%',   'value'],
-    // Warmwasser
-    ['eta.warmwasser.oben',        'Warmwasser oben',           'number', '°C',  'value.temperature'],
-    ['eta.warmwasser.unten',       'Warmwasser unten',          'number', '°C',  'value.temperature'],
-    ['eta.warmwasser.soll',        'Warmwasser Soll',           'number', '°C',  'value.temperature'],
-    // Puffer 2 (nach Umbau)
-    ['eta.puffer2.oben',           'Puffer 2 oben',             'number', '°C',  'value.temperature'],
-    ['eta.puffer2.mitte',          'Puffer 2 mitte',            'number', '°C',  'value.temperature'],
-    ['eta.puffer2.unten',          'Puffer 2 unten',            'number', '°C',  'value.temperature'],
-    // Pellets
-    ['eta.pellets.zustand',        'Pellets Zustand',           'number', '',    'value'],
-    ['eta.pellets.ertrag_heute',   'Pellets Ertrag heute',      'number', 'kWh', 'value'],
-    ['eta.pellets.energie_gesamt', 'Pellets Energie gesamt',    'number', 'kWh', 'value'],
-    ['eta.pellets.leistung',       'Pellets Leistung aktuell',  'number', 'kW',  'value.power'],
-    ['eta.pellets.volllaststunden','Pellets Volllaststunden',   'number', 'h',   'value'],
-    ['eta.pellets.verbrauch_gesamt','Pellets Verbrauch gesamt', 'number', 'kg',  'value'],
-    ['eta.pellets.behaelter_inhalt','Pellets Behälter Inhalt',  'number', 'kg',  'value'],
-    // Scheitholz
-    ['eta.holz.zustand',           'Holz Zustand',              'number', '',    'value'],
-    ['eta.holz.ertrag_heute',      'Holz Ertrag heute',         'number', 'kWh', 'value'],
-    // System
-    ['eta.aussen.temperatur',      'Aussentemperatur',          'number', '°C',  'value.temperature'],
+    // --- Pellets (/264/10891) ---
+    ['pellets_zustand',         '/264/10891/0/0/12000',      'eta.pellets.zustand',          'Pellets Zustand',             '',    'text',              'string'],
+    ['pellets_ertrag_heute',    '/264/10891/14877/0/12350',  'eta.pellets.ertrag_heute',     'Pellets Ertrag heute',        'kWh', 'value',             'number'],
+    ['pellets_ertrag_gestern',  '/264/10891/14877/0/12769',  'eta.pellets.ertrag_gestern',   'Pellets Ertrag gestern',      'kWh', 'value',             'number'],
+    ['pellets_energie_gesamt',  '/264/10891/14877/0/2273',   'eta.pellets.energie_gesamt',   'Pellets Energie gesamt',      'kWh', 'value',             'number'],
+    ['pellets_leistung',        '/264/10891/14877/0/2287',   'eta.pellets.leistung',         'Pellets Leistung',            'kW',  'value.power',       'number'],
+    ['pellets_volllaststunden', '/264/10891/0/0/12153',      'eta.pellets.volllaststunden',  'Pellets Volllaststunden',     'h',   'value',             'number'],
+    ['pellets_verbrauch',       '/264/10891/0/0/12016',      'eta.pellets.verbrauch_gesamt', 'Pellets Verbrauch gesamt',    'kg',  'value',             'number'],
+    ['pellets_behaelter',       '/264/10891/0/0/12011',      'eta.pellets.behaelter_inhalt', 'Pellets Behälter Inhalt',     'kg',  'value',             'number'],
+    ['pellets_ruecklauf',       '/264/10891/0/0/12220',      'eta.pellets.ruecklauf',        'Pellets Rücklauf',            '°C',  'value.temperature', 'number'],
+    ['pellets_kessel_soll',     '/264/10891/0/0/12006',      'eta.pellets.kessel_soll',      'Pellets Kessel Soll',         '°C',  'value.temperature', 'number'],
+    ['pellets_kesseldruck',     '/264/10891/0/0/12180',      'eta.pellets.kesseldruck',      'Pellets Kesseldruck',         'bar', 'value',             'number'],
+    ['pellets_heizbetriebe',    '/264/10891/0/0/12017',      'eta.pellets.heizbetriebe',     'Pellets Heizbetriebe',        '',    'value',             'number'],
+    ['pellets_zuendungen',      '/264/10891/0/0/12018',      'eta.pellets.zuendungen',       'Pellets Zündungen',           '',    'value',             'number'],
+
+    // --- Scheitholz (/272/10921) ---
+    ['holz_zustand',            '/272/10921/0/0/12000',      'eta.holz.zustand',             'Holz Zustand',                '',    'text',              'string'],
+    ['holz_ertrag_heute',       '/272/10921/14877/0/12350',  'eta.holz.ertrag_heute',        'Holz Ertrag heute',           'kWh', 'value',             'number'],
+    ['holz_ertrag_gestern',     '/272/10921/14877/0/12769',  'eta.holz.ertrag_gestern',      'Holz Ertrag gestern',         'kWh', 'value',             'number'],
+    ['holz_energie_gesamt',     '/272/10921/14877/0/2273',   'eta.holz.energie_gesamt',      'Holz Energie gesamt',         'kWh', 'value',             'number'],
+    ['holz_leistung',           '/272/10921/14877/0/2287',   'eta.holz.leistung',            'Holz Leistung',               'kW',  'value.power',       'number'],
+    ['holz_ruecklauf',          '/272/10921/0/0/12220',      'eta.holz.ruecklauf',           'Holz Rücklauf',               '°C',  'value.temperature', 'number'],
+    ['holz_volllaststunden',    '/272/10921/0/0/12153',      'eta.holz.volllaststunden',     'Holz Volllaststunden',        'h',   'value',             'number'],
+    ['holz_heizbetriebe',       '/272/10921/0/0/12017',      'eta.holz.heizbetriebe',        'Holz Heizbetriebe',           '',    'value',             'number'],
+    ['holz_zuendungen',         '/272/10921/0/0/12018',      'eta.holz.zuendungen',          'Holz Zündungen',              '',    'value',             'number'],
+    ['holz_kesseldruck',        '/272/10921/0/0/12180',      'eta.holz.kesseldruck',         'Holz Kesseldruck',            'bar', 'value',             'number'],
+
+    // --- System (/121/10241) ---
+    ['aussen_temp',             '/121/10241/0/0/12197',      'eta.aussen.temperatur',        'Aussentemperatur',            '°C',  'value.temperature', 'number'],
 ];
 
-// Alias für Kompatibilität mit eta_pellets_logik.js
-createState('eta.puffer.oben', 0, {
-    name: 'Puffer oben (Alias fuer fuehler1)', type: 'number', unit: '°C',
-    role: 'value.temperature', read: true, write: false
-});
-
-states.forEach(function(s) {
-    createState(s[0], 0, {
-        name: s[1], type: s[2], unit: s[3], role: s[4], read: true, write: false
+// States anlegen
+ETA_DATENPUNKTE.forEach(function(dp) {
+    createState(dp[2], dp[6] === 'string' ? '' : 0, {
+        name: dp[3], type: dp[6], unit: dp[4], role: dp[5], read: true, write: false
     });
 });
 
-function etaLesen(uri, datenpunkt) {
+// Alias für Kompatibilität mit eta_pellets_logik.js
+createState('eta.puffer.oben', 0, {
+    name: 'Puffer oben (Alias für fuehler1)', type: 'number', unit: '°C',
+    role: 'value.temperature', read: true, write: false
+});
+
+function etaLesen(uri, statePath, isString) {
     var options = { host: ETA_IP, port: ETA_PORT, path: '/user/var' + uri, method: 'GET' };
     var req = http.request(options, function(res) {
         var data = '';
         res.on('data', function(c) { data += c; });
         res.on('end', function() {
             var match = data.match(/strValue="([^"]+)"/);
-            if (match) {
+            if (!match) return;
+            if (isString) {
+                setState('javascript.0.' + statePath, {val: match[1], ack: true});
+            } else {
                 var val = parseFloat(match[1].replace(',', '.'));
                 if (!isNaN(val)) {
-                    setState('javascript.0.' + datenpunkt, {val: val, ack: true});
-                    if (datenpunkt === 'eta.puffer.fuehler1') {
+                    setState('javascript.0.' + statePath, {val: val, ack: true});
+                    if (statePath === 'eta.puffer.fuehler1') {
                         setState('javascript.0.eta.puffer.oben', {val: val, ack: true});
                     }
                 }
@@ -137,13 +121,12 @@ function etaLesen(uri, datenpunkt) {
 }
 
 function alleEtaWerteLesen() {
-    Object.keys(ETA_URIS).forEach(function(key) {
-        var uri = ETA_URIS[key];
-        if (uri === null) return;
-        etaLesen(uri, MAPPING[key]);
+    ETA_DATENPUNKTE.forEach(function(dp) {
+        if (dp[1] === null) return;
+        etaLesen(dp[1], dp[2], dp[6] === 'string');
     });
 }
 
 alleEtaWerteLesen();
 schedule('*/5 * * * *', function() { alleEtaWerteLesen(); });
-log('ETA Script gestartet');
+log('ETA Script gestartet — ' + ETA_DATENPUNKTE.filter(function(dp) { return dp[1] !== null; }).length + ' Datenpunkte aktiv');
