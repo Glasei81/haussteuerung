@@ -23,8 +23,8 @@ var ETA_DATENPUNKTE = [
 
     // --- Puffer 2 (600L Keller, /121/10601) — nach Umbau aktivieren ---
     ['puffer2_oben',            '/121/10601/0/0/13191',      'eta.puffer2.oben',             'Puffer2 oben',                '°C',  'value.temperature', 'number'],
-    ['puffer2_mitte',           null,                        'eta.puffer2.mitte',            'Puffer2 mitte',               '°C',  'value.temperature', 'number'],
-    ['puffer2_unten',           '/121/10601/0/0/13935',      'eta.puffer2.unten',            'Puffer2 unten',               '°C',  'value.temperature', 'number'],
+    ['puffer2_mitte',           '/121/10601/0/11328/0',      'eta.puffer2.mitte',            'Puffer2 mitte',               '°C',  'value.temperature', 'number'],
+    ['puffer2_unten',           '/121/10601/0/11329/0',      'eta.puffer2.unten',            'Puffer2 unten',               '°C',  'value.temperature', 'number'],
     ['puffer2_ladung',          '/121/10601/0/0/12528',      'eta.puffer2.ladung',           'Puffer2 Ladung',              '%',   'value',             'number'],
 
     // --- Warmwasser (/121/10111) ---
