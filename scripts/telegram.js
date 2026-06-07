@@ -1,6 +1,6 @@
 // ============================================
 // Telegram Script
-// Alle Befehle: /status /klima /pellets_ein/aus/auto
+// Befehle: /status /forecast /klima /pellets_ein/aus/auto /hilfe
 // Liest ioBroker States — unabhängig von anderen Scripts
 // ============================================
 
@@ -57,6 +57,32 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
             '🧠 Entscheidung:\n' + safeState('eta.pellets.letzte_entscheidung', '-')
         );
 
+    // --- Forecast ---
+
+    } else if (cmd === '/forecast') {
+
+        var fMorgenMax    = safeState('wetter.forecast.morgen.max',        0);
+        var fMorgenMin    = safeState('wetter.forecast.morgen.min',        0);
+        var fMorgenRegen  = safeState('wetter.forecast.morgen.regen',      0);
+        var fMorgenUV     = safeState('wetter.forecast.morgen.uv',         0);
+        var fMorgenText   = safeState('wetter.forecast.morgen.text',       '');
+        var fUeberMax     = safeState('wetter.forecast.uebermorgen.max',   0);
+        var fUeberRegen   = safeState('wetter.forecast.uebermorgen.regen', 0);
+        var fUeberUV      = safeState('wetter.forecast.uebermorgen.uv',    0);
+        var pvPrognose    = safeState('wetter.pv.prognose_morgen',         '');
+
+        sendTo('telegram.0',
+            '🌤️ Wettervorschau Raubling\n\n' +
+            '📅 Morgen:\n' +
+            '🌡️ ' + (fMorgenMax || '?') + '°C / ' + (fMorgenMin || '?') + '°C (max/min)\n' +
+            '🌧️ Regen: ' + (fMorgenRegen || '?') + '%\n' +
+            '🔆 UV: ' + (fMorgenUV || '?') + '\n' +
+            (fMorgenText ? '📝 ' + fMorgenText + '\n' : '') +
+            '\n📅 Übermorgen:\n' +
+            '🌡️ ' + (fUeberMax || '?') + '°C | Regen: ' + (fUeberRegen || '?') + '% | UV: ' + (fUeberUV || '?') + '\n' +
+            '\n☀️ PV Prognose morgen: ' + (pvPrognose || '?')
+        );
+
     // --- Klimaanlage Status ---
 
     } else if (cmd === '/klima') {
@@ -106,6 +132,7 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
         sendTo('telegram.0',
             '📋 Verfügbare Befehle:\n\n' +
             '/status — Heizung & Energie Überblick\n' +
+            '/forecast — Wettervorschau morgen & übermorgen\n' +
             '/klima — Klimaanlage Schlafzimmer\n' +
             '/pellets_ein — Pellets manuell freigeben\n' +
             '/pellets_aus — Pellets manuell sperren\n' +
