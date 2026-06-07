@@ -10,36 +10,34 @@ var ETA_PORT = 8080;
 
 var KANDIDATEN = [
 
-    // --- Puffer 1 Fühler 2/3/4 (/272/10601) ---
-    // Aktuell eingetragen (zeigen 0°C):
-    ['/272/10601/0/0/13933',  'P1-F2 (aktuell 13933)'],
-    ['/272/10601/0/0/13934',  'P1-F3 (aktuell 13934)'],
-    ['/272/10601/0/0/13935',  'P1-F4 (aktuell 13935)'],
-    // Alte Kandidaten: Sensor-Node im Sub-Pfad
-    ['/272/10601/0/11328/0',  'P1-F2 (alt: node 11328)'],
-    ['/272/10601/0/11329/0',  'P1-F3 (alt: node 11329)'],
-    ['/272/10601/0/11330/0',  'P1-F4 (alt: node 11330)'],
-    // Weitere Varianten mit bekannter Variable 13191/13192
-    ['/272/10601/0/11328/13191', 'P1-F2 (node+var)'],
-    ['/272/10601/0/11329/13191', 'P1-F3 (node+var)'],
-    ['/272/10601/0/11330/13191', 'P1-F4 (node+var)'],
-    // Sequenzielle IDs um bekannte herum
-    ['/272/10601/0/0/13193',  'P1 (13193)'],
-    ['/272/10601/0/0/13194',  'P1 (13194)'],
-    ['/272/10601/0/0/13195',  'P1 (13195)'],
-    ['/272/10601/0/0/13196',  'P1 (13196)'],
-
     // --- Puffer 2 Mitte (/121/10601) ---
-    // Aktuell eingetragen (zeigt 0°C):
-    ['/121/10601/0/0/13934',  'P2-mitte (aktuell 13934)'],
-    // Kandidaten:
-    ['/121/10601/0/0/13193',  'P2-mitte (13193)'],
-    ['/121/10601/0/0/13933',  'P2-mitte (13933)'],
-    ['/121/10601/0/0/13935',  'P2-mitte (13935)'],
+    // ETA Display zeigt ~62°C — URI noch unbekannt
+    // Variablen-basiert (wie oben=13191, unten=13935):
+    ['/121/10601/0/0/13192',  'P2-mitte var 13192'],
+    ['/121/10601/0/0/13193',  'P2-mitte var 13193'],
+    ['/121/10601/0/0/13933',  'P2-mitte var 13933'],
+    ['/121/10601/0/0/13934',  'P2-mitte var 13934'],
+    ['/121/10601/0/0/13936',  'P2-mitte var 13936'],
+    ['/121/10601/0/0/13937',  'P2-mitte var 13937'],
+    ['/121/10601/0/0/13938',  'P2-mitte var 13938'],
+    // Node-basiert (wie Puffer 1 Fühler 2-4 = 11328/29/30):
+    ['/121/10601/0/11328/0',  'P2-mitte node 11328'],
+    ['/121/10601/0/11329/0',  'P2-mitte node 11329'],
+    ['/121/10601/0/11330/0',  'P2-mitte node 11330'],
+    ['/121/10601/0/11331/0',  'P2-mitte node 11331'],
+    ['/121/10601/0/11332/0',  'P2-mitte node 11332'],
+    ['/121/10601/0/11333/0',  'P2-mitte node 11333'],
+    ['/121/10601/0/11334/0',  'P2-mitte node 11334'],
+    ['/121/10601/0/11335/0',  'P2-mitte node 11335'],
+    // Node + Variable:
+    ['/121/10601/0/11328/13191', 'P2-mitte node11328+var'],
+    ['/121/10601/0/11329/13191', 'P2-mitte node11329+var'],
+    ['/121/10601/0/11330/13191', 'P2-mitte node11330+var'],
 
 ];
 
 log('=== ETA URI Scan startet (' + KANDIDATEN.length + ' Kandidaten) ===');
+log('Ziel: Puffer 2 Mitte (~62°C laut ETA-Display)');
 
 KANDIDATEN.forEach(function(k) {
     var uri   = k[0];
