@@ -78,7 +78,7 @@
 - /status zeigt: Pellets, Puffer, WW, Aussen, PV, Batterie, Forecast
 - InfluxDB Datenaufzeichnung laeuft (seit 21.05.2026)
 - windGust wird in InfluxDB aufgezeichnet (seit 25.05.2026)
-- Grafana Dashboard (10 Panels)
+- Grafana Dashboard (10 Panels, Wind + Windböe kombiniert ergänzt)
 - Weatherunderground Adapter geloescht
 - Hydraulik Puffer vollstaendig verstanden und dokumentiert
 - ETA Script komplett neu auf Basis eta_menu.xml (05.06.2026)
@@ -104,9 +104,11 @@
 ---
 
 ## Kurzfristig (naechste Session am PC)
-- [ ] Grafana Panel Wind + Windboee kombiniert ergaenzen
-  Flux Query: filter wind or windboee, unit km/h
+- [x] Grafana Panel Wind + Windböe kombiniert ergänzt ✓
 - [ ] Tailscale auf hauspi einrichten (Fernzugriff)
+  curl -fsSL https://tailscale.com/install.sh | sh
+  sudo tailscale up  → URL im Browser öffnen, einloggen
+  danach: ioBroker erreichbar als http://hauspi:8081 von überall
 - [ ] Telegram /klima Befehl einbauen
   -> Jahresmitteltemperatur aus InfluxDB berechnen
   -> Jahresniederschlag gesamt
@@ -126,7 +128,10 @@
 ### Heizstab Puffer 2 (4.5kW)
 - [x] Device-ID in Solarmanager identifiziert: 3 Relais (Shelly Pro3) ✓
 - [x] In Solarmanager Script eingebunden: solar.puffer2.watt ✓
-- [ ] Maximaltemperatur 65°C in Solarmanager Gerätekonfiguration prüfen/setzen
+- [ ] Heizstab Puffer 2: Drehschalter auf 85°C (Hardware-Sicherheit)
+      Software-Abschaltung bei 65°C via ioBroker → Shelly HTTP API direkt
+      (nicht über Solarmanager, da Solarmanager die Relais selbst steuert)
+      → wird Teil der Ladelogik-Implementierung
 
 ### Ladelogik Erweiterung (nach Datensammlung)
 - [ ] Temperaturschwelle definieren ab der alle Heizstäbe abschalten
