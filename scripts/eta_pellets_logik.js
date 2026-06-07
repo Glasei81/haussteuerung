@@ -384,6 +384,8 @@ on({
 
     } else if (cmd === '/status') {
 
+        var p2watt = safeState('solar.puffer2.watt', 0);
+
         var text =
             '📊 ETA Status\n' +
             '🔥 Pellets: ' +
@@ -392,9 +394,14 @@ on({
             '⚙️ Modus: ' +
             safeState('eta.pellets.modus', '-') +
             '\n\n' +
-            '🌡️ Puffer oben: ' +
+            '🌡️ Puffer 1 oben: ' +
             safeState('eta.puffer.oben', '?') +
             '°C\n' +
+            '🌡️ Puffer 2: ' +
+            safeState('eta.puffer2.oben', '?') +
+            '°C / ' +
+            safeState('eta.puffer2.unten', '?') +
+            '°C (oben/unten)\n' +
             '🚿 Warmwasser: ' +
             safeState('eta.warmwasser.oben', '?') +
             '°C\n' +
@@ -406,7 +413,19 @@ on({
             'W\n' +
             '🔋 Batterie: ' +
             safeState('solar.batterie.soc', '?') +
-            '%\n\n' +
+            '%\n' +
+            (p2watt > 0 ? '⚡ Heizstab P2: ' + p2watt + 'W\n' : '') +
+            '\n' +
+            '📅 Morgen: ' +
+            safeState('wetter.forecast.morgen.max', '?') +
+            '°C | Regen ' +
+            safeState('wetter.forecast.morgen.regen', '?') +
+            '% | UV ' +
+            safeState('wetter.forecast.morgen.uv', '?') +
+            '\n' +
+            '☀️ PV Prognose: ' +
+            safeState('wetter.pv.prognose_morgen', '?') +
+            '\n\n' +
             '🧠 Entscheidung:\n' +
             safeState('eta.pellets.letzte_entscheidung', '-');
 
