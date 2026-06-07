@@ -52,32 +52,33 @@ function smGet(path, callback) {
 
 function solarmanagerLesen() {
     smGet('/v2/point', function(data) {
-        if (!data || !data.point) return;
-        var p = data.point;
-
-        setState('javascript.0.solar.pv.watt',        {val: p.pv_power || 0,      ack: true});
-        setState('javascript.0.solar.pv.today',       {val: p.pv_today || 0,      ack: true});
-        setState('javascript.0.solar.netz.watt',      {val: p.grid_power || 0,    ack: true});
-        setState('javascript.0.solar.verbrauch.watt', {val: p.consumption || 0,   ack: true});
-        setState('javascript.0.solar.batterie.soc',   {val: p.battery_soc || 0,   ack: true});
-        setState('javascript.0.solar.batterie.watt',  {val: p.battery_power || 0, ack: true});
-
-        // Geräte
-        if (p.devices) {
-            var puffer2Watt = 0;
-            p.devices.forEach(function(d) {
-                if (d._id === DEVICE_IDS.virt_switch) {
-                    setState('javascript.0.solar.switch', {val: d.switchState === 1, ack: true});
-                }
-                if (d._id === DEVICE_IDS.puffer_heizstab && d.temperature !== undefined) {
-                    setState('javascript.0.solar.puffer.temperatur', {val: d.temperature, ack: true});
-                }
-                if (DEVICE_IDS.puffer2_relais.indexOf(d._id) !== -1) {
-                    puffer2Watt += d.power || 0;
-                }
-            });
-            setState('javascript.0.solar.puffer2.watt', {val: puffer2Watt, ack: true});
+        if (!data || typeof data.pW === 'undefined') {
+            log('SM: Ungültige Antwort', 'warn');
+            return;
         }
+
+        setState('javascript.0.solar.pv.watt',        {val: data.pW  || 0, ack: true});
+        setState('javascript.0.solar.pv.today',       {val: data.pWh || 0, ack: true});
+        setState('javascript.0.solar.verbrauch.watt', {val: data.cW  || 0, ack: true});
+        setState('javascript.0.solar.batterie.soc',   {val: data.soc || 0, ack: true});
+        // positiv = laden, negativ = entladen
+        setState('javascript.0.solar.batterie.watt',  {val: (data.bcW || 0) - (data.bdW || 0), ack: true});
+        // positiv = Netzbezug, negativ = Einspeisung
+        setState('javascript.0.solar.netz.watt',      {val: (data.cW || 0) + (data.bcW || 0) - (data.pW || 0) - (data.bdW || 0), ack: true});
+
+        var puffer2Watt = 0;
+        (data.devices || []).forEach(function(d) {
+            if (d._id === DEVICE_IDS.virt_switch) {
+                setState('javascript.0.solar.switch', {val: d.switchState === 1, ack: true});
+            }
+            if (d._id === DEVICE_IDS.puffer_heizstab && d.temperature !== undefined) {
+                setState('javascript.0.solar.puffer.temperatur', {val: d.temperature, ack: true});
+            }
+            if (DEVICE_IDS.puffer2_relais.indexOf(d._id) !== -1) {
+                puffer2Watt += d.power || 0;
+            }
+        });
+        setState('javascript.0.solar.puffer2.watt', {val: puffer2Watt, ack: true});
     });
 }
 
