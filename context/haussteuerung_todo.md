@@ -77,6 +77,14 @@
 - Grafana Dashboard (10 Panels)
 - Weatherunderground Adapter geloescht
 - Hydraulik Puffer vollstaendig verstanden und dokumentiert
+- ETA Script komplett neu auf Basis eta_menu.xml (05.06.2026)
+  - Puffer 1a/b: alle 5 Fühler aktiv (fuehler1-5)
+  - Puffer 2 (600L): alle 3 Fühler + Ladung aktiv (oben/mitte/unten)
+  - Solar: Vorlauf, Rücklauf, Ertrag heute/gestern, Wärmemenge gesamt
+  - Heizkreis HK + FBH: Vorlauf, Rücklauf, Zustand
+  - Warmwasser: oben, unten, Soll, Zustand
+  - Pellets + Scheitholz: je Rücklauf, Leistung, Energie gesamt, Ertrag gestern, Kesseldruck, Heizbetriebe, Zündungen
+  - 48 Datenpunkte aktiv, Zustand-Felder als String gespeichert
 
 ---
 
@@ -92,51 +100,37 @@
 
 ---
 
-## In ca. 12 Tagen (nach Heizungsumbau)
+## Nach Heizungsumbau (Umbau abgeschlossen 07.06.2026)
 
-### Puffer 2 (600L Keller)
-- [ ] 3 Temperatursensoren einbinden (eta.puffer2.oben/mitte/unten)
-- [ ] Ladepumpe Puffer 2 Status aus ETA auslesen (nur lesen, nicht steuern!)
-- [ ] Heizstab 3 (4.5kW) Device-ID in Solarmanager identifizieren
-- [ ] Heizstab 3 in Solarmanager Script einbinden
-- [ ] Heizstab 3 Maximaltemperatur auf 65 Grad pruefen/setzen
+### ETA Script einspielen + prüfen
+- [ ] eta.js aus GH ziehen und in ioBroker einspielen
+- [ ] Prüfen ob alle 48 Datenpunkte Werte liefern (Log: "ETA Script gestartet — 48 Datenpunkte aktiv")
+- [ ] Puffer 1a/b Fühler 2-4 prüfen: Schichtung plausibel? (oben > mitte > unten)
+      Fühler 2 = /272/10601/0/0/13933, Fühler 3 = /272/10601/0/0/13934, Fühler 4 = /272/10601/0/0/13935
+      -> Falls Werte 0 oder vertauscht: URIs anpassen
 
-### Puffer 1a/1b
-- [ ] 5 Temperatursensoren einbinden (Schichtung sichtbar machen)
-- [ ] Puffer 1b Temperatur erfassen
-- [ ] Fühler 2-4 URIs per curl testen (am PC, nicht Termius):
-        curl http://192.168.178.5:8080/user/var/272/10601/0/11328/0
-        curl http://192.168.178.5:8080/user/var/272/10601/0/11329/0
-        curl http://192.168.178.5:8080/user/var/272/10601/0/11330/0
-        curl http://192.168.178.5:8080/user/var/272/10601/0/11331/0
-  -> Wenn strValue mit Temperatur zurueckkommt: URI in eta.js eintragen
-  -> Alternativ direkt im Browser aufrufen (gibt XML zurueck)
+### Heizstab Puffer 2 (4.5kW)
+- [ ] Device-ID in Solarmanager identifizieren
+- [ ] In Solarmanager Script einbinden
+- [ ] Maximaltemperatur auf 65 Grad prüfen/setzen
 
-### Solarthermie
-- [ ] Wärmemengenzähler URI in ETA finden
-- [ ] Solarthermie Ertrag als Datenpunkt in ioBroker
-- [ ] ETA Entscheidung WW vs Puffer respektieren (nicht ueberschreiben!)
-
-### Ladelogik Erweiterung
-- [ ] Temperaturschwelle definieren ab der alle Heizstaebe abschalten
-- [ ] Nur Solarthermie wenn alle Puffer ueber Schwelltemperatur
-- [ ] Sicherstellung: ETA Pumpenlogik wird nicht gestört
+### Ladelogik Erweiterung (nach Datensammlung)
+- [ ] Temperaturschwelle definieren ab der alle Heizstäbe abschalten
+- [ ] Nur Solarthermie wenn alle Puffer über Schwelltemperatur
+- [ ] ETA Pumpenlogik nicht stören
 
 ### Scheitholz
-- [ ] ETA URI für Scheitholz Programmstatus finden
-- [ ] Kein Konflikt: Script prueft ob ETA Scheitholzprogramm aktiv
+- [ ] holz_zustand Werte beobachten: was liefert ETA wenn Holz brennt vs. Bereitschaft?
 - [ ] Telegram Kommando /holz_ein dokumentieren
 
 ### Pellets
-- [ ] Solltemperatur Puffer per ETA REST API setzen
-- [ ] Nachlaufzeit ca. 1h beim Sperren beruecksichtigen
+- [ ] Nachlaufzeit ca. 1h beim Sperren berücksichtigen (bereits bekannt)
 
 ### ETA / myPV Koordination (WW Optimierung)
-- [ ] URI fuer "Warmwasser Soll" in ETA REST API finden
+- [ ] WW Soll URI bestätigt: /121/10111/0/0/12132 (warmwasser.soll bereits geloggt)
 - [ ] Logik: wenn PV > X kW UND Batterie > 95%
-        -> ETA WW-Soll per REST hochsetzen (z.B. 60°C)
-        -> ETA laed WW nicht mehr per Puffer
-        -> myPV Heizstab uebernimmt mit gratis PV-Strom
+        -> ETA WW-Soll per POST auf 65°C setzen
+        -> myPV Heizstab übernimmt mit gratis PV-Strom
   HINWEIS: Beobachtet 28.05.2026 (PV 9613W, Bat 99%, ETA lud trotzdem per Puffer)
 
 ---
@@ -211,12 +205,10 @@
   - Logik: solar.pv.watt > 2000 UND solar.batterie.soc > 80 -> Freigabe
   - HINWEIS: Klimaanlagen laufen bereits über Solarmanager
 
-### ETA Heizkreis URIs (bereits im menu XML vorhanden)
-- [ ] Heizkreis 1 Vorlauf/Rücklauf Temperaturen aus ETA lesen
-  - URI aus menu XML heraussuchen (Heizkreis 1 und 2 nodes)
-  - Datenpunkte: eta.heizkreis1.vorlauf / rücklauf / soll
-  - Nutzen: Abkühlkurve präziser berechnen, Hydraulik besser verstehen
-- [ ] Heizkreis-Pumpen Status (nur lesen, nicht steuern!)
+### ETA Heizkreis (erledigt im Script)
+- [x] HK Vorlauf/Rücklauf/Zustand: eta.hk.vorlauf / ruecklauf / zustand ✓
+- [x] FBH Vorlauf/Rücklauf/Zustand: eta.fbh.vorlauf / ruecklauf / zustand ✓
+- [ ] Heizkreis-Pumpen Status beobachten wenn Heizperiode startet
 
 ### Gesamtes Regelkreis-Konzept (Ziel)
 - [ ] Implementierungsreihenfolge festlegen wenn Komponenten bereit:
