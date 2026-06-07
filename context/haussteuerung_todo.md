@@ -243,13 +243,15 @@
 ## Laengerfristig / Ideen
 - [ ] Wasserverbrauch Tracking via optische Schnittstelle (IrDA)
   - Zähler: Diehl Metering HYDRUS Type 173, SN 3124653, Baujahr 2024
-  - Zähler hat optisches IrDA-Fenster (oval, Gehäusemitte) → kein wM-Bus/RTL-SDR nötig
-  - wM-Bus sendet nur bei geöffnetem Deckel (Privacy Mode) → optisch ist einfacher
-  - SCHRITT 1: Optischer USB-Lesekopf kaufen (~20-30€, magnetisch, "IR Lesekopf SML")
-  - SCHRITT 2: Lesekopf auf IrDA-Fenster klemmen, USB an hauspi
-  - SCHRITT 3: ioBroker Adapter `ioBroker.smartmeter` (unterstützt SML/IEC 62056-21)
-  - Liefert: Zählerstand m³, Momentanverbrauch m³/h, Stundenwerte
-  - Kein AES-Schlüssel nötig, kein Wasserwerk kontaktieren
+  - IrDA-Fenster am Gehäuse bestätigt ✓
+  - Hardware (bestellen):
+    - Raspberry Pi Zero 2W (~15€) + Micro-SD 16GB (~8€)
+    - Micro-USB OTG-Adapter (~2€)
+    - Optischer USB-Lesekopf SML/IEC 62056-21 (~20-30€)
+  - Setup Pi Zero 2W: Raspberry Pi OS Lite (headless) + ser2net
+    → ser2net macht seriellen Port über WLAN als TCP-Port verfügbar
+  - ioBroker.smartmeter auf hauspi verbindet sich per Netzwerk zum Zero 2W
+  - ESP32-CAM vorhanden aber kein USB-Host → nicht für Lesekopf geeignet, Reserve
 - [ ] Eigener ioBroker Adapter mit Installationsassistent
   - Wizard fuehrt einmalig durch alle benoetigten Werte
     (Device-IDs, IPs, API Keys, Temperaturschwellen)
