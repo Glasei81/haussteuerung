@@ -50,73 +50,61 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
             '☀️ PV: ' + safeState('solar.pv.watt', '?') + 'W\n' +
             '🔋 Batterie: ' + safeState('solar.batterie.soc', '?') + '%\n' +
             (p2watt > 0 ? '⚡ Heizstab P2: ' + p2watt + 'W\n' : '') +
-            '\n📅 Morgen: ' + safeState('wetter.forecast.morgen.max', '?') + '°C | Regen ' +
-            safeState('wetter.forecast.morgen.regen', '?') + '% | UV ' + safeState('wetter.forecast.morgen.uv', '?') + '\n' +
-            '☀️ PV Prognose: ' + safeState('wetter.pv.prognose_morgen', '?') + '\n\n' +
+            '\n📅 Morgen: ' + (safeState('wetter.forecast.morgen.max', 0) || '?') + '°C | Regen ' +
+            (safeState('wetter.forecast.morgen.regen', -1) >= 0 ? safeState('wetter.forecast.morgen.regen', 0) + '%' : '?') + ' | UV ' +
+            (safeState('wetter.forecast.morgen.uv', 0) || '?') + '\n' +
+            '☀️ PV Prognose: ' + (safeState('wetter.pv.prognose_morgen', '') || '?') + '\n\n' +
             '🧠 Entscheidung:\n' + safeState('eta.pellets.letzte_entscheidung', '-')
         );
 
-    // --- Klimastatistik ---
+    // --- Klimaanlage Status ---
 
     } else if (cmd === '/klima') {
 
-        var startMs = new Date('2026-05-21').getTime();
-        var endMs   = Date.now();
-        var tage    = Math.round((endMs - startMs) / 86400000);
-        var res     = {};
-        var offen   = 4;
+        var klimaAktiv      = safeState('klima.tuya.aktiv',       false);
+        var klimaStart      = safeState('klima.tuya.start_zeit',  0);
+        var klimaPause      = safeState('klima.tuya.pause_start', 0);
+        var klimaGrund      = safeState('klima.tuya.grund',       '-');
 
-        function sendKlima() {
-            if (offen > 0) return;
-            sendTo('telegram.0',
-                '🌍 Klimastatistik Raubling\n' +
-                '📅 Aufzeichnung: ' + tage + ' Tage (seit 21.05.2026)\n\n' +
-                '🌡️ Ø Temperatur: ' + (res.temp      !== undefined ? res.temp.toFixed(1)      + '°C'   : '?') + '\n' +
-                '💨 Ø Wind:        ' + (res.wind      !== undefined ? res.wind.toFixed(1)      + ' km/h' : '?') + '\n' +
-                '🌧️ Niederschlag:  ' + (res.regen     !== undefined ? res.regen.toFixed(1)     + ' mm'   : '?') + '\n' +
-                '⛈️ Starkregen-Tage (>10mm/h): ' + (res.starkregen !== undefined ? res.starkregen : '?')
-            );
+        var zigbeeTemp = null;
+        try {
+            var zs = getState('zigbee.0.a4c1388f0b92eb71.temperature');
+            if (zs && zs.val !== null && zs.val !== undefined) zigbeeTemp = zs.val;
+        } catch(e) {}
+
+        var jetzt = Date.now();
+        var statusZeile = '';
+
+        if (klimaAktiv) {
+            var laufMin = Math.round((jetzt - klimaStart) / 60000);
+            statusZeile = '✅ AKTIV — Laufzeit: ' + laufMin + ' Min';
+        } else if (klimaPause > 0 && (jetzt - klimaPause) < 3600000) {
+            var restMin = Math.round((3600000 - (jetzt - klimaPause)) / 60000);
+            statusZeile = '⏸️ PAUSE — noch ' + restMin + ' Min';
+        } else {
+            statusZeile = '⭕ AUS';
         }
 
-        sendTo('influxdb.0', 'getHistory', {
-            id: 'javascript.0.wetter.aktuell.temperatur',
-            options: { start: startMs, end: endMs, aggregate: 'average', count: 1 }
-        }, function(r) {
-            if (r && r.result && r.result[0]) res.temp = r.result[0].val;
-            offen--; sendKlima();
-        });
+        sendTo('telegram.0',
+            '❄️ Klimaanlage Schlafzimmer\n' +
+            'Status: ' + statusZeile + '\n' +
+            '🌡️ Raumtemperatur: ' + (zigbeeTemp !== null ? zigbeeTemp + '°C' : '?') + '\n' +
+            '📝 Letzter Grund: ' + klimaGrund
+        );
 
-        sendTo('influxdb.0', 'getHistory', {
-            id: 'javascript.0.wetter.aktuell.wind',
-            options: { start: startMs, end: endMs, aggregate: 'average', count: 1 }
-        }, function(r) {
-            if (r && r.result && r.result[0]) res.wind = r.result[0].val;
-            offen--; sendKlima();
-        });
+    // --- Hilfe ---
 
-        // regen_gesamt ist Tageskumulation → Tagesmax pro Tag summieren
-        sendTo('influxdb.0', 'getHistory', {
-            id: 'javascript.0.wetter.aktuell.regen_gesamt',
-            options: { start: startMs, end: endMs, aggregate: 'max', step: 86400000 }
-        }, function(r) {
-            if (r && r.result) {
-                var sum = 0;
-                r.result.forEach(function(p) { if (p.val) sum += p.val; });
-                res.regen = sum;
-            }
-            offen--; sendKlima();
-        });
+    } else if (cmd === '/hilfe' || cmd === '/start') {
 
-        // Starkregentage: Tage mit max regen_rate > 10 mm/h
-        sendTo('influxdb.0', 'getHistory', {
-            id: 'javascript.0.wetter.aktuell.regen_rate',
-            options: { start: startMs, end: endMs, aggregate: 'max', step: 86400000 }
-        }, function(r) {
-            var count = 0;
-            if (r && r.result) r.result.forEach(function(p) { if (p.val > 10) count++; });
-            res.starkregen = count;
-            offen--; sendKlima();
-        });
+        sendTo('telegram.0',
+            '📋 Verfügbare Befehle:\n\n' +
+            '/status — Heizung & Energie Überblick\n' +
+            '/klima — Klimaanlage Schlafzimmer\n' +
+            '/pellets_ein — Pellets manuell freigeben\n' +
+            '/pellets_aus — Pellets manuell sperren\n' +
+            '/pellets_auto — Pellets zurück auf Automatik\n' +
+            '/hilfe — Diese Übersicht'
+        );
     }
 });
 
