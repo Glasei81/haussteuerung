@@ -62,15 +62,15 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
     } else if (cmd === '/klima') {
 
         var klimaStateObj = null;
-        try { klimaStateObj = getState('javascript.0.klima.tuya.aktiv'); } catch(e) {}
+        try { klimaStateObj = getState('javascript.0.klima.schlafzimmer.aktiv'); } catch(e) {}
 
         if (!klimaStateObj || klimaStateObj.val === null || klimaStateObj.val === undefined) {
-            sendTo('telegram.0', '❄️ Klimaanlage\nScript noch nicht aktiv.\n(Midea-Adapter ausstehend)');
+            sendTo('telegram.0', '❄️ Klimaanlage\nScript nicht aktiv.');
         } else {
             var klimaAktiv  = klimaStateObj.val;
-            var klimaStart  = safeState('klima.tuya.start_zeit',  0);
-            var klimaPause  = safeState('klima.tuya.pause_start', 0);
-            var klimaGrund  = safeState('klima.tuya.grund',       '-');
+            var klimaStart  = safeState('klima.schlafzimmer.start_zeit',  0);
+            var klimaPause  = safeState('klima.schlafzimmer.pause_start', 0);
+            var klimaGrund  = safeState('klima.schlafzimmer.grund',       '-');
 
             var zigbeeTemp = null;
             try {

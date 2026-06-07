@@ -1,11 +1,11 @@
 // ============================================
-// Klima Logik — Tuya Klimaanlage Schlafzimmer
+// Klima Logik — Midea Klimaanlage Schlafzimmer
 // Einschalten bei Raumtemp >= 25°C
 // 2h Betrieb, 1h Pflichtpause
 // Stand: 07.06.2026
 // ============================================
 
-var TUYA_ID          = '121075124022d88f2e59';
+var MIDEA_ID         = '153931628437826';
 var ZIGBEE_SCHLAFEN  = 'zigbee.0.a4c1388f0b92eb71.temperature';
 
 var CONFIG = {
@@ -19,10 +19,10 @@ var CONFIG = {
     WW_STUNDE:        14,                    // Uhrzeit für WW-Check
 };
 
-createState('klima.tuya.aktiv',       false, { name: 'Klima Tuya aktiv',        type: 'boolean', role: 'switch', read: true, write: true });
-createState('klima.tuya.start_zeit',  0,     { name: 'Klima Tuya Startzeit ms', type: 'number',  role: 'value',  read: true, write: false });
-createState('klima.tuya.pause_start', 0,     { name: 'Klima Tuya Pausestart ms',type: 'number',  role: 'value',  read: true, write: false });
-createState('klima.tuya.grund',       '',    { name: 'Klima Tuya letzter Grund',type: 'string',  role: 'text',   read: true, write: false });
+createState('klima.schlafzimmer.aktiv',       false, { name: 'Klima Schlafzimmer aktiv',        type: 'boolean', role: 'switch', read: true, write: true });
+createState('klima.schlafzimmer.start_zeit',  0,     { name: 'Klima Schlafzimmer Startzeit ms', type: 'number',  role: 'value',  read: true, write: false });
+createState('klima.schlafzimmer.pause_start', 0,     { name: 'Klima Schlafzimmer Pausestart ms',type: 'number',  role: 'value',  read: true, write: false });
+createState('klima.schlafzimmer.grund',       '',    { name: 'Klima Schlafzimmer letzter Grund',type: 'string',  role: 'text',   read: true, write: false });
 
 function safe(id, fallback) {
     try {
@@ -33,21 +33,21 @@ function safe(id, fallback) {
 }
 
 function klimaEin(raumTemp) {
-    setState('tuya.0.' + TUYA_ID + '.4', 0);               // Modus: Kühlen (cold=0)
-    setState('tuya.0.' + TUYA_ID + '.2', CONFIG.TEMP_SOLL); // Solltemperatur 22°C
-    setState('tuya.0.' + TUYA_ID + '.1', true);             // Einschalten
-    setState('javascript.0.klima.tuya.aktiv',       { val: true,       ack: true });
-    setState('javascript.0.klima.tuya.start_zeit',  { val: Date.now(), ack: true });
-    setState('javascript.0.klima.tuya.pause_start', { val: 0,          ack: true });
-    setState('javascript.0.klima.tuya.grund',       { val: 'Eingeschaltet — ' + raumTemp + '°C', ack: true });
+    setState('midea.0.' + MIDEA_ID + '.operationalMode',   2);                  // Kühlen = 2
+    setState('midea.0.' + MIDEA_ID + '.targetTemperature', CONFIG.TEMP_SOLL);   // 22°C
+    setState('midea.0.' + MIDEA_ID + '.powerState',        true);               // Einschalten
+    setState('javascript.0.klima.schlafzimmer.aktiv',       { val: true,       ack: true });
+    setState('javascript.0.klima.schlafzimmer.start_zeit',  { val: Date.now(), ack: true });
+    setState('javascript.0.klima.schlafzimmer.pause_start', { val: 0,          ack: true });
+    setState('javascript.0.klima.schlafzimmer.grund',       { val: 'Eingeschaltet — ' + raumTemp + '°C', ack: true });
     sendTo('telegram.0', '❄️ Klimaanlage EIN\nSchlafzimmer: ' + raumTemp + '°C → Ziel: ' + CONFIG.TEMP_SOLL + '°C');
     log('Klima EIN — Schlafzimmer ' + raumTemp + '°C');
 }
 
 function klimaAus(grund, mitTelegram) {
-    setState('tuya.0.' + TUYA_ID + '.1', false);
-    setState('javascript.0.klima.tuya.aktiv', { val: false, ack: true });
-    setState('javascript.0.klima.tuya.grund', { val: grund, ack: true });
+    setState('midea.0.' + MIDEA_ID + '.powerState', false);
+    setState('javascript.0.klima.schlafzimmer.aktiv', { val: false, ack: true });
+    setState('javascript.0.klima.schlafzimmer.grund', { val: grund, ack: true });
     if (mitTelegram) sendTo('telegram.0', '❄️ Klimaanlage AUS\n' + grund);
     log('Klima AUS — ' + grund);
 }
@@ -56,14 +56,14 @@ function klimaLogik() {
     var jetzt      = Date.now();
     var stunde     = new Date().getHours();
 
-    var aktiv      = safe('javascript.0.klima.tuya.aktiv',       false);
-    var startZeit  = safe('javascript.0.klima.tuya.start_zeit',  0);
-    var pauseStart = safe('javascript.0.klima.tuya.pause_start', 0);
+    var aktiv      = safe('javascript.0.klima.schlafzimmer.aktiv',       false);
+    var startZeit  = safe('javascript.0.klima.schlafzimmer.start_zeit',  0);
+    var pauseStart = safe('javascript.0.klima.schlafzimmer.pause_start', 0);
 
-    var raumTemp   = safe(ZIGBEE_SCHLAFEN,                            0);
-    var pvWatt     = safe('javascript.0.solar.pv.watt',               0);
-    var verbWatt   = safe('javascript.0.solar.verbrauch.watt',        0);
-    var wwTemp     = safe('javascript.0.eta.warmwasser.oben',         99);
+    var raumTemp   = safe(ZIGBEE_SCHLAFEN,                        0);
+    var pvWatt     = safe('javascript.0.solar.pv.watt',           0);
+    var verbWatt   = safe('javascript.0.solar.verbrauch.watt',    0);
+    var wwTemp     = safe('javascript.0.eta.warmwasser.oben',     99);
 
     // Nettobilanz: negativ = Batterie/Netz liefert Energie
     var netto      = pvWatt - verbWatt;
@@ -78,7 +78,7 @@ function klimaLogik() {
         if ((jetzt - pauseStart) < CONFIG.PAUSE_MS) {
             inPause = true;
         } else {
-            setState('javascript.0.klima.tuya.pause_start', { val: 0, ack: true });
+            setState('javascript.0.klima.schlafzimmer.pause_start', { val: 0, ack: true });
         }
     }
 
@@ -89,7 +89,7 @@ function klimaLogik() {
             klimaAus('Zieltemperatur ' + CONFIG.TEMP_AUS + '°C erreicht (' + raumTemp + '°C)', true);
 
         } else if (laufzeit >= CONFIG.MAX_LAUFZEIT_MS) {
-            setState('javascript.0.klima.tuya.pause_start', { val: jetzt, ack: true });
+            setState('javascript.0.klima.schlafzimmer.pause_start', { val: jetzt, ack: true });
             klimaAus('2h Laufzeit — 1h Pause', true);
 
         } else if (wwSperre) {
@@ -108,4 +108,4 @@ function klimaLogik() {
 
 klimaLogik();
 schedule('*/5 * * * *', function() { klimaLogik(); });
-log('Klima Logik gestartet — Schlafzimmer Tuya ' + TUYA_ID);
+log('Klima Logik gestartet — Schlafzimmer Midea ' + MIDEA_ID);
