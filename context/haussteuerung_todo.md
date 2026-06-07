@@ -118,7 +118,7 @@
 ## Nach Heizungsumbau (Umbau abgeschlossen 07.06.2026)
 
 ### ETA Script einspielen + prüfen
-- [ ] eta.js aus GH ziehen und in ioBroker einspielen (URI-Korrekturen vom 07.06.2026 enthalten)
+- [x] eta.js eingespielt, alle 50 Datenpunkte liefern plausible Werte ✓ (07.06.2026)
 - [x] Prüfen ob alle Datenpunkte Werte liefern: 50 Datenpunkte aktiv ✓
 - [x] Puffer 1 Fühler 2-4 URI-Korrekturen: node-basierte URIs bestätigt ✓
 - [x] Puffer 2 mitte + unten URI-Korrekturen: 62°C / 32°C bestätigt ✓
