@@ -105,10 +105,8 @@
 
 ## Kurzfristig (naechste Session am PC)
 - [x] Grafana Panel Wind + Windböe kombiniert ergänzt ✓
-- [ ] Tailscale auf hauspi einrichten (Fernzugriff)
-  curl -fsSL https://tailscale.com/install.sh | sh
-  sudo tailscale up  → URL im Browser öffnen, einloggen
-  danach: ioBroker erreichbar als http://hauspi:8081 von überall
+- [x] Tailscale auf hauspi einrichten ✓ (07.06.2026)
+      ioBroker erreichbar als http://hauspi:8081 von überall
 - [ ] Telegram /klima Befehl einbauen
   -> Jahresmitteltemperatur aus InfluxDB berechnen
   -> Jahresniederschlag gesamt
