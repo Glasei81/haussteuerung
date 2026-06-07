@@ -61,36 +61,43 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
 
     } else if (cmd === '/klima') {
 
-        var klimaAktiv      = safeState('klima.tuya.aktiv',       false);
-        var klimaStart      = safeState('klima.tuya.start_zeit',  0);
-        var klimaPause      = safeState('klima.tuya.pause_start', 0);
-        var klimaGrund      = safeState('klima.tuya.grund',       '-');
+        var klimaStateObj = null;
+        try { klimaStateObj = getState('javascript.0.klima.tuya.aktiv'); } catch(e) {}
 
-        var zigbeeTemp = null;
-        try {
-            var zs = getState('zigbee.0.a4c1388f0b92eb71.temperature');
-            if (zs && zs.val !== null && zs.val !== undefined) zigbeeTemp = zs.val;
-        } catch(e) {}
-
-        var jetzt = Date.now();
-        var statusZeile = '';
-
-        if (klimaAktiv) {
-            var laufMin = Math.round((jetzt - klimaStart) / 60000);
-            statusZeile = '✅ AKTIV — Laufzeit: ' + laufMin + ' Min';
-        } else if (klimaPause > 0 && (jetzt - klimaPause) < 3600000) {
-            var restMin = Math.round((3600000 - (jetzt - klimaPause)) / 60000);
-            statusZeile = '⏸️ PAUSE — noch ' + restMin + ' Min';
+        if (!klimaStateObj || klimaStateObj.val === null || klimaStateObj.val === undefined) {
+            sendTo('telegram.0', '❄️ Klimaanlage\nScript noch nicht aktiv.\n(Midea-Adapter ausstehend)');
         } else {
-            statusZeile = '⭕ AUS';
-        }
+            var klimaAktiv  = klimaStateObj.val;
+            var klimaStart  = safeState('klima.tuya.start_zeit',  0);
+            var klimaPause  = safeState('klima.tuya.pause_start', 0);
+            var klimaGrund  = safeState('klima.tuya.grund',       '-');
 
-        sendTo('telegram.0',
-            '❄️ Klimaanlage Schlafzimmer\n' +
-            'Status: ' + statusZeile + '\n' +
-            '🌡️ Raumtemperatur: ' + (zigbeeTemp !== null ? zigbeeTemp + '°C' : '?') + '\n' +
-            '📝 Letzter Grund: ' + klimaGrund
-        );
+            var zigbeeTemp = null;
+            try {
+                var zs = getState('zigbee.0.a4c1388f0b92eb71.temperature');
+                if (zs && zs.val !== null && zs.val !== undefined) zigbeeTemp = zs.val;
+            } catch(e) {}
+
+            var jetzt = Date.now();
+            var statusZeile = '';
+
+            if (klimaAktiv) {
+                var laufMin = Math.round((jetzt - klimaStart) / 60000);
+                statusZeile = '✅ AKTIV — Laufzeit: ' + laufMin + ' Min';
+            } else if (klimaPause > 0 && (jetzt - klimaPause) < 3600000) {
+                var restMin = Math.round((3600000 - (jetzt - klimaPause)) / 60000);
+                statusZeile = '⏸️ PAUSE — noch ' + restMin + ' Min';
+            } else {
+                statusZeile = '⭕ AUS';
+            }
+
+            sendTo('telegram.0',
+                '❄️ Klimaanlage Schlafzimmer\n' +
+                'Status: ' + statusZeile + '\n' +
+                '🌡️ Raumtemperatur: ' + (zigbeeTemp !== null ? zigbeeTemp + '°C' : '?') + '\n' +
+                '📝 Letzter Grund: ' + klimaGrund
+            );
+        }
 
     // --- Hilfe ---
 
