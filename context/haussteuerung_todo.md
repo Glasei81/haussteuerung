@@ -241,15 +241,15 @@
 ---
 
 ## Laengerfristig / Ideen
-- [ ] Wasserverbrauch Tracking via wM-Bus (868 MHz)
+- [ ] Wasserverbrauch Tracking via optische Schnittstelle (IrDA)
   - Zähler: Diehl Metering HYDRUS Type 173, SN 3124653, Baujahr 2024
-  - Sendet rollierend Momentan- + Stundenwerte — aber nur bei geöffnetem Deckel (Privacy Mode)
-  - SCHRITT 1: Wasserwerk kontaktieren → Dauersendung (T1 permanent) aktivieren lassen (SN: 3124653)
-    → Alternativ: optische IrDA-Schnittstelle am Zähler prüfen (optischer USB-Adapter ~20€)
-  - SCHRITT 2 (nach Freischaltung): RTL-SDR USB-Dongle (~15-20€, RTL2832U) an hauspi
-  - SCHRITT 3: ioBroker Adapter `ioBroker.wmbus` konfigurieren
-  - AES-128 Schlüssel beim Wasserwerk erfragen (wird für Entschlüsselung benötigt)
+  - Zähler hat optisches IrDA-Fenster (oval, Gehäusemitte) → kein wM-Bus/RTL-SDR nötig
+  - wM-Bus sendet nur bei geöffnetem Deckel (Privacy Mode) → optisch ist einfacher
+  - SCHRITT 1: Optischer USB-Lesekopf kaufen (~20-30€, magnetisch, "IR Lesekopf SML")
+  - SCHRITT 2: Lesekopf auf IrDA-Fenster klemmen, USB an hauspi
+  - SCHRITT 3: ioBroker Adapter `ioBroker.smartmeter` (unterstützt SML/IEC 62056-21)
   - Liefert: Zählerstand m³, Momentanverbrauch m³/h, Stundenwerte
+  - Kein AES-Schlüssel nötig, kein Wasserwerk kontaktieren
 - [ ] Eigener ioBroker Adapter mit Installationsassistent
   - Wizard fuehrt einmalig durch alle benoetigten Werte
     (Device-IDs, IPs, API Keys, Temperaturschwellen)
