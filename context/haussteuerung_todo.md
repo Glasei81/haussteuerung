@@ -243,14 +243,13 @@
 ## Laengerfristig / Ideen
 - [ ] Wasserverbrauch Tracking via wM-Bus (868 MHz)
   - Zähler: Diehl Metering HYDRUS Type 173, SN 3124653, Baujahr 2024
-  - Zähler sendet bereits aktiv per Funk (868 E = wM-Bus T1/C1 Mode)
-  - Hardware: RTL-SDR USB-Dongle (~15-20€, RTL2832U) an hauspi
-  - Software: ioBroker Adapter `ioBroker.wmbus` (existiert, gepflegt)
-  - Liefert: Zählerstand m³, Durchfluss m³/h
-  - AES-128 Schlüssel notwendig:
-    -> Aufkleber am Zähler (Rückseite / Lieferdoku prüfen)
-    -> oder beim Wasserwerk anfragen (SN: 3124653)
-  - KEIN ESP32-CAM nötig!
+  - Sendet rollierend Momentan- + Stundenwerte — aber nur bei geöffnetem Deckel (Privacy Mode)
+  - SCHRITT 1: Wasserwerk kontaktieren → Dauersendung (T1 permanent) aktivieren lassen (SN: 3124653)
+    → Alternativ: optische IrDA-Schnittstelle am Zähler prüfen (optischer USB-Adapter ~20€)
+  - SCHRITT 2 (nach Freischaltung): RTL-SDR USB-Dongle (~15-20€, RTL2832U) an hauspi
+  - SCHRITT 3: ioBroker Adapter `ioBroker.wmbus` konfigurieren
+  - AES-128 Schlüssel beim Wasserwerk erfragen (wird für Entschlüsselung benötigt)
+  - Liefert: Zählerstand m³, Momentanverbrauch m³/h, Stundenwerte
 - [ ] Eigener ioBroker Adapter mit Installationsassistent
   - Wizard fuehrt einmalig durch alle benoetigten Werte
     (Device-IDs, IPs, API Keys, Temperaturschwellen)
