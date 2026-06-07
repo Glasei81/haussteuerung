@@ -241,16 +241,16 @@
 ---
 
 ## Laengerfristig / Ideen
-- [ ] Wasserverbrauch Tracking via AI-on-the-edge-device (ESP32-CAM vorhanden)
-  - ESP32-CAM am digitalen Hausanschluss montieren
-  - AI-on-the-edge-device Firmware flashen (liest Ziffern per neuronales Netz)
-  - HTTP API -> ioBroker Datenpunkt wasser.gesamt.m3
-  - ioBroker Adapter vorhanden
-  - TODO: Zaehlertyp feststellen -> Halterung planen
-    (digital: einfacher, analog: praeziser Winkel noetig -> evtl 3D Druck)
-    (Karton mit Lichtschutz als guenstige Alternative moeglich)
-  - HINWEIS: Hauptzaehler = Gesamtwasser (kalt + warm)
-  - Warmwasser indirekt aus ETA Temperaturverlauf (eta.warmwasser.oben) schaetzen
+- [ ] Wasserverbrauch Tracking via wM-Bus (868 MHz)
+  - Zähler: Diehl Metering HYDRUS Type 173, SN 3124653, Baujahr 2024
+  - Zähler sendet bereits aktiv per Funk (868 E = wM-Bus T1/C1 Mode)
+  - Hardware: RTL-SDR USB-Dongle (~15-20€, RTL2832U) an hauspi
+  - Software: ioBroker Adapter `ioBroker.wmbus` (existiert, gepflegt)
+  - Liefert: Zählerstand m³, Durchfluss m³/h
+  - AES-128 Schlüssel notwendig:
+    -> Aufkleber am Zähler (Rückseite / Lieferdoku prüfen)
+    -> oder beim Wasserwerk anfragen (SN: 3124653)
+  - KEIN ESP32-CAM nötig!
 - [ ] Eigener ioBroker Adapter mit Installationsassistent
   - Wizard fuehrt einmalig durch alle benoetigten Werte
     (Device-IDs, IPs, API Keys, Temperaturschwellen)
