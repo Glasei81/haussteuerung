@@ -430,6 +430,67 @@ on({
             safeState('eta.pellets.letzte_entscheidung', '-');
 
         sendTo('telegram.0', text);
+
+    } else if (cmd === '/klima') {
+
+        var startMs = new Date('2026-05-21').getTime();
+        var endMs   = Date.now();
+        var tage    = Math.round((endMs - startMs) / 86400000);
+        var res     = {};
+        var offen   = 4;
+
+        function sendKlima() {
+            if (offen > 0) return;
+            sendTo('telegram.0',
+                '🌍 Klimastatistik Raubling\n' +
+                '📅 Aufzeichnung: ' + tage + ' Tage (seit 21.05.2026)\n\n' +
+                '🌡️ Ø Temperatur: ' + (res.temp  !== undefined ? res.temp.toFixed(1)  + '°C'   : '?') + '\n' +
+                '💨 Ø Wind:        ' + (res.wind  !== undefined ? res.wind.toFixed(1)  + ' km/h' : '?') + '\n' +
+                '🌧️ Niederschlag:  ' + (res.regen !== undefined ? res.regen.toFixed(1) + ' mm'   : '?') + '\n' +
+                '⛈️ Starkregen-Tage (>10mm/h): ' + (res.starkregen !== undefined ? res.starkregen : '?')
+            );
+        }
+
+        sendTo('influxdb.0', 'getHistory', {
+            id: 'javascript.0.wetter.aktuell.temperatur',
+            options: { start: startMs, end: endMs, aggregate: 'average', count: 1 }
+        }, function(r) {
+            if (r && r.result && r.result[0]) res.temp = r.result[0].val;
+            offen--; sendKlima();
+        });
+
+        sendTo('influxdb.0', 'getHistory', {
+            id: 'javascript.0.wetter.aktuell.wind',
+            options: { start: startMs, end: endMs, aggregate: 'average', count: 1 }
+        }, function(r) {
+            if (r && r.result && r.result[0]) res.wind = r.result[0].val;
+            offen--; sendKlima();
+        });
+
+        // regen_gesamt ist Tageskumulation → Tagesmax pro Tag summieren
+        sendTo('influxdb.0', 'getHistory', {
+            id: 'javascript.0.wetter.aktuell.regen_gesamt',
+            options: { start: startMs, end: endMs, aggregate: 'max', step: 86400000 }
+        }, function(r) {
+            if (r && r.result) {
+                var sum = 0;
+                r.result.forEach(function(p) { if (p.val) sum += p.val; });
+                res.regen = sum;
+            }
+            offen--; sendKlima();
+        });
+
+        // Starkregentage: Tage mit max regen_rate > 10 mm/h
+        sendTo('influxdb.0', 'getHistory', {
+            id: 'javascript.0.wetter.aktuell.regen_rate',
+            options: { start: startMs, end: endMs, aggregate: 'max', step: 86400000 }
+        }, function(r) {
+            var count = 0;
+            if (r && r.result) r.result.forEach(function(p) { if (p.val > 10) count++; });
+            res.starkregen = count;
+            offen--; sendKlima();
+        });
+
     }
 });
 
