@@ -1,199 +1,133 @@
-# Stand Umbau 28.05.2026
+# Haussteuerung Raubling — Technischer Kontext
 
-## Was noch aussteht (Elektriker)
-- Puffer600 (Puffer 2) Sensoren noch nicht angeschlossen -> alle zeigen 41°C (Phantomwert)
-- Solar Umschaltventil noch nicht fertig verdrahtet
-- ERST DANACH: URIs für Puffer2 und Solarthermie in eta.js eintragen und testen
+## Infrastruktur (Stand: 07.06.2026)
 
-## Beobachtung Puffer 1a/1b Schichtung (real, 28.05.2026 17:19)
-Fühler 1 oben links:  66°C
-Fühler 2 oben rechts: 64°C
-Fühler 3 mitte links: 53°C  <- Thermokline
-Fühler 4 mitte rechts:47°C
-Fühler 5 unten links: 46°C
-Ladezustand: 36%
+| Gerät | Rolle | IP / URL |
+|---|---|---|
+| ETA eSH 27 | Pellets + Scheitholz Kombiheizung | 192.168.178.5:8080 |
+| hauspi | Raspberry Pi — ioBroker | hauspi.local |
+| Dell Latitude 5320 | Ollama + InfluxDB Docker + Grafana Docker | 192.168.178.130 |
+| Solarmanager v1 | PV-Überschusssteuerung | 192.168.178.36 |
 
-## Hydraulik bestätigt
-Manuelles Laden Puffer600 -> lädt über Rücklauf den Puffer 1b
--> Bestätigt die dokumentierte Hydraulik (Fernwärmeleitung + Rücklauf)
+### InfluxDB
+- URL: http://192.168.178.130:8086
+- Bucket: `wetter`
+- Organisation: `iobroker`
+- Aufzeichnung läuft seit 21.05.2026
+- ioBroker InfluxDB-Adapter schreibt auf Dell Laptop (nicht lokal auf hauspi!)
 
----
-
-
-# Firmware 4.65.0, Release 20260413
-
-## Bestätigte URIs (aus menu XML)
-
-### Warmwasser (/121/10111)
-- WW oben:  /121/10111/0/0/12271  (war schon bekannt)
-- WW unten: /121/10111/0/0/12272  (NEU bestätigt)
-- WW Soll:  /121/10111/0/0/12132  (NEU bestätigt -> WW/myPV Optimierung möglich)
-
-### Puffer 1a/1b (/272/10601) — 5 Fühler
-- Fühler 1 oben:  /272/10601/0/0/13191  (bekannt)
-- Fühler 2:       TODO testen: /272/10601/0/11328/0
-- Fühler 3:       TODO testen: /272/10601/0/11329/0
-- Fühler 4:       TODO testen: /272/10601/0/11330/0
-- Fühler 5 unten: /272/10601/0/0/13192  (bekannt)
-- Ladezustand:    /272/10601/0/0/12528  (bekannt)
-
-### Puffer 2 (600L Keller = /121/10601) — nach Umbau
-- Fühler 1 oben:  /121/10601/0/0/13191  (bereit)
-- Fühler 2 mitte: /121/10601/0/0/13934  (testen)
-- Fühler 3 unten: /121/10601/0/0/13192  (bereit)
-HINWEIS: Puffer 2 noch nicht physisch installiert -> null bis Umbau fertig
-
-### Pellets (/264/10891)
-- Zustand:           /264/10891/0/0/12000  (bekannt)
-- Ertrag heute:      /264/10891/14877/0/12350  (NEU)
-- Energie gesamt:    /264/10891/14877/0/2273   (NEU)
-- Leistung aktuell:  /264/10891/14877/0/2287   (NEU)
-- Volllaststunden:   /264/10891/0/0/12153       (NEU)
-- Gesamtverbrauch:   /264/10891/0/0/12016       (NEU)
-- Behälter Inhalt:   /264/10891/0/0/12011       (NEU)
-- Verriegelung:      /264/10891/0/0/12651       (bekannt)
-
-### Scheitholz (/272/10921)
-- Zustand:        /272/10921/0/0/12000   (bekannt)
-- Ertrag heute:   /272/10921/14877/0/12350  (NEU)
-- Energie gesamt: /272/10921/14877/0/2273   (NEU)
-
-### Solarthermie (/121/10221)
-- Solar-Zustand: /121/10221/0/0/12183
-- Kollektor Sensor: /121/10221/0/11139/0  (testen)
-- Kein expliziter Wärmemengenzähler im menu sichtbar
-  -> Wärmemengenzähler kommt nach Umbau, URI dann neu suchen
+### Grafana
+- URL: http://192.168.178.130:3001
+- Dashboard vorhanden: 10 Panels (Stand 21.05.2026)
 
 ---
 
+## ETA Script — eta.js (Stand: 07.06.2026)
 
+- **50 aktive Datenpunkte** (bestätigt im Log 07.06.2026 13:08)
+- Polling alle 5 Minuten via `schedule('*/5 * * * *', ...)`
+- Struktur: `ETA_DATENPUNKTE` Array, je `[key, uri, statePath, name, unit, role, type]`
+- Alias `eta.puffer.oben` = `eta.puffer.fuehler1` (Kompatibilität mit eta_pellets_logik.js)
 
-## Problem
-ETA heizt Warmwasser per Puffer-Wärme (Vorlauf 58°C), obwohl gleichzeitig
-PV 9613W produziert und Batterie bei 99% ist.
-myPV WW-Heizstab (3kW) könnte das mit gratis PV-Strom erledigen.
-
-## Ursache
-ETA und Solarmanager kennen sich nicht.
-ETA sieht "WW 1°C unter Soll" → lädt sofort über Puffer.
-Solarmanager steuert myPV unabhängig nach eigener Logik.
-
-## Lösungsansatz
-Wenn PV-Überschuss > X kW UND Batterie > 95%:
-  -> ETA WW-Soll per REST API temporär hochsetzen (z.B. 60°C)
-  -> ETA greift dann nicht mehr ein
-  -> myPV Heizstab übernimmt WW-Laden mit PV-Strom
-  -> Bei schlechtem Wetter: WW-Soll wieder auf Normal (55°C)
-
-## Voraussetzung
-URI für "Warmwasser Soll" in ETA REST API finden (noch unbekannt).
+### Bekannte Timing-Warnung (harmlos)
+Bei Script-Neustart erscheinen `State "javascript.0.eta.*" not found` Warnungen.
+Ursache: `createState()` ist asynchron, erste HTTP-Antwort kann früher ankommen.
+Verschwindet nach dem ersten 5-Minuten-Zyklus. Kein Handlungsbedarf.
 
 ---
 
+## InfluxDB — Welche ETA Datenpunkte aufzeichnen
 
+Entschieden: 07.06.2026
 
-## Geprüfte Bereiche
-- ETA REST Zugriff
-- Pellets-Automatik
-- Solarmanager-Logik
-- Wetterstation
-- Telegram-Steuerung
-- Datenpunktstruktur
+### Tier 1 — immer aufzeichnen
+```
+eta.puffer.fuehler1–5         Pufferschichtung + Verlust
+eta.puffer.ladung             Puffer 1 Ladezustand
+eta.puffer2.oben/mitte/unten  Puffer 2 Schichtung
+eta.puffer2.ladung            Puffer 2 Ladezustand
+eta.aussen.temperatur         Korrelation mit Verbrauch
+eta.warmwasser.oben           WW-Temperatur Trend
+eta.solar.ertrag_heute        täglicher Solarertrag
+eta.pellets.leistung          Brennerleistung live
+eta.pellets.ertrag_heute      täglicher Pellets-Ertrag
+eta.holz.leistung             Scheitholz-Leistung live
+eta.holz.ertrag_heute         täglicher Scheitholz-Ertrag
+```
 
-## Gravierende Änderungen
+### Tier 2 — sinnvoll
+```
+eta.hk.vorlauf / ruecklauf    Spreizung Heizkreis HK
+eta.fbh.vorlauf / ruecklauf   Spreizung Fußbodenheizung
+eta.solar.vorlauf / ruecklauf Kollektoreffizienz
+eta.pellets.behaelter_inhalt  Füllstand-Verlauf
+eta.pellets.verbrauch_gesamt  Verbrauch-Counter
+eta.pellets.volllaststunden   Verschleiß-Tracking
+eta.pellets.heizbetriebe      Startvorgänge
+eta.holz.volllaststunden      Verschleiß-Tracking
+eta.holz.energie_gesamt       kumulierter Scheitholz-Ertrag
+eta.solar.waermemenge         kumulierter Solarertrag
+```
 
-### 1. Hysterese gegen Takten
-ALT:
-- Sperre bereits ab 40°C
-- Freigabe sofort wieder unter 40°C
+### Tier 3 — optional / bei Bedarf
+```
+eta.warmwasser.unten          wenn WW-Logik aktiv
+eta.pellets.kesseldruck       nur für Fehlerdiagnose
+eta.pellets.zuendungen        Statistik
+eta.*.zustand                 wenn Betriebszeiten ausgewertet werden
+```
 
-NEU:
-- Sperre erst ab 42°C
-- Freigabe erst unter 38°C
-
-Vorteil:
-- deutlich weniger Ein/Aus-Schalten
-- ruhigerer ETA Betrieb
-- weniger Pelletzünder-Zyklen
-- besser für Hydraulik und Brenner
-
----
-
-### 2. Sicherheitsfreigabe bei fehlenden Daten
-ALT:
-- Fehlende Werte konnten theoretisch falsche Sperren erzeugen
-
-NEU:
-- Wenn ETA oder Solarmanager Daten älter als 15 Minuten:
-  -> automatische Freigabe
-
-Warum?
-Bei Kommunikationsfehlern ist "Heizung läuft weiter"
-fast immer sicherer als unbeabsichtigtes Sperren.
-
----
-
-### 3. SafeState Wrapper
-ALT:
-- getState() direkt verwendet
-
-RISIKO:
-- Fehler bei nicht vorhandenen Datenpunkten
-
-NEU:
-- zentrale safeState() Funktion
-- Fallback-Werte
-- stabilere Laufzeit
+### Bewusst NICHT aufzeichnen
+- `eta.puffer.oben` — Alias, identisch mit fuehler1
+- `eta.warmwasser.soll` — ändert sich kaum, kein Trend-Wert
+- `eta.*_ertrag_gestern` — gestern bleibt gestern, täglicher Snapshot reicht
 
 ---
 
-### 4. Doppeltes Schreiben verhindert
-ALT:
-- Script konnte identischen Zustand erneut senden
+## Puffer 1a/1b — Schichtungsbeobachtung (28.05.2026 17:19)
+```
+Fühler 1 oben:   66°C
+Fühler 2:        64°C
+Fühler 3 mitte:  53°C  ← Thermokline
+Fühler 4:        47°C
+Fühler 5 unten:  46°C
+Ladezustand:     36%
+```
 
-NEU:
-- Vor jedem ETA POST wird geprüft,
-  ob sich der Zustand wirklich ändert
-
-Vorteil:
-- weniger REST Traffic
-- weniger ETA Last
-- saubereres Logging
-
----
-
-### 5. Transparente Automatikentscheidung
-NEU:
-- neuer Datenpunkt:
-  eta.pellets.letzte_entscheidung
-
-Dadurch jederzeit sichtbar:
-- warum gesperrt wurde
-- warum freigegeben wurde
-- welche Regel aktiv war
-
-Ideal für Grafana oder Telegram.
+## Puffer — Abkühlkurve (07.06.2026, Sommertag)
+- 43,8°C → 40,8°C in 13h bei 20–27°C Außentemperatur
+- ≈ 0,23°C/h Wärmeverlust
+- Nur Sommer-Datenpunkt, Winterdaten ab Herbst 2026 belastbar
 
 ---
 
-## Bewusst NICHT geändert
+## Hydraulik Puffer (geklärt)
+- Puffer 1a + 1b in Reihe: Entnahme oben 1a, Rücklauf unten 1b
+- Fernwärmeleitung: Puffer 1a ↔ Puffer 2 (Keller)
+- Puffer 2 zu warm → schiebt über Rücklauf zurück → lädt Puffer 1b
+- ETA steuert Pumpen selbst → wir greifen nicht ein!
 
-- ETA Pumpenlogik
-- ETA Solarthermie-Regelung
-- ETA Holzlogik
-- bestehende Datenpunktnamen
-- Telegram-Kommandos
-
-Dadurch bleibt maximale Kompatibilität erhalten.
+## Heizstäbe
+- myPV Puffer (3–3,5 kW): `672f524463329ad0323012bd`
+- myPV Warmwasser (3 kW): `672f519e00c1de1963ec63db`
+- Heizstab Puffer 2 (4,5 kW): Device-ID in Solarmanager noch unbekannt
 
 ---
 
-## Empfehlung für später
+## WW-Optimierung (Konzept, noch nicht implementiert)
+- Problem: ETA lädt WW über Puffer auch bei vollem PV-Überschuss
+- Lösung: wenn PV > X kW UND Batterie > 95% → ETA WW-Soll per POST auf 65°C
+- URI bestätigt: `/121/10111/0/0/12132` (warmwasser.soll bereits geloggt)
 
-Sinnvolle nächste Schritte:
-- Pufferschichtung vollständig auswerten
-- Wetterforecast in Pelletslogik integrieren
-- PV-Prognose dynamisch berücksichtigen
-- Sommer/Winter Modus automatisch
-- Telegram /klima erweitern
-- Influx Alarme
+## Zigbee
+- Dongle bereits auf hauspi installiert
+- Zigbee-Adapter läuft in ioBroker
+- FBH-Thermostate OG bereits sichtbar: `0x9035eafffe2a7ad9`, `0x2c1165fffe52fc24` (TS0601)
+- TS0601 Ping-Fehler im Log = normal (Sleep-Mode-Geräte)
+- **NICHTS mit ETA REST API zu tun** — komplett getrennte Systeme
+
+## ETA REST API
+- Dokumentation: Version 1.2, November 2019
+- Endpunkte: `/user/var` (GET+POST), `/user/menu`, `/user/errors`, `/user/varinfo`
+- POST-Wert = Rohwert ohne Skalierung (z.B. `value=1803` für 60,1°C bei scale=10)
+- `/user/errors` → nützlich für Telegram-Alerts bei ETA-Fehlern (noch nicht implementiert)

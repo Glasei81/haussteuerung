@@ -84,7 +84,7 @@
   - Heizkreis HK + FBH: Vorlauf, Rücklauf, Zustand
   - Warmwasser: oben, unten, Soll, Zustand
   - Pellets + Scheitholz: je Rücklauf, Leistung, Energie gesamt, Ertrag gestern, Kesseldruck, Heizbetriebe, Zündungen
-  - 48 Datenpunkte aktiv, Zustand-Felder als String gespeichert
+  - 50 Datenpunkte aktiv (bestätigt im Log 07.06.2026), Zustand-Felder als String gespeichert
 
 ---
 
@@ -104,7 +104,7 @@
 
 ### ETA Script einspielen + prüfen
 - [ ] eta.js aus GH ziehen und in ioBroker einspielen
-- [ ] Prüfen ob alle 48 Datenpunkte Werte liefern (Log: "ETA Script gestartet — 48 Datenpunkte aktiv")
+- [x] Prüfen ob alle Datenpunkte Werte liefern: 50 Datenpunkte aktiv bestätigt ✓
 - [ ] Puffer 1a/b Fühler 2-4 prüfen: Schichtung plausibel? (oben > mitte > unten)
       Fühler 2 = /272/10601/0/0/13933, Fühler 3 = /272/10601/0/0/13934, Fühler 4 = /272/10601/0/0/13935
       -> Falls Werte 0 oder vertauscht: URIs anpassen
