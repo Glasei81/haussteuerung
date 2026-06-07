@@ -41,7 +41,11 @@
 ### Heizstäbe
 - myPV Puffer (3-3.5kW): 672f524463329ad0323012bd
 - myPV Warmwasser (3kW): 672f519e00c1de1963ec63db
-- Neu Puffer 2 (4.5kW): Device-ID noch unbekannt, max. 65 Grad einstellen
+- Puffer 2 (4.5kW, Shelly Pro3, 3 Relais à 1500W):
+  - Relais 1: 672cd496e4b1e4feca2e4b4c
+  - Relais 2: 672dccfdc008a5373eadad23
+  - Relais 3: 672e09ecbf2027621d498c3c
+  - State: solar.puffer2.watt (Summe, in solarmanager.js eingebunden ✓)
 
 ### Solar
 - **PV:** ca. 17 kWp (Erweiterung auf ca. 30 kWp geplant 2029)
@@ -85,6 +89,17 @@
   - Warmwasser: oben, unten, Soll, Zustand
   - Pellets + Scheitholz: je Rücklauf, Leistung, Energie gesamt, Ertrag gestern, Kesseldruck, Heizbetriebe, Zündungen
   - 50 Datenpunkte aktiv (bestätigt im Log 07.06.2026), Zustand-Felder als String gespeichert
+- ETA URI-Korrekturen (07.06.2026, per eta_uri_scan.js bestätigt)
+  - Puffer 1 Fühler 2/3/4: node-basierte URIs (/272/10601/0/11328|29|30/0)
+  - Puffer 2 mitte: /121/10601/0/11328/0 → 62°C ✓
+  - Puffer 2 unten: /121/10601/0/11329/0 → 32°C ✓
+  - Alle 50 Datenpunkte liefern plausible Werte
+- Solarmanager Script: Puffer 2 Heizstab (Shelly Pro3, 3 Relais) eingebunden (07.06.2026)
+  - State solar.puffer2.watt = Summe aller 3 Relais
+  - Bugs in Original-Script behoben: d.id → d._id, d.state → d.switchState
+- InfluxDB ETA Datenpunkte aktiviert via influxdb_setup_eta.js (07.06.2026)
+  - 31 States aktiviert (0 Fehler): Tier 1 + Tier 2 + solar.puffer2.watt
+  - changesOnly: false → jeden 5-Min-Polling-Wert aufzeichnen
 
 ---
 
@@ -103,11 +118,10 @@
 ## Nach Heizungsumbau (Umbau abgeschlossen 07.06.2026)
 
 ### ETA Script einspielen + prüfen
-- [ ] eta.js aus GH ziehen und in ioBroker einspielen
-- [x] Prüfen ob alle Datenpunkte Werte liefern: 50 Datenpunkte aktiv bestätigt ✓
-- [ ] Puffer 1a/b Fühler 2-4 prüfen: Schichtung plausibel? (oben > mitte > unten)
-      Fühler 2 = /272/10601/0/0/13933, Fühler 3 = /272/10601/0/0/13934, Fühler 4 = /272/10601/0/0/13935
-      -> Falls Werte 0 oder vertauscht: URIs anpassen
+- [ ] eta.js aus GH ziehen und in ioBroker einspielen (URI-Korrekturen vom 07.06.2026 enthalten)
+- [x] Prüfen ob alle Datenpunkte Werte liefern: 50 Datenpunkte aktiv ✓
+- [x] Puffer 1 Fühler 2-4 URI-Korrekturen: node-basierte URIs bestätigt ✓
+- [x] Puffer 2 mitte + unten URI-Korrekturen: 62°C / 32°C bestätigt ✓
 
 ### Heizstab Puffer 2 (4.5kW)
 - [x] Device-ID in Solarmanager identifiziert: 3 Relais (Shelly Pro3) ✓
