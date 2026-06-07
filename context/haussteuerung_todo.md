@@ -74,8 +74,6 @@
 - ETA Pellets Logik (Temperatur + PV + Mindestlaufzeit 30 Min)
 - Wetterstation Script (Weather Company API, Station IRAUBL19)
 - windGust (Windboeen) ins Wetterstation Script ergaenzt (25.05.2026)
-- Telegram Steuerung (/status, /forecast, /pellets_ein/aus/auto)
-- /status zeigt: Pellets, Puffer, WW, Aussen, PV, Batterie, Forecast
 - InfluxDB Datenaufzeichnung laeuft (seit 21.05.2026)
 - windGust wird in InfluxDB aufgezeichnet (seit 25.05.2026)
 - Grafana Dashboard (10 Panels, Wind + Windböe kombiniert ergänzt)
@@ -94,12 +92,30 @@
   - Puffer 2 mitte: /121/10601/0/11328/0 → 62°C ✓
   - Puffer 2 unten: /121/10601/0/11329/0 → 32°C ✓
   - Alle 50 Datenpunkte liefern plausible Werte
-- Solarmanager Script: Puffer 2 Heizstab (Shelly Pro3, 3 Relais) eingebunden (07.06.2026)
-  - State solar.puffer2.watt = Summe aller 3 Relais
-  - Bugs in Original-Script behoben: d.id → d._id, d.state → d.switchState
+- Solarmanager Script: komplett überarbeitet (07.06.2026)
+  - Kritischer Bug behoben: API liefert kein .point Objekt → Script las nie Daten
+  - Alle API-Feldnamen korrigiert (pW, pWh, cW, soc, bcW, bdW, devices[])
+  - Puffer 2 Heizstab (Shelly Pro3, 3 Relais) eingebunden: solar.puffer2.watt
 - InfluxDB ETA Datenpunkte aktiviert via influxdb_setup_eta.js (07.06.2026)
   - 31 States aktiviert (0 Fehler): Tier 1 + Tier 2 + solar.puffer2.watt
   - changesOnly: false → jeden 5-Min-Polling-Wert aufzeichnen
+- Telegram Script in eigenes telegram.js ausgelagert (07.06.2026)
+  - Vorher: Telegram-Handler war in eta_pellets_logik.js eingebettet
+  - Jetzt: 5 unabhängige Scripts, jedes mit eigener Aufgabe:
+    1. wetterstation.js — Wetterdaten + Forecast
+    2. solarmanager.js — PV, Batterie, Heizstäbe
+    3. eta.js — ETA REST API polling
+    4. eta_pellets_logik.js — Pellets-Steuerungslogik
+    5. telegram.js — alle Telegram-Befehle
+  - Befehle: /status, /klima, /pellets_ein, /pellets_aus, /pellets_auto, /hilfe
+  - /status zeigt: Pellets, Puffer 1+2, WW, Außen, PV, Batterie, Heizstab P2, Forecast
+  - /klima zeigt: Klimaanlage-Status (aktiv/pause/aus), Raumtemperatur, Laufzeit
+  - /hilfe und /start: Übersicht aller Befehle
+- klima_logik.js erstellt (07.06.2026) — NOCH NICHT AKTIV
+  - Logik vorhanden: Zigbee-Temperatur → Tuya schalten, 2h/1h Zyklus, Energiesperre
+  - PROBLEM: Tuya-Gerät ist im Treppenhaus, nicht im Schlafzimmer
+  - Schlafzimmer-Gerät ist Midea (NetHome Plus) — Adapter noch nicht lauffähig
+  - WARTEN auf: Midea-Adapter ODER Treppenhaus bekommt eigenes Zigbee-Thermometer
 
 ---
 
@@ -107,11 +123,12 @@
 - [x] Grafana Panel Wind + Windböe kombiniert ergänzt ✓
 - [x] Tailscale auf hauspi einrichten ✓ (07.06.2026)
       ioBroker erreichbar als http://hauspi:8081 von überall
-- [ ] Telegram /klima Befehl einbauen
-  -> Jahresmitteltemperatur aus InfluxDB berechnen
-  -> Jahresniederschlag gesamt
-  -> Starkregenereignisse zaehlen (precipRate > 10mm/h)
-  -> Windmittel Jahresdurchschnitt
+- [x] Telegram Script überarbeitet ✓ (07.06.2026)
+      /hilfe, /klima (Klimaanlage-Status), Forecast-Anzeige robuster
+- [ ] Klimaanlage Schlafzimmer aktivieren
+  -> Option A: Midea-Adapter (ioBroker.midea-air-conditioner) zum Laufen bringen
+  -> Option B: Treppenhaus-Tuya mit eigenem Zigbee-Thermometer ausstatten
+  -> klima_logik.js ist fertig, nur Gerät/Sensor-Zuordnung anpassen
 
 ---
 
@@ -272,12 +289,13 @@
   - Solarthermie Ertrag
   - Heizkosten-Tracking (Pellets vs Scheitholz vs PV)
 - [ ] OpenClaw/Sepp Zugang zur Haussteuerung via Telegram
-- [ ] Klimaanlagen in ioBroker einbinden
-  - Tuya Klimaanlage: Tuya Adapter konfigurieren (Local Key besorgen via tuya-cli)
-  - NetHome Plus Klimaanlage: wahrscheinlich Midea-basiert
-    -> ioBroker Adapter: ioBroker.midea-air-conditioner pruefen
-    -> Marke/Modell klaeren fuer passenden Adapter
-  - Solarmanager trackt bereits Verbrauch beider Geraete
+- [ ] Klimaanlage Schlafzimmer (Midea/NetHome Plus) in ioBroker einbinden
+  - Tuya-Gerät (Treppenhaus): bereits in ioBroker ✓, braucht noch eigenes Zigbee-Thermometer
+  - Midea Schlafzimmer: ioBroker.midea-air-conditioner Adapter prüfen/installieren
+    -> Repo: https://github.com/nbogojevic/midea-beautiful-air (geprüft, vielversprechend)
+    -> Sobald Adapter läuft: klima_logik.js auf Midea-States umschreiben (einfach)
+  - klima_logik.js ist fertig (Logik, Energiesperre, WW-Vorrang, 2h/1h Zyklus)
+  - Solarmanager trackt bereits Verbrauch beider Geräte
   - Ziel: PV-Ueberschuss -> Klimaanlage automatisch ein
   - Ziel: Winter-Waermepumpen-Modus bei milden Temps (>5 Grad) effizienter als Pellets
 - [ ] Victron SmartShunt/Multiplus 2 Integration
