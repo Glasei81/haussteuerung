@@ -24,10 +24,19 @@
 
 ## ETA Script — eta.js (Stand: 07.06.2026)
 
-- **50 aktive Datenpunkte** (bestätigt im Log 07.06.2026 13:08)
+- **49 aktive Datenpunkte** (nach URI-Korrektur 07.06.2026; puffer2_mitte URI unbekannt → null)
 - Polling alle 5 Minuten via `schedule('*/5 * * * *', ...)`
 - Struktur: `ETA_DATENPUNKTE` Array, je `[key, uri, statePath, name, unit, role, type]`
 - Alias `eta.puffer.oben` = `eta.puffer.fuehler1` (Kompatibilität mit eta_pellets_logik.js)
+
+### URI-Korrekturen (07.06.2026, per eta_uri_scan.js bestätigt)
+| Sensor | Alte URI | Neue URI | Wert |
+|---|---|---|---|
+| puffer_fuehler2 | /272/10601/0/0/13933 | /272/10601/0/11328/0 | node-basiert |
+| puffer_fuehler3 | /272/10601/0/0/13934 | /272/10601/0/11329/0 | node-basiert |
+| puffer_fuehler4 | /272/10601/0/0/13935 | /272/10601/0/11330/0 | node-basiert |
+| puffer2_unten | /121/10601/0/0/13192 | /121/10601/0/0/13935 | 32°C ✓ |
+| puffer2_mitte | /121/10601/0/0/13934 | **null** | URI unbekannt, Sensor evtl. nicht verbaut |
 
 ### Bekannte Timing-Warnung (harmlos)
 Bei Script-Neustart erscheinen `State "javascript.0.eta.*" not found` Warnungen.
