@@ -110,7 +110,12 @@ Ladezustand:     36%
 ## Heizstäbe
 - myPV Puffer (3–3,5 kW): `672f524463329ad0323012bd`
 - myPV Warmwasser (3 kW): `672f519e00c1de1963ec63db`
-- Heizstab Puffer 2 (4,5 kW): Device-ID in Solarmanager noch unbekannt
+- Heizstab Puffer 2 (4,5 kW, Shelly Pro3, 3 Relais à 1500W):
+  - Relais 1: `672cd496e4b1e4feca2e4b4c`
+  - Relais 2: `672dccfdc008a5373eadad23`
+  - Relais 3: `672e09ecbf2027621d498c3c`
+  - State: `solar.puffer2.watt` (Summe aller 3 Relais)
+  - 0W = normal wenn Puffer 2 Zieltemperatur (65°C) erreicht
 
 ---
 

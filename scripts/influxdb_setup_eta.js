@@ -77,6 +77,9 @@ var DATENPUNKTE = [
     // Solar kumuliert
     'javascript.0.eta.solar.waermemenge',
 
+    // === SOLARMANAGER ===
+    'javascript.0.solar.puffer2.watt',     // Heizstab Puffer 2 gesamt (3 Relais summiert)
+
 ];
 
 // === TIER 3 — optional, bei Bedarf auskommentieren ===

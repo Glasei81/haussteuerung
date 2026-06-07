@@ -13,18 +13,21 @@ var DEVICE_IDS = {
     ww_heizstab:      '672f519e00c1de1963ec63db',
     virt_switch:      '6a0cb9886b7b9a89b6aa06a2',
     batterie1:        '672cded5a25fe6ead2b37ef6',
-    batterie2:        '672e0993e05febbf44b19ff3'
+    batterie2:        '672e0993e05febbf44b19ff3',
+    // Heizstab Puffer 2 (4,5kW Keller) — Shelly Pro3, 3 Relais à 1500W
+    puffer2_relais:   ['672cd496e4b1e4feca2e4b4c', '672dccfdc008a5373eadad23', '672e09ecbf2027621d498c3c']
 };
 
 var states = [
-    ['solar.pv.watt',          'PV Leistung',       'number',  'W',   'value.power'],
-    ['solar.pv.today',         'PV Heute kWh',      'number',  'kWh', 'value.power.consumption'],
-    ['solar.netz.watt',        'Netz Leistung',     'number',  'W',   'value.power'],
-    ['solar.verbrauch.watt',   'Verbrauch',         'number',  'W',   'value.power'],
-    ['solar.batterie.soc',     'Batterie SOC',      'number',  '%',   'value.battery'],
-    ['solar.batterie.watt',    'Batterie Leistung', 'number',  'W',   'value.power'],
-    ['solar.switch',           'Virtueller Switch', 'boolean', '',    'switch'],
-    ['solar.puffer.temperatur','Puffer Temp myPV',  'number',  '°C',  'value.temperature'],
+    ['solar.pv.watt',           'PV Leistung',            'number',  'W',   'value.power'],
+    ['solar.pv.today',          'PV Heute kWh',           'number',  'kWh', 'value.power.consumption'],
+    ['solar.netz.watt',         'Netz Leistung',          'number',  'W',   'value.power'],
+    ['solar.verbrauch.watt',    'Verbrauch',               'number',  'W',   'value.power'],
+    ['solar.batterie.soc',      'Batterie SOC',            'number',  '%',   'value.battery'],
+    ['solar.batterie.watt',     'Batterie Leistung',      'number',  'W',   'value.power'],
+    ['solar.switch',            'Virtueller Switch',       'boolean', '',    'switch'],
+    ['solar.puffer.temperatur', 'Puffer Temp myPV',       'number',  '°C',  'value.temperature'],
+    ['solar.puffer2.watt',      'Heizstab Puffer2 gesamt','number',  'W',   'value.power'],
 ];
 
 states.forEach(function(s) {
@@ -59,16 +62,21 @@ function solarmanagerLesen() {
         setState('javascript.0.solar.batterie.soc',   {val: p.battery_soc || 0,   ack: true});
         setState('javascript.0.solar.batterie.watt',  {val: p.battery_power || 0, ack: true});
 
-        // Virtueller Switch
+        // Geräte
         if (p.devices) {
+            var puffer2Watt = 0;
             p.devices.forEach(function(d) {
-                if (d.id === DEVICE_IDS.virt_switch) {
-                    setState('javascript.0.solar.switch', {val: d.state === 1, ack: true});
+                if (d._id === DEVICE_IDS.virt_switch) {
+                    setState('javascript.0.solar.switch', {val: d.switchState === 1, ack: true});
                 }
-                if (d.id === DEVICE_IDS.puffer_heizstab && d.temperature) {
+                if (d._id === DEVICE_IDS.puffer_heizstab && d.temperature !== undefined) {
                     setState('javascript.0.solar.puffer.temperatur', {val: d.temperature, ack: true});
                 }
+                if (DEVICE_IDS.puffer2_relais.indexOf(d._id) !== -1) {
+                    puffer2Watt += d.power || 0;
+                }
             });
+            setState('javascript.0.solar.puffer2.watt', {val: puffer2Watt, ack: true});
         }
     });
 }

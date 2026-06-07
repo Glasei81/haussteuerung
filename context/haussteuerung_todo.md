@@ -110,9 +110,9 @@
       -> Falls Werte 0 oder vertauscht: URIs anpassen
 
 ### Heizstab Puffer 2 (4.5kW)
-- [ ] Device-ID in Solarmanager identifizieren
-- [ ] In Solarmanager Script einbinden
-- [ ] Maximaltemperatur auf 65 Grad prüfen/setzen
+- [x] Device-ID in Solarmanager identifiziert: 3 Relais (Shelly Pro3) ✓
+- [x] In Solarmanager Script eingebunden: solar.puffer2.watt ✓
+- [ ] Maximaltemperatur 65°C in Solarmanager Gerätekonfiguration prüfen/setzen
 
 ### Ladelogik Erweiterung (nach Datensammlung)
 - [ ] Temperaturschwelle definieren ab der alle Heizstäbe abschalten
