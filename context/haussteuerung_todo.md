@@ -101,21 +101,40 @@
   - changesOnly: false → jeden 5-Min-Polling-Wert aufzeichnen
 - Telegram Script in eigenes telegram.js ausgelagert (07.06.2026)
   - Vorher: Telegram-Handler war in eta_pellets_logik.js eingebettet
-  - Jetzt: 5 unabhängige Scripts, jedes mit eigener Aufgabe:
-    1. wetterstation.js — Wetterdaten + Forecast
+  - Jetzt: 9 unabhängige Scripts, jedes mit eigener Aufgabe:
+    1. wetterstation.js — Wetterdaten + Forecast (API-Key jetzt in ioBroker-States)
     2. solarmanager.js — PV, Batterie, Heizstäbe
-    3. eta.js — ETA REST API polling
+    3. eta.js — ETA REST API polling (50 Datenpunkte, Haupt-ETA-Script)
     4. eta_pellets_logik.js — Pellets-Steuerungslogik
     5. telegram.js — alle Telegram-Befehle
-  - Befehle: /status, /klima, /pellets_ein, /pellets_aus, /pellets_auto, /hilfe
+    6. klima_logik.js — Klimaanlage Schlafzimmer (Midea, noch nicht aktiv)
+    7. eta_solar.js — Solarthermie erweiterte Datenpunkte
+    8. eta_zirkulation.js — Zirkulation + Warmwasser Ladepumpe
+    9. eta_puffer2.js — Puffer2 erweiterte Datenpunkte
+   10. eta_scheitholz.js — Scheitholz erweiterte Datenpunkte
+   11. puffer2_heizstab_schutz.js — Heizstab Puffer2 Schutzlogik
+  - Befehle: /status, /klima, /pellets_ein, /pellets_aus, /pellets_auto, /forecast, /hilfe
   - /status zeigt: Pellets, Puffer 1+2, WW, Außen, PV, Batterie, Heizstab P2, Forecast
   - /klima zeigt: Klimaanlage-Status (aktiv/pause/aus), Raumtemperatur, Laufzeit
+  - /forecast zeigt: Morgen + Übermorgen Wetter, PV-Prognose
   - /hilfe und /start: Übersicht aller Befehle
-- klima_logik.js erstellt (07.06.2026) — NOCH NICHT AKTIV
-  - Logik vorhanden: Zigbee-Temperatur → Tuya schalten, 2h/1h Zyklus, Energiesperre
-  - PROBLEM: Tuya-Gerät ist im Treppenhaus, nicht im Schlafzimmer
-  - Schlafzimmer-Gerät ist Midea (NetHome Plus) — Adapter noch nicht lauffähig
-  - WARTEN auf: Midea-Adapter ODER Treppenhaus bekommt eigenes Zigbee-Thermometer
+- klima_logik.js komplett neu für Midea umgeschrieben (08.06.2026)
+  - Midea-Adapter Device-ID 153931628437826 bestätigt (Screenshots)
+  - States: klima.schlafzimmer.aktiv / start_zeit / pause_start / grund
+  - Befehle: operationalMode=2 (Cool), targetTemperature=22, powerState
+  - NOCH NICHT AKTIV — Midea-Adapter muss erst lauffähig sein
+- wetterstation.js: API-Key aus Code entfernt (08.06.2026)
+  - API-Key war sichtbar im GitHub → Sicherheitsproblem
+  - Jetzt in ioBroker-States: javascript.0.config.wetter.api_key / .pws_id
+  - createState() setzt nur Defaultwert wenn State nicht existiert
+  - Einmalig im ioBroker-Admin eintragen!
+- ETA Sub-Scripts erstellt (08.06.2026) — 4 neue unabhängige Scripts:
+  - eta_solar.js: Solar Vorlauf/Rücklauf/Leistung/Ertrag/Kollektorpumpe (6 DP)
+  - eta_zirkulation.js: Zirkulation Status/Laufzeit/Pause/Freigabe + WW Ladepumpe (5 DP)
+  - eta_puffer2.js: Puffer2 oben/mitte/unten + Ladepumpe + Ladezustand (5 DP)
+  - eta_scheitholz.js: Zustand/Isoliertüre/Wärmemenge/Leistung (4 DP)
+  - Alle nach gleichem Muster wie eta.js, schedule alle 5 Min
+  - HINWEIS: eta.solar.leistung URI (/121/10221/14877/0/2287) noch prüfen!
 
 ---
 

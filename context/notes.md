@@ -165,3 +165,28 @@ Ladezustand:     36%
 - Endpunkte: `/user/var` (GET+POST), `/user/menu`, `/user/errors`, `/user/varinfo`
 - POST-Wert = Rohwert ohne Skalierung (z.B. `value=1803` für 60,1°C bei scale=10)
 - `/user/errors` → nützlich für Telegram-Alerts bei ETA-Fehlern (noch nicht implementiert)
+
+## ETA Sub-Scripts (08.06.2026)
+
+Zusätzlich zu eta.js (50 Datenpunkte) gibt es 4 spezialisierte Sub-Scripts
+für erweiterte/ergänzende Datenpunkte. Alle 5 Minuten, gleiches Muster.
+
+| Script | Datenpunkte | States |
+|---|---|---|
+| eta.js | 50 | eta.puffer.*, eta.warmwasser.*, eta.hk.*, eta.fbh.*, eta.solar.*, eta.pellets.*, eta.holz.*, eta.aussen.* |
+| eta_solar.js | 6 | eta.solar.vorlauf/ruecklauf/leistung/ertrag_heute/waermemenge/kollektor_pumpe |
+| eta_zirkulation.js | 5 | eta.zirkulation.status/laufzeit/pause/freigabe, eta.warmwasser.ladepumpe |
+| eta_puffer2.js | 5 | eta.puffer2.oben/mitte/unten/ladepumpe/ladezustand |
+| eta_scheitholz.js | 4 | eta.scheitholz.zustand/isoliertuere/waermemenge/leistung |
+
+**Wichtig: State-Überschneidungen**
+- eta.puffer2.oben/mitte/unten: gelesen von eta.js UND eta_puffer2.js (leicht andere URIs, /2002 vs /0)
+- eta.solar.vorlauf/ruecklauf/waermemenge: gelesen von eta.js UND eta_solar.js (gleiche URIs)
+- eta.holz.* vs eta.scheitholz.*: unterschiedliche State-Namensräume, gleiche Hardware
+- Wenn beide Scripts installiert: eta.js hat Vorrang (50 DP), Sub-Scripts ergänzen spezifische Werte
+
+**URI noch zu prüfen:**
+- eta.solar.leistung: /121/10221/14877/0/2287 — analog Pellets/Holz, aber Solarthermie hat evtl. andere Struktur
+- eta.solar.kollektor_pumpe: /121/10221/0/11142/2002 — node-basiert, erst nach Test bestätigt
+
+Alle URIs vollständig dokumentiert in: `context/ids_keys.md` (gitignored, lokal)
