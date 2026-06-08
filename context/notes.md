@@ -126,6 +126,26 @@ Ladezustand:     36%
   - State: `solar.puffer2.watt` (Summe aller 3 Relais)
   - 0W = normal wenn Puffer 2 Zieltemperatur (65°C) erreicht
 
+### Heizstab Puffer 2 — Temperaturgrenzen
+- **Heizstab-Regler-Maximum: 80°C** (Hardware-Grenze, Regler schaltet selbst ab)
+- **Elektrische Abschalttemperatur (Software): 65°C** (puffer2.oben oder puffer2.mitte)
+- **Puffer-Maximum bei Holz/Solarthermie: 85°C** — das ist normaler Betrieb, kein Fehler!
+- Hohe Puffertemperatur allein ist KEIN Alarm-Grund
+- Fehlerhaft: elektrische Leistung (solar.puffer2.watt > 100W) bei Temp ≥ 65°C
+
+### Heizstab Puffer 2 — Schutzlogik (puffer2_heizstab_schutz.js)
+| Zustand | Heizstab | Reaktion |
+|---|---|---|
+| Puffer2 < 65°C | läuft oder aus | OK, kein Eingriff |
+| Puffer2 ≥ 65°C | aus | Relais AUS (sicherheitshalber), kein Alarm |
+| Puffer2 ≥ 65°C | läuft (>100W) | Relais AUS + Telegram Warnung |
+| Puffer2 ≥ 80°C | läuft (>100W) | Relais AUS + Telegram ALARM |
+| Puffer2 ≥ 85°C | aus (=0W) | Status "Holz/Solar" — kein Alarm |
+| ETA-Daten fehlen | egal | Sicherheitsabschaltung + Log |
+
+- Shelly IP noch eintragen in `CONFIG.SHELLY_IP` (Platzhalter `0.0.0.0`)
+- Solarmanager steuert Relais auch → kann nach 1 Min wieder einschalten → Schutz läuft alle 5 Min
+
 ---
 
 ## WW-Optimierung (Konzept, noch nicht implementiert)

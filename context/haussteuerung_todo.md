@@ -143,10 +143,14 @@
 ### Heizstab Puffer 2 (4.5kW)
 - [x] Device-ID in Solarmanager identifiziert: 3 Relais (Shelly Pro3) ✓
 - [x] In Solarmanager Script eingebunden: solar.puffer2.watt ✓
-- [ ] Heizstab Puffer 2: Drehschalter auf 85°C (Hardware-Sicherheit)
-      Software-Abschaltung bei 65°C via ioBroker → Shelly HTTP API direkt
-      (nicht über Solarmanager, da Solarmanager die Relais selbst steuert)
-      → wird Teil der Ladelogik-Implementierung
+- [x] Schutzlogik erstellt: puffer2_heizstab_schutz.js (07.06.2026)
+      Abschaltung bei 65°C (oben/mitte), Alarm bei Leistung trotz Temperatur
+      Hohe Temps durch Holz/Solar (bis 85°C) = kein Alarm
+- [ ] Shelly Pro3 IP eintragen in puffer2_heizstab_schutz.js (CONFIG.SHELLY_IP)
+- [ ] Script in ioBroker einspielen nach IP-Eintragung
+- [ ] Heizstab Puffer 2: Drehschalter physisch auf 80°C belassen (Hardware-Regler-Grenze)
+      Software-Schutz bei 65°C via Shelly HTTP API
+      HINWEIS: Puffer selbst darf 85°C haben (Holz/Solarthermie normal)
 
 ### Ladelogik Erweiterung (nach Datensammlung)
 - [ ] Temperaturschwelle definieren ab der alle Heizstäbe abschalten
