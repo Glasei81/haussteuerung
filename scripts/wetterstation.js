@@ -19,9 +19,11 @@ var LAT = '47.788';
 var LON = '12.106';
 
 function getApiConfig() {
+    var keyState = getState('javascript.0.config.wetter.api_key');
+    var idState  = getState('javascript.0.config.wetter.pws_id');
     return {
-        apiKey: getState('javascript.0.config.wetter.api_key').val || '',
-        pwsId:  getState('javascript.0.config.wetter.pws_id').val  || ''
+        apiKey: (keyState && keyState.val) ? keyState.val : '',
+        pwsId:  (idState  && idState.val)  ? idState.val  : ''
     };
 }
 
