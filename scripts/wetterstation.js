@@ -7,10 +7,23 @@
 
 var https = require('https');
 
-var PWS_ID  = 'IRAUBL19';
-var API_KEY = 'cf0bad571a684a698bad571a687a69c6';
-var LAT     = '47.788';
-var LON     = '12.106';
+// API-Key und Station-ID werden aus ioBroker-States gelesen.
+// Einmalig im ioBroker Admin setzen:
+//   javascript.0.config.wetter.api_key  → Weather Company API Key
+//   javascript.0.config.wetter.pws_id   → Stationskennung (z.B. IRAUBL19)
+// createState setzt nur den Defaultwert wenn der State noch nicht existiert.
+createState('config.wetter.api_key', '', { name: 'Wetter API Key',    type: 'string', role: 'text', read: true, write: true });
+createState('config.wetter.pws_id',  '', { name: 'Wetter PWS Station',type: 'string', role: 'text', read: true, write: true });
+
+var LAT = '47.788';
+var LON = '12.106';
+
+function getApiConfig() {
+    return {
+        apiKey: getState('javascript.0.config.wetter.api_key').val || '',
+        pwsId:  getState('javascript.0.config.wetter.pws_id').val  || ''
+    };
+}
 
 var states = [
     // Aktuelle Werte
@@ -68,8 +81,10 @@ function pvPrognose(cloudCover, precipChance, uvIndex) {
 }
 
 function aktuelleWerte() {
+    var cfg = getApiConfig();
+    if (!cfg.apiKey || !cfg.pwsId) { log('Wetter: API-Key oder PWS-ID fehlt — bitte in ioBroker Admin setzen', 'warn'); return; }
     var url = 'https://api.weather.com/v2/pws/observations/current?stationId=' +
-              PWS_ID + '&format=json&units=m&apiKey=' + API_KEY;
+              cfg.pwsId + '&format=json&units=m&apiKey=' + cfg.apiKey;
 
     httpsGet(url, function(json) {
         if (!json.observations || !json.observations[0]) return;
@@ -93,8 +108,10 @@ function aktuelleWerte() {
 }
 
 function forecastAbrufen() {
+    var cfg = getApiConfig();
+    if (!cfg.apiKey) { log('Wetter Forecast: API-Key fehlt', 'warn'); return; }
     var url = 'https://api.weather.com/v3/wx/forecast/daily/5day?geocode=' +
-              LAT + ',' + LON + '&format=json&units=m&language=de-DE&apiKey=' + API_KEY;
+              LAT + ',' + LON + '&format=json&units=m&language=de-DE&apiKey=' + cfg.apiKey;
 
     httpsGet(url, function(json) {
         var maxMorgen  = json.calendarDayTemperatureMax[1];
