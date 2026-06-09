@@ -92,24 +92,31 @@ var DATENPUNKTE = [
 
 // ============================================
 
-var ok = 0;
-var fehler = 0;
-var offen = DATENPUNKTE.length;
+log('InfluxDB Setup startet — wartet 15s auf influxdb.0...');
 
-log('InfluxDB Setup startet — ' + offen + ' Datenpunkte werden aktiviert...');
+setTimeout(function() {
+    var ok = 0;
+    var fehler = 0;
+    var offen = DATENPUNKTE.length;
 
-DATENPUNKTE.forEach(function(id) {
-    sendTo(INFLUX_ADAPTER, 'enableHistory', { id: id, options: OPTIONEN }, function(result) {
-        offen--;
-        if (result && result.error) {
-            log('FEHLER ' + id + ': ' + result.error, 'error');
-            fehler++;
-        } else {
-            log('OK: ' + id);
-            ok++;
-        }
-        if (offen === 0) {
-            log('InfluxDB Setup abgeschlossen: ' + ok + ' aktiviert, ' + fehler + ' Fehler');
-        }
+    log('InfluxDB Setup: aktiviere ' + offen + ' Datenpunkte...');
+
+    DATENPUNKTE.forEach(function(id) {
+        sendTo(INFLUX_ADAPTER, 'enableHistory', { id: id, options: OPTIONEN }, function(result) {
+            offen--;
+            if (result && result.error) {
+                if (result.error === 'timeout') {
+                    log('WARNUNG ' + id + ': Adapter noch nicht bereit (Logging bereits aktiv?)', 'warn');
+                } else {
+                    log('FEHLER ' + id + ': ' + result.error, 'error');
+                    fehler++;
+                }
+            } else {
+                ok++;
+            }
+            if (offen === 0) {
+                log('InfluxDB Setup abgeschlossen: ' + ok + ' aktiviert, ' + fehler + ' Fehler');
+            }
+        });
     });
-});
+}, 15000);
