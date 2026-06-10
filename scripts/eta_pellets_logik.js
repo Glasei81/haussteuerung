@@ -1,9 +1,10 @@
 // ============================================
-// ETA Pellets Logik
-// Temperatur + PV + Warmwasser gesteuert
-// Mit Telegram Steuerung inkl. Forecast
-// Optimierte Sicherheits- und Hysterese-Logik
-// Stand: 26.05.2026
+// ETA Pellets Logik — Hinweis-Modus
+// Automatik greift NICHT mehr in den ETA ein,
+// sondern schickt Empfehlungen per Telegram.
+// Nur manuelle Befehle (/pellets_ein, /pellets_aus)
+// schreiben in den Kessel.
+// Stand: 10.06.2026
 // ============================================
 
 var http = require('http');
@@ -13,7 +14,7 @@ var CONFIG = {
     ETA_PORT: 8080,
     ETA_URI: '/user/var/264/10891/0/0/12651',
 
-    // Hysterese verhindert staendiges Umschalten
+    // Hysterese verhindert staendiges Umschalten der Empfehlung
     PUFFER_SPERRE_AB: 42,
     PUFFER_FREIGABE_AB: 38,
 
@@ -23,24 +24,17 @@ var CONFIG = {
     NACHT_START: 0,
     NACHT_ENDE: 4.5,
 
-    MINDESTLAUFZEIT_MIN: 30,
+    // Kein Empfehlungs-Spam bei flatternden Werten
+    EMPFEHLUNG_COOLDOWN_MIN: 30,
 
     // Falls ETA / Solarmanager Werte fehlen
     MAX_DATENALTER_MIN: 15
 };
 
 createState('eta.pellets.gesperrt', false, {
-    name: 'Pellets gesperrt durch ioBroker',
+    name: 'Pellets gesperrt durch ioBroker (nur manuell)',
     type: 'boolean',
     role: 'indicator',
-    read: true,
-    write: false
-});
-
-createState('eta.pellets.freigabe_zeit', 0, {
-    name: 'Zeitpunkt der letzten Freigabe',
-    type: 'number',
-    role: 'value',
     read: true,
     write: false
 });
@@ -53,8 +47,24 @@ createState('eta.pellets.modus', 'auto', {
     write: true
 });
 
+createState('eta.pellets.empfehlung', '', {
+    name: 'Aktuelle Empfehlung (sperren/freigeben)',
+    type: 'string',
+    role: 'text',
+    read: true,
+    write: false
+});
+
+createState('eta.pellets.empfehlung_zeit', 0, {
+    name: 'Zeitpunkt der letzten Empfehlungs-Nachricht',
+    type: 'number',
+    role: 'value',
+    read: true,
+    write: false
+});
+
 createState('eta.pellets.letzte_entscheidung', '', {
-    name: 'Letzte Automatikentscheidung',
+    name: 'Letzte Empfehlung / Entscheidung',
     type: 'string',
     role: 'text',
     read: true,
@@ -83,6 +93,8 @@ function datenZuAlt(id) {
     }
 }
 
+// Schreibt NUR bei manuellen Befehlen oder zur einmaligen
+// Freigabe beim Wechsel zurück auf Automatik
 function etaSchreiben(sperren, grund) {
 
     var aktuellGesperrt = safeState('eta.pellets.gesperrt', false);
@@ -124,13 +136,6 @@ function etaSchreiben(sperren, grund) {
                     ack: true
                 });
 
-                if (!sperren) {
-                    setState('javascript.0.eta.pellets.freigabe_zeit', {
-                        val: Date.now(),
-                        ack: true
-                    });
-                }
-
                 setState('javascript.0.eta.pellets.letzte_entscheidung', {
                     val: grund,
                     ack: true
@@ -164,9 +169,79 @@ function etaSchreiben(sperren, grund) {
     req.end();
 }
 
+// Telegram-Hinweis senden wenn sich die Empfehlung ändert
+function empfehlungSenden(sperren, grund) {
+
+    var letzteEmpfehlung = safeState('eta.pellets.empfehlung', '');
+    var neueEmpfehlung = sperren ? 'sperren' : 'freigeben';
+
+    setState('javascript.0.eta.pellets.letzte_entscheidung', {
+        val: grund,
+        ack: true
+    });
+
+    // Nur bei Wechsel benachrichtigen
+    if (letzteEmpfehlung === neueEmpfehlung) {
+        return;
+    }
+
+    // Cooldown gegen Flattern
+    var letzteZeit = safeState('eta.pellets.empfehlung_zeit', 0);
+    var minSeitNachricht = (Date.now() - letzteZeit) / 1000 / 60;
+
+    if (letzteZeit > 0 && minSeitNachricht < CONFIG.EMPFEHLUNG_COOLDOWN_MIN) {
+        log('Empfehlungswechsel (' + neueEmpfehlung + ') — Cooldown aktiv (' +
+            Math.round(minSeitNachricht) + '/' + CONFIG.EMPFEHLUNG_COOLDOWN_MIN + ' Min)');
+        return;
+    }
+
+    setState('javascript.0.eta.pellets.empfehlung', {
+        val: neueEmpfehlung,
+        ack: true
+    });
+
+    setState('javascript.0.eta.pellets.empfehlung_zeit', {
+        val: Date.now(),
+        ack: true
+    });
+
+    var msg =
+        (sperren ? '💡 Empfehlung: Pellets SPERREN' : '🔥 Empfehlung: Pellets FREIGEBEN') +
+        '\nGrund: ' + grund +
+        '\nPuffer: ' + safeState('eta.puffer.oben', '?') + '°C' +
+        '\nWarmwasser: ' + safeState('eta.warmwasser.oben', '?') + '°C' +
+        '\nAußen: ' + safeState('eta.aussen.temperatur', '?') + '°C' +
+        '\nPV: ' + safeState('solar.pv.watt', '?') + 'W' +
+        '\n\nManuell: ' + (sperren ? '/pellets_aus' : '/pellets_ein');
+
+    sendTo('telegram.0', msg);
+
+    log('Empfehlung ' + neueEmpfehlung.toUpperCase() + ' | ' + grund);
+}
+
 function etaPelletsSteuerung() {
 
     var modus = safeState('eta.pellets.modus', 'auto');
+
+    // --- Manuelle Modi: einzige verbleibende Schreibzugriffe ---
+    if (modus === 'manuell_ein') {
+        etaSchreiben(false, 'Manuell per Telegram freigegeben');
+        return;
+    }
+
+    if (modus === 'manuell_aus') {
+        etaSchreiben(true, 'Manuell per Telegram gesperrt');
+        return;
+    }
+
+    // --- Automatik = nur Hinweise, kein Eingriff ---
+
+    // Sicherheit: Im Auto-Modus darf keine Sperre von uns aktiv sein.
+    // Greift beim Umstieg auf Hinweis-Modus und nach /pellets_auto.
+    if (safeState('eta.pellets.gesperrt', false)) {
+        etaSchreiben(false, 'Automatik aktiv — Sperre aufgehoben (Hinweis-Modus)');
+        return;
+    }
 
     var puffer = safeState('eta.puffer.oben', 99);
     var ww = safeState('eta.warmwasser.oben', 99);
@@ -175,35 +250,14 @@ function etaPelletsSteuerung() {
     var switch_an = safeState('solar.switch', false);
     var pvWatt = safeState('solar.pv.watt', 0);
 
-    var aktuellGesperrt = safeState('eta.pellets.gesperrt', false);
-
-    var freigabeZeit = safeState('eta.pellets.freigabe_zeit', 0);
-
-    // Sicherheitslogik bei fehlenden Daten
+    // Bei alten Daten keine Empfehlung abgeben
     var kritischeDatenAlt =
         datenZuAlt('eta.puffer.oben') ||
         datenZuAlt('eta.warmwasser.oben') ||
         datenZuAlt('solar.switch');
 
     if (kritischeDatenAlt) {
-
-        log('Daten zu alt -> ETA Sicherheit FREIGABE', 'warn');
-
-        etaSchreiben(false, 'Sicherheitsfreigabe wegen fehlender Daten');
-
-        return;
-    }
-
-    // Manuelle Modi
-    if (modus === 'manuell_ein') {
-
-        etaSchreiben(false, 'Manuell per Telegram freigegeben');
-        return;
-    }
-
-    if (modus === 'manuell_aus') {
-
-        etaSchreiben(true, 'Manuell per Telegram gesperrt');
+        log('Daten zu alt — keine Empfehlung', 'warn');
         return;
     }
 
@@ -217,19 +271,13 @@ function etaPelletsSteuerung() {
         stundeJetzt >= CONFIG.NACHT_START &&
         stundeJetzt < CONFIG.NACHT_ENDE;
 
-    var minSeitFreigabe =
-        (Date.now() - freigabeZeit) / 1000 / 60;
-
-    var mindestlaufzeitAktiv =
-        !aktuellGesperrt &&
-        freigabeZeit > 0 &&
-        minSeitFreigabe < CONFIG.MINDESTLAUFZEIT_MIN;
+    var letzteEmpfehlung = safeState('eta.pellets.empfehlung', '');
 
     var sperren = false;
     var grund = '';
 
     // Prioritaet 1: Pufferlogik mit Hysterese
-    if (aktuellGesperrt) {
+    if (letzteEmpfehlung === 'sperren') {
 
         if (puffer >= CONFIG.PUFFER_FREIGABE_AB) {
 
@@ -240,7 +288,6 @@ function etaPelletsSteuerung() {
                 '°C >= ' +
                 CONFIG.PUFFER_FREIGABE_AB +
                 '°C)';
-
         }
 
     } else {
@@ -289,38 +336,20 @@ function etaPelletsSteuerung() {
 
         } else {
 
-            grund = 'Keine PV Sperre aktiv';
+            grund = 'Kein Sperrgrund aktiv';
         }
     }
 
-    // Mindestlaufzeit beachten
-    if (mindestlaufzeitAktiv && sperren) {
-
-        sperren = false;
-
-        grund =
-            'Mindestlaufzeit aktiv (' +
-            Math.round(minSeitFreigabe) +
-            '/' +
-            CONFIG.MINDESTLAUFZEIT_MIN +
-            ' Min)';
-    }
-
-    setState('javascript.0.eta.pellets.letzte_entscheidung', {
-        val: grund,
-        ack: true
-    });
-
     log(
-        'ETA Logik [' +
+        'ETA Hinweis-Logik [' +
         modus +
-        ']: ' +
+        ']: Empfehlung ' +
         (sperren ? 'SPERREN' : 'FREIGEBEN') +
         ' | ' +
         grund
     );
 
-    etaSchreiben(sperren, grund);
+    empfehlungSenden(sperren, grund);
 }
 
 // Sofortige Reaktion wenn Modus per Telegram geändert wird
@@ -334,4 +363,4 @@ schedule('*/5 * * * *', function() {
     etaPelletsSteuerung();
 });
 
-log('ETA Pellets Logik gestartet');
+log('ETA Pellets Hinweis-Logik gestartet (Automatik greift nicht mehr ein)');

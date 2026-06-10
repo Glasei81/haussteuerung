@@ -31,7 +31,7 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
 
     } else if (cmd === '/pellets_auto') {
         setState('javascript.0.eta.pellets.modus', {val: 'auto', ack: true});
-        sendTo('telegram.0', '🔄 Pellets zurück auf AUTOMATIK');
+        sendTo('telegram.0', '🔄 Pellets auf AUTOMATIK\nKein Eingriff mehr — du bekommst nur noch Empfehlungen.\nEine bestehende Sperre wird aufgehoben.');
 
     // --- Status ---
 
@@ -42,7 +42,8 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
         sendTo('telegram.0',
             '📊 ETA Status\n' +
             '🔥 Pellets: ' + (safeState('eta.pellets.gesperrt', false) ? 'GESPERRT' : 'FREIGEGEBEN') + '\n' +
-            '⚙️ Modus: ' + safeState('eta.pellets.modus', '-') + '\n\n' +
+            '⚙️ Modus: ' + safeState('eta.pellets.modus', '-') + '\n' +
+            '💡 Empfehlung: ' + (safeState('eta.pellets.empfehlung', '') || '-') + '\n\n' +
             '🌡️ Puffer 1 oben: ' + safeState('eta.puffer.oben', '?') + '°C\n' +
             '🌡️ Puffer 2: ' + safeState('eta.puffer2.oben', '?') + '°C / ' + safeState('eta.puffer2.unten', '?') + '°C (oben/unten)\n' +
             '🚿 Warmwasser: ' + safeState('eta.warmwasser.oben', '?') + '°C\n' +
@@ -136,7 +137,7 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
             '/klima — Klimaanlage Schlafzimmer\n' +
             '/pellets_ein — Pellets manuell freigeben\n' +
             '/pellets_aus — Pellets manuell sperren\n' +
-            '/pellets_auto — Pellets zurück auf Automatik\n' +
+            '/pellets_auto — Automatik (nur Empfehlungen, kein Eingriff)\n' +
             '/hilfe — Diese Übersicht'
         );
     }

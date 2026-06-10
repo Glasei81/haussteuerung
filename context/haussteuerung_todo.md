@@ -128,6 +128,14 @@
   - Jetzt in ioBroker-States: javascript.0.config.wetter.api_key / .pws_id
   - createState() setzt nur Defaultwert wenn State nicht existiert
   - Einmalig im ioBroker-Admin eintragen!
+- Pellets-Automatik auf Hinweis-Modus umgestellt (10.06.2026)
+  - Entscheidung: Automatik greift NICHT mehr in den ETA ein (kein POST mehr)
+  - Stattdessen Telegram-Empfehlung bei Wechsel (sperren/freigeben), Cooldown 30 Min
+  - Manuell bleibt: /pellets_ein und /pellets_aus schreiben weiterhin in den Kessel
+  - Sicherheit: im Auto-Modus wird eine bestehende Sperre einmalig aufgehoben
+    -> keine "vergessene" Dauersperre mehr möglich wenn ioBroker ausfällt
+  - Neue States: eta.pellets.empfehlung / empfehlung_zeit
+  - /status zeigt jetzt auch die aktuelle Empfehlung
 - ETA Sub-Scripts erstellt (08.06.2026) — 4 neue unabhängige Scripts:
   - eta_solar.js: Solar Vorlauf/Rücklauf/Leistung/Ertrag/Kollektorpumpe (6 DP)
   - eta_zirkulation.js: Zirkulation Status/Laufzeit/Pause/Freigabe + WW Ladepumpe (5 DP)
@@ -186,8 +194,8 @@
 ### ETA / myPV Koordination (WW Optimierung)
 - [ ] WW Soll URI bestätigt: /121/10111/0/0/12132 (warmwasser.soll bereits geloggt)
 - [ ] Logik: wenn PV > X kW UND Batterie > 95%
-        -> ETA WW-Soll per POST auf 65°C setzen
-        -> myPV Heizstab übernimmt mit gratis PV-Strom
+        -> Telegram-Hinweis: "WW-Soll auf 65°C lohnt sich, myPV übernimmt mit PV-Strom"
+        -> KEIN automatischer POST (Entscheidung 10.06.2026: nur Hinweise, kein Eingriff)
   HINWEIS: Beobachtet 28.05.2026 (PV 9613W, Bat 99%, ETA lud trotzdem per Puffer)
 
 ---
@@ -198,8 +206,8 @@
   - Tabelle: 0-5 / 5-10 / 10-15 / 15-20 Grad Aussen
   - ACHTUNG: Sommer-Daten nicht belastbar (keine Waermeanforderung)
   - Belastbare Daten erst ab Heizsaison Herbst 2026
-- [ ] Forecast in Heizungslogik einbauen
-  - Sperrschwelle dynamisch (40 vs 55 Grad je nach Morgen-Forecast)
+- [ ] Forecast in Hinweis-Logik einbauen
+  - Empfehlungsschwelle dynamisch (40 vs 55 Grad je nach Morgen-Forecast)
   - Tagesplanung taeglich 06:00 Uhr per Telegram
 - [ ] Scheitholz-Empfehlung per Telegram
   - Wenn 2 Tage schlechtes Wetter (UV < 4, Regen > 50%)
