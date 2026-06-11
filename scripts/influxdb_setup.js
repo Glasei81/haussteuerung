@@ -1,0 +1,199 @@
+// ============================================
+// InfluxDB Setup — Vollständige Konfiguration
+// ETA + Solarmanager + Wetterstation
+//
+// Ersetzt influxdb_setup_eta.js.
+// Läuft bei jedem ioBroker-Start (idempotent —
+// bereits aktive Datenpunkte werden nur aktualisiert).
+//
+// Warum welcher Tier:
+//   TIER 1 — Energiebilanz: ohne diese Werte keine Aussage möglich
+//   TIER 2 — Betrieb & Verschleiß: langfristig wertvoll, geringer Overhead
+//   TIER 3 — Wetter & Klima: Korrelationsanalyse mit Heizverbrauch
+//   NICHT aufzeichnen: Text-Zustände, Aliase, gestrige Werte (schon
+//                      in der Historie), Timestamps, booleans ohne Trend
+// ============================================
+
+var INFLUX = 'influxdb.0';
+
+// changesOnly: false → jeden Poll-Wert schreiben (saubere Zeitreihe
+//   auch wenn Wert gleich bleibt — wichtig bei 5/10-Min-Polling)
+var OPT_NORMAL = { changesOnly: false, debounce: 0, maxLength: 0, retention: 0, aliasId: '' };
+
+// changesOnly: true → nur bei Wertänderung (für langsam ändernde Zähler)
+var OPT_COUNTER = { changesOnly: true,  debounce: 0, maxLength: 0, retention: 0, aliasId: '' };
+
+var DATENPUNKTE = [
+
+    // =========================================================
+    // TIER 1 — Energiebilanz ETA (Pflicht für alle Auswertungen)
+    // =========================================================
+
+    // Puffer 1 Schichtung (5 Fühler) + Ladezustand
+    // → Wärmeverlust-Kurve, Ladeprofile, Thermokline sichtbar
+    { id: 'javascript.0.eta.puffer.fuehler1',       opt: OPT_NORMAL  },  // oben
+    { id: 'javascript.0.eta.puffer.fuehler2',       opt: OPT_NORMAL  },
+    { id: 'javascript.0.eta.puffer.fuehler3',       opt: OPT_NORMAL  },  // mitte (Thermokline)
+    { id: 'javascript.0.eta.puffer.fuehler4',       opt: OPT_NORMAL  },
+    { id: 'javascript.0.eta.puffer.fuehler5',       opt: OPT_NORMAL  },  // unten
+    { id: 'javascript.0.eta.puffer.ladung',         opt: OPT_NORMAL  },  // % → quantitativer Energieinhalt
+
+    // Puffer 2 Schichtung (600L Keller) + Ladezustand
+    // → Heizstab-Effizienz, Solarthermie-Einspeisung
+    { id: 'javascript.0.eta.puffer2.oben',          opt: OPT_NORMAL  },
+    { id: 'javascript.0.eta.puffer2.mitte',         opt: OPT_NORMAL  },
+    { id: 'javascript.0.eta.puffer2.unten',         opt: OPT_NORMAL  },
+    { id: 'javascript.0.eta.puffer2.ladung',        opt: OPT_NORMAL  },
+
+    // Warmwasser
+    // → tägliche Verbrauchsmuster, Legionellenschutz-Nachweis
+    { id: 'javascript.0.eta.warmwasser.oben',       opt: OPT_NORMAL  },
+    { id: 'javascript.0.eta.warmwasser.unten',      opt: OPT_NORMAL  },  // Stratifikation im WW-Speicher
+
+    // Heizkreise — Spreizung = Wärmeleistung ohne Durchflusssensor
+    // → Vorlauf − Rücklauf × const = näherungsweise Heizleistung
+    { id: 'javascript.0.eta.hk.vorlauf',            opt: OPT_NORMAL  },  // Heizkörper EG
+    { id: 'javascript.0.eta.hk.ruecklauf',          opt: OPT_NORMAL  },
+    { id: 'javascript.0.eta.fbh.vorlauf',           opt: OPT_NORMAL  },  // Fußbodenheizung OG
+    { id: 'javascript.0.eta.fbh.ruecklauf',         opt: OPT_NORMAL  },
+
+    // Pellets — Leistung live + täglicher Ertrag
+    // → Brennerstunden, Effizienz-Trend
+    { id: 'javascript.0.eta.pellets.leistung',      opt: OPT_NORMAL  },
+    { id: 'javascript.0.eta.pellets.ertrag_heute',  opt: OPT_NORMAL  },  // kWh täglich (reset um Mitternacht)
+
+    // Scheitholz — Leistung live + täglicher Ertrag
+    { id: 'javascript.0.eta.holz.leistung',         opt: OPT_NORMAL  },
+    { id: 'javascript.0.eta.holz.ertrag_heute',     opt: OPT_NORMAL  },
+
+    // Solarthermie — Leistung + täglicher Ertrag
+    // → Kollektor-Effizienz: Vorlauf − Rücklauf × Pumpenleistung
+    { id: 'javascript.0.eta.solar.vorlauf',         opt: OPT_NORMAL  },
+    { id: 'javascript.0.eta.solar.ruecklauf',       opt: OPT_NORMAL  },
+    { id: 'javascript.0.eta.solar.ertrag_heute',    opt: OPT_NORMAL  },
+
+    // Außentemperatur ETA (eigener Sensor der Heizung)
+    // → Korrelation: Außentemp vs Verbrauch (Heizkennlinie)
+    { id: 'javascript.0.eta.aussen.temperatur',     opt: OPT_NORMAL  },
+
+    // =========================================================
+    // TIER 1 — Energiebilanz Solar (Pflicht)
+    // =========================================================
+
+    // PV — Leistung + Tagesertrag
+    // (1-Min-Polling → in Grafana aggregateWindow(5m) verwenden!)
+    { id: 'javascript.0.solar.pv.watt',             opt: OPT_NORMAL  },
+    { id: 'javascript.0.solar.pv.today',            opt: OPT_NORMAL  },  // kWh heute kumuliert
+
+    // Netzbezug/-einspeisung (positiv = Bezug, negativ = Einspeisung)
+    { id: 'javascript.0.solar.netz.watt',           opt: OPT_NORMAL  },
+
+    // Hausverbrauch gesamt
+    { id: 'javascript.0.solar.verbrauch.watt',      opt: OPT_NORMAL  },
+
+    // Batterie
+    { id: 'javascript.0.solar.batterie.soc',        opt: OPT_NORMAL  },  // % Ladestand
+    { id: 'javascript.0.solar.batterie.watt',       opt: OPT_NORMAL  },  // positiv = laden
+
+    // Heizstab Puffer 2 (3 Relais Shelly Pro3, summiert)
+    // → wann und wie viel PV-Überschuss in Wärme umgewandelt wird
+    { id: 'javascript.0.solar.puffer2.watt',        opt: OPT_NORMAL  },
+
+    // =========================================================
+    // TIER 1 — Wetter (für alle Korrelationsanalysen nötig)
+    // =========================================================
+
+    // Eigene Wetterstation IRAUBL19 (10-Min-Auflösung)
+    { id: 'javascript.0.wetter.aktuell.temperatur', opt: OPT_NORMAL  },  // Außen-Vergleich
+    { id: 'javascript.0.wetter.aktuell.solar',      opt: OPT_NORMAL  },  // W/m² → PV-Korrelation
+
+    // =========================================================
+    // TIER 2 — Betrieb & Verschleiß (langfristig wertvoll)
+    // =========================================================
+
+    // Pellets — Wartungsindikatoren + Verbrauchsbilanz
+    { id: 'javascript.0.eta.pellets.behaelter_inhalt',   opt: OPT_NORMAL  },  // kg → wann nachfüllen
+    { id: 'javascript.0.eta.pellets.verbrauch_gesamt',   opt: OPT_COUNTER },  // kg total (Zähler)
+    { id: 'javascript.0.eta.pellets.volllaststunden',    opt: OPT_COUNTER },  // h → Wartungsintervall
+    { id: 'javascript.0.eta.pellets.heizbetriebe',       opt: OPT_COUNTER },  // Starts → Verschleiß
+    { id: 'javascript.0.eta.pellets.zuendungen',         opt: OPT_COUNTER },  // Zündungen → Verschleiß
+    { id: 'javascript.0.eta.pellets.kesseldruck',        opt: OPT_NORMAL  },  // bar → Druckabfall = Wartung fällig
+
+    // Scheitholz — Verbrauchsbilanz + Wartung
+    { id: 'javascript.0.eta.holz.energie_gesamt',        opt: OPT_COUNTER },  // kWh kumuliert
+    { id: 'javascript.0.eta.holz.volllaststunden',       opt: OPT_COUNTER },
+    { id: 'javascript.0.eta.holz.heizbetriebe',          opt: OPT_COUNTER },
+
+    // Solarthermie — kumulierter Ertrag
+    { id: 'javascript.0.eta.solar.waermemenge',          opt: OPT_COUNTER },  // kWh gesamt
+
+    // =========================================================
+    // TIER 3 — Klima & Komfort (Langzeit-Klimastatistik)
+    // =========================================================
+
+    { id: 'javascript.0.wetter.aktuell.feuchte',         opt: OPT_NORMAL  },  // % → Behaglichkeit, Taupunkt
+    { id: 'javascript.0.wetter.aktuell.druck',           opt: OPT_NORMAL  },  // hPa → Wetterfront-Erkennung
+    { id: 'javascript.0.wetter.aktuell.wind',            opt: OPT_NORMAL  },  // km/h
+    { id: 'javascript.0.wetter.aktuell.windboee',        opt: OPT_NORMAL  },  // km/h → Sturmstatistik
+    { id: 'javascript.0.wetter.aktuell.regen_rate',      opt: OPT_NORMAL  },  // mm/h → Starkregen-Events
+    { id: 'javascript.0.wetter.aktuell.regen_gesamt',    opt: OPT_COUNTER },  // mm täglich kumuliert
+    { id: 'javascript.0.wetter.aktuell.uv',              opt: OPT_NORMAL  },  // UV-Index → PV-Korrelation
+
+];
+
+// =========================================================
+// BEWUSST NICHT AUFGEZEICHNET — Begründung:
+// =========================================================
+//
+//   eta.puffer.oben          → Alias für fuehler1, identische Daten
+//   eta.pellets.ertrag_gestern / holz.ertrag_gestern / solar.ertrag_gestern
+//                            → gestern ist schon in der Historie von ertrag_heute
+//   eta.warmwasser.soll      → ändert sich kaum, kein Trend
+//   eta.warmwasser.zustand / hk.zustand / fbh.zustand / solar.zustand
+//   eta.pellets.zustand / holz.zustand
+//                            → Text-Felder, nicht für Zeitreihen geeignet
+//                              (in ioBroker Admin lesbar, kein InfluxDB-Wert)
+//   eta.pellets.kessel_soll / eta.pellets.ruecklauf / eta.holz.ruecklauf
+//                            → wenig Aussagekraft, Rücklauf-Wert nicht für Spreizung
+//                              relevant (keine Pumpensteuerung unsererseits)
+//   eta.holz.zuendungen / holz.kesseldruck
+//                            → Holz-Kesseldruck nicht aussagekräftig (Naturzug)
+//   solar.switch             → boolean, kein Trend
+//   solar.puffer.temperatur  → myPV Sensor, weitgehend redundant zu eta.warmwasser
+//   wetter.aktuell.windrichtung  → interessant, aber wenig Analysewert im Heimkontext
+//   wetter.forecast.*        → Vorhersagedaten, keine Messwerte
+//   wetter.pv.prognose_morgen → Text, nicht numerisch
+//   wetter.aktuell.timestamp  → kein Messwert
+
+// =========================================================
+
+log('InfluxDB Setup startet — wartet 15s auf influxdb.0...');
+
+setTimeout(function () {
+    var ok = 0;
+    var fehler = 0;
+    var offen = DATENPUNKTE.length;
+
+    log('InfluxDB Setup: prüfe und aktiviere ' + offen + ' Datenpunkte...');
+
+    DATENPUNKTE.forEach(function (dp) {
+        sendTo(INFLUX, 'enableHistory', { id: dp.id, options: dp.opt }, function (result) {
+            offen--;
+            if (result && result.error) {
+                if (result.error === 'timeout') {
+                    // Adapter noch nicht bereit — Konfiguration trotzdem meistens übernommen
+                    log('WARNUNG ' + dp.id + ': timeout (Logging meist trotzdem aktiv)', 'warn');
+                } else {
+                    log('FEHLER ' + dp.id + ': ' + result.error, 'error');
+                    fehler++;
+                }
+            } else {
+                ok++;
+            }
+            if (offen === 0) {
+                log('InfluxDB Setup abgeschlossen: ' + ok + ' aktiviert, ' + fehler + ' Fehler');
+            }
+        });
+    });
+
+}, 15000);

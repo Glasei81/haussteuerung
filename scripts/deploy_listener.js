@@ -23,7 +23,7 @@ var SCRIPTS_MAP = {
     'eta.js':                     'script.js.ETA',
     'eta_pellets_logik.js':       'script.js.Eta_Pellets_Logik',
     'telegram.js':                'script.js.telegram',
-    'influxdb_setup_eta.js':      'script.js.influxdb',
+    'influxdb_setup.js':          'script.js.influxdb',       // neues vollständiges Setup (ersetzt influxdb_setup_eta.js)
     'eta_uri_scan.js':            'script.js.eta_uri_scan',
     'eta_zirkulation.js':         'script.js.ETA_zirkulation',
     'eta_puffer2.js':             'script.js.Eta_Puffer_2',
