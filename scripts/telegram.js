@@ -138,6 +138,7 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
             '/pellets_ein — Pellets manuell freigeben\n' +
             '/pellets_aus — Pellets manuell sperren\n' +
             '/pellets_auto — Automatik (nur Empfehlungen, kein Eingriff)\n' +
+            '/deploy — Scripts aus Git aktualisieren\n' +
             '/hilfe — Diese Übersicht'
         );
     }

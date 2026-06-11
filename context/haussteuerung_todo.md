@@ -146,6 +146,17 @@
 
 ---
 
+## Einmalige Einrichtung — Deploy (noch offen)
+- [ ] Repo auf hauspi klonen:
+      git clone git@github.com:glasei81/haussteuerung.git /home/pi/haussteuerung
+- [ ] SSH-Key für GitHub auf hauspi einrichten (als iobroker-User oder pi-User mit Zugriffsrecht)
+- [ ] deploy_listener.js einmalig manuell in ioBroker einspielen
+      → danach: /deploy per Telegram aktualisiert alle anderen Scripts automatisch
+- [ ] Script-IDs in SCRIPTS_MAP prüfen (falls ioBroker-Namen von den Dateinamen abweichen)
+      → ioBroker Admin → Skripte → Namen ablesen und mit deploy_listener.js abgleichen
+
+---
+
 ## Kurzfristig (naechste Session am PC)
 - [x] Grafana Panel Wind + Windböe kombiniert ergänzt ✓
 - [x] Tailscale auf hauspi einrichten ✓ (07.06.2026)
