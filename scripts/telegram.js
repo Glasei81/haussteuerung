@@ -37,17 +37,32 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
 
     } else if (cmd === '/status') {
 
-        var p2watt = safeState('solar.puffer2.watt', 0);
+        var p1oben     = safeState('eta.puffer.fuehler1',  safeState('eta.puffer.oben', 0));
+        var p2oben     = safeState('eta.puffer2.oben',     0);
+        var p2unten    = safeState('eta.puffer2.unten',    0);
+        var deltaT     = (p1oben > 0 && p2oben > 0) ? Math.round(p2oben - p1oben) : null;
+        var p2watt     = safeState('solar.puffer2.watt',   0);
+
+        var rueckZeit  = safeState('eta.puffer2rueck.letzter_transfer', 0);
+        var rueckGrund = safeState('eta.puffer2rueck.grund', '');
+        var rueckZeile = '';
+        if (rueckZeit > 0) {
+            var minAgo = Math.round((Date.now() - rueckZeit) / 60000);
+            var zeitTxt = minAgo < 60 ? 'vor ' + minAgo + ' Min' : 'vor ' + Math.round(minAgo / 60) + ' h';
+            rueckZeile = '🔄 Rückspeisung: ' + zeitTxt + ' (' + rueckGrund + ')\n';
+        }
 
         sendTo('telegram.0',
-            '📊 ETA Status\n' +
-            '🔥 Pellets: ' + (safeState('eta.pellets.gesperrt', false) ? 'GESPERRT' : 'FREIGEGEBEN') + '\n' +
-            '⚙️ Modus: ' + safeState('eta.pellets.modus', '-') + '\n' +
-            '💡 Empfehlung: ' + (safeState('eta.pellets.empfehlung', '') || '-') + '\n\n' +
-            '🌡️ Puffer 1 oben: ' + safeState('eta.puffer.oben', '?') + '°C\n' +
-            '🌡️ Puffer 2: ' + safeState('eta.puffer2.oben', '?') + '°C / ' + safeState('eta.puffer2.unten', '?') + '°C (oben/unten)\n' +
+            '📊 Haus Status\n\n' +
+            '🌡️ P1 oben: ' + (p1oben || '?') + '°C\n' +
+            '🌡️ P2: ' + (p2oben || '?') + '°C / ' + (p2unten || '?') + '°C (oben/unten)' +
+                (deltaT !== null ? '  Δ' + (deltaT >= 0 ? '+' : '') + deltaT + '°C' : '') + '\n' +
+            rueckZeile +
             '🚿 Warmwasser: ' + safeState('eta.warmwasser.oben', '?') + '°C\n' +
             '🌡️ Außen: ' + safeState('eta.aussen.temperatur', '?') + '°C\n\n' +
+            '🔥 Pellets: ' + (safeState('eta.pellets.gesperrt', false) ? 'GESPERRT' : 'FREIGEGEBEN') +
+                ' (' + safeState('eta.pellets.modus', '-') + ')\n' +
+            '💡 Empfehlung: ' + (safeState('eta.pellets.empfehlung', '') || '-') + '\n\n' +
             '☀️ PV: ' + safeState('solar.pv.watt', '?') + 'W\n' +
             '🔋 Batterie: ' + safeState('solar.batterie.soc', '?') + '%\n' +
             (p2watt > 0 ? '⚡ Heizstab P2: ' + p2watt + 'W\n' : '') +
@@ -138,6 +153,7 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
             '/pellets_ein — Pellets manuell freigeben\n' +
             '/pellets_aus — Pellets manuell sperren\n' +
             '/pellets_auto — Automatik (nur Empfehlungen, kein Eingriff)\n' +
+            '/p2rueck — Puffer2 → Puffer1 Rückspeisung manuell starten\n' +
             '/deploy — Scripts aus Git aktualisieren\n' +
             '/hilfe — Diese Übersicht'
         );
