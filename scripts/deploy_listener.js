@@ -31,7 +31,8 @@ var SCRIPTS_MAP = {
     'eta_scheitholz.js':          'script.js.Eta_Scheitholz',
     'zirkulation_monitor.js':     'script.js.Zirkulation_monitor',
     'klima_logik.js':             'script.js.klima_logik',
-    'puffer2_heizstab_schutz.js': 'script.js.puffer2_heizstab_schutz'
+    'puffer2_heizstab_schutz.js':      'script.js.puffer2_heizstab_schutz',
+    'eta_puffer2_rueckspeisung.js':    'script.js.eta_puffer2_rueckspeisung'
     // deploy_listener.js NICHT hier eintragen — kann sich nicht selbst deployen
 };
 
