@@ -139,6 +139,36 @@ var DATENPUNKTE = [
     { id: 'javascript.0.wetter.aktuell.regen_gesamt',    opt: OPT_COUNTER },  // mm täglich kumuliert
     { id: 'javascript.0.wetter.aktuell.uv',              opt: OPT_NORMAL  },  // UV-Index → PV-Korrelation
 
+    // =========================================================
+    // TIER 2 — Raumklima Zigbee (event-driven, minimaler Overhead)
+    // =========================================================
+
+    // Sensoren (TH02Z) — temperature + humidity
+    { id: 'zigbee.0.a4c13829dfc9b6a6.temperature',      opt: OPT_NORMAL  },
+    { id: 'zigbee.0.a4c13829dfc9b6a6.humidity',         opt: OPT_NORMAL  },
+    { id: 'zigbee.0.a4c138b099b0852f.temperature',      opt: OPT_NORMAL  },
+    { id: 'zigbee.0.a4c138b099b0852f.humidity',         opt: OPT_NORMAL  },
+
+    // Sensoren (ZTH05_1) — temperature + humidity
+    { id: 'zigbee.0.a4c13894b001e9c9.temperature',      opt: OPT_NORMAL  },
+    { id: 'zigbee.0.a4c13894b001e9c9.humidity',         opt: OPT_NORMAL  },
+    { id: 'zigbee.0.a4c138a8b3f53353.temperature',      opt: OPT_NORMAL  },
+    { id: 'zigbee.0.a4c138a8b3f53353.humidity',         opt: OPT_NORMAL  },
+    { id: 'zigbee.0.a4c1388161f407cf.temperature',      opt: OPT_NORMAL  },
+    { id: 'zigbee.0.a4c1388161f407cf.humidity',         opt: OPT_NORMAL  },
+
+    // Sensor (TH01) — Schlafzimmer (bestätigt in klima_logik.js)
+    { id: 'zigbee.0.a4c1388f0b92eb71.temperature',      opt: OPT_NORMAL  },
+    { id: 'zigbee.0.a4c1388f0b92eb71.humidity',         opt: OPT_NORMAL  },
+
+    // Thermostate (BHT-002) — local_temperature = gemessene Raumtemperatur
+    { id: 'zigbee.0.9035eafffe2a7ad9.local_temperature', opt: OPT_NORMAL },
+    { id: 'zigbee.0.2c1165fffe52fc24.local_temperature', opt: OPT_NORMAL },
+
+    // Thermostate (ZHT-002) — Gang/Treppenhaus + Gang/Schlafzimmer (neu)
+    { id: 'zigbee.0.a4c1387b40e90364.local_temperature', opt: OPT_NORMAL },
+    { id: 'zigbee.0.a4c138d0a5ca4495.local_temperature', opt: OPT_NORMAL },
+
 ];
 
 // =========================================================
@@ -164,6 +194,10 @@ var DATENPUNKTE = [
 //   wetter.forecast.*        → Vorhersagedaten, keine Messwerte
 //   wetter.pv.prognose_morgen → Text, nicht numerisch
 //   wetter.aktuell.timestamp  → kein Messwert
+//   zigbee.*.occupied_heating_setpoint / current_heating_setpoint
+//                            → Soll-Werte der Thermostate, kein Messwert
+//   zigbee.*.battery         → Batteriestand, interessant aber niedrige Frequenz
+//                              (bei Bedarf ergänzen)
 
 // =========================================================
 
