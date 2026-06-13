@@ -133,18 +133,13 @@ Ladezustand:     36%
 - Hohe Puffertemperatur allein ist KEIN Alarm-Grund
 - Fehlerhaft: elektrische Leistung (solar.puffer2.watt > 100W) bei Temp ≥ 65°C
 
-### Heizstab Puffer 2 — Schutzlogik (puffer2_heizstab_schutz.js)
-| Zustand | Heizstab | Reaktion |
-|---|---|---|
-| Puffer2 < 65°C | läuft oder aus | OK, kein Eingriff |
-| Puffer2 ≥ 65°C | aus | Relais AUS (sicherheitshalber), kein Alarm |
-| Puffer2 ≥ 65°C | läuft (>100W) | Relais AUS + Telegram Warnung |
-| Puffer2 ≥ 80°C | läuft (>100W) | Relais AUS + Telegram ALARM |
-| Puffer2 ≥ 85°C | aus (=0W) | Status "Holz/Solar" — kein Alarm |
-| ETA-Daten fehlen | egal | Sicherheitsabschaltung + Log |
-
-- Shelly IP noch eintragen in `CONFIG.SHELLY_IP` (Platzhalter `0.0.0.0`)
-- Solarmanager steuert Relais auch → kann nach 1 Min wieder einschalten → Schutz läuft alle 5 Min
+### Heizstab Puffer 2 — Schutzlogik (ENTFERNT 13.06.2026)
+puffer2_heizstab_schutz.js wurde entfernt weil:
+- Shelly Pro3 hat KEINE Leistungsmessung → solar.puffer2.watt las falschen Wert
+  (vermutlich PV-Gesamtleistung statt Heizstab-Leistung)
+- Folge: Fehlalarme ("läuft trotz 73°C"), falsche Relais-Abschaltungen
+- ETA und Heizstab-Hardware-Regler (80°C) haben eigene Sicherheitsmechanismen → kein Script nötig
+OFFEN: solar.puffer2.watt Quelle klären (Solarmanager summiert was genau?)
 
 ---
 
@@ -163,8 +158,21 @@ Ladezustand:     36%
 ## ETA REST API
 - Dokumentation: Version 1.2, November 2019
 - Endpunkte: `/user/var` (GET+POST), `/user/menu`, `/user/errors`, `/user/varinfo`
-- POST-Wert = Rohwert ohne Skalierung (z.B. `value=1803` für 60,1°C bei scale=10)
+- POST body: `value=<Rohwert>&at=0` (at=0 = sofort)
+- Rohwert = strValue × scaleFactor (z.B. 25,5°C × scale=10 → value=255)
+- Enum-Werte: Rohwert = advTextOffset + Enum-Index (z.B. 1802+0=Aus, 1802+1=1803=Ein)
 - `/user/errors` → nützlich für Telegram-Alerts bei ETA-Fehlern (noch nicht implementiert)
+
+### ETA Puffer2 Rückspeisung — Erkenntnisse (13.06.2026)
+- "Sofort laden" URI: /121/10601/0/0/13025
+  GET: scaleFactor=1, advTextOffset=1802, strValue="Aus", value=1802
+  POST value=1803&at=0 → <success> ✓ — aber Pumpe läuft NUR wenn ETA P2-Bedarf sieht
+- ETA Logik: Pumpe lädt P2 AUS P1 (P1→P2 Richtung)
+  → startet nur wenn P2 < P1 (P2 braucht Wärme)
+  → bei P2 > P1 (unser Szenario: solar/Heizstab) kein Bedarf → Pumpe bleibt aus
+- Pump-Ausgänge (Ausgang /2130, Anforderung /2001, Drehzahlsteuerung /2133):
+  read-only oder ETA-intern berechnet → können nicht direkt überschrieben werden
+- FAZIT: P2→P1 Wärmerückspeisung nur mit Shelly 1PM direkt an der Pumpe möglich
 
 ## ETA Sub-Scripts (08.06.2026)
 

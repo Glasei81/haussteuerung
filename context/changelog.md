@@ -1,0 +1,94 @@
+# Changelog — Haussteuerung Raubling
+
+Chronologische Entwicklungshistorie. Jede Session mit Datum und Inhalt.
+
+---
+
+## 21.05.2026 — Projektstart
+- InfluxDB Datenaufzeichnung gestartet (Bucket: wetter, Org: iobroker)
+- Grundinfrastruktur: hauspi (ioBroker), Dell Laptop (InfluxDB + Grafana)
+
+## 25.05.2026
+- windGust (Windböen) ins Wetterstation Script ergänzt
+- windGust wird in InfluxDB aufgezeichnet
+
+## 26.05.2026 — Kontext-Ordner erstellt
+- context/ Ordner mit Todo, Notes, IDs angelegt
+- Prinzip "Files over Tools" definiert
+
+## 28.05.2026
+- Beobachtung: PV 9613W, Batterie 99%, ETA lud trotzdem über Puffer (nicht via myPV)
+  → Erkenntnis: WW-Optimierung via ETA-POST wäre möglich, aber Entscheidung dagegen (nur Hinweise)
+- Puffer 1 Schichtung dokumentiert:
+  Fühler 1: 66°C / 2: 64°C / 3: 53°C (Thermokline) / 4: 47°C / 5: 46°C → 36% Ladung
+
+## 05.06.2026
+- ETA Script komplett neu auf Basis eta_menu.xml analysiert
+
+## 07.06.2026 — Heizungsumbau abgeschlossen, großes Update
+- eta.js neu: 50 Datenpunkte, alle Fühler aktiv, URI-Korrekturen (node-basierte URIs)
+  - Puffer 1 Fühler 2/3/4: /272/10601/0/11328|29|30/0
+  - Puffer 2 mitte + unten: /121/10601/0/11328|29/0
+- Solarmanager Script kritischer Bug behoben: API-Feldnamen korrigiert, Script las nie Daten
+- Puffer 2 Heizstab (Shelly Pro3, 3 Relais) eingebunden: solar.puffer2.watt
+- InfluxDB: 31 ETA States aktiviert via influxdb_setup_eta.js
+- Telegram Script in eigenes telegram.js ausgelagert (war in eta_pellets_logik.js)
+- Weatherunderground Adapter gelöscht
+- Tailscale auf hauspi eingerichtet (http://hauspi:8081 von überall)
+- puffer2_heizstab_schutz.js erstellt (Schutzlogik 65°C)
+- 4 ETA Sub-Scripts erstellt: eta_solar, eta_zirkulation, eta_puffer2, eta_scheitholz
+- URI-Korrekturen per eta_uri_scan.js bestätigt, alle 50 DP liefern plausible Werte
+- Abkühlkurve erster Datenpunkt: 43,8°C → 40,8°C in 13h bei 20–27°C Außen = 0,23°C/h
+
+## 08.06.2026
+- klima_logik.js komplett neu für Midea Schlafzimmer (153931628437826)
+  States: klima.schlafzimmer.aktiv / start_zeit / pause_start / grund
+  NOCH NICHT AKTIV — Midea-Adapter muss erst laufen
+- wetterstation.js: API-Key aus Code entfernt → ioBroker-States
+
+## 10.06.2026 — Pellets-Automatik Entscheidung
+- Pellets-Automatik auf Hinweis-Modus umgestellt (kein automatischer ETA-POST mehr)
+  Hintergrund: ETA steuert Heizung selbst, Automatik-Eingriff birgt Risiko
+  Neue Logik: Telegram-Empfehlung bei Wechsel, /pellets_ein und /pellets_aus manuell
+  Sicherheit: Auto-Modus hebt vergessene Sperre einmalig auf
+
+## 13.06.2026 — Deploy-System + InfluxDB komplett + Puffer2 Analyse
+- **Deploy-System vollständig in Betrieb**
+  - HTTPS Clone (kein SSH-Key nötig für public repo)
+  - sudo chown -R iobroker:iobroker /home/pi/haussteuerung
+  - ioBroker javascript.0: "Enable Exec" + "setObject erlaubt" aktiviert
+  - deploy_listener.js kann neue Scripts anlegen (setObject mit vollem Script-Objekt)
+  - 14 Scripts via /deploy: "Deploy: 14 OK, 0 Fehler" ✓
+  - git pull immer als iobroker: sudo -u iobroker git -C /home/pi/haussteuerung pull
+
+- **InfluxDB auf 66 Datenpunkte erweitert**
+  - Alle 10 Zigbee-Geräte aufgenommen (TH02Z, ZTH05_1, TH01, BHT-002, ZHT-002)
+  - influxdb_setup.js ersetzt influxdb_setup_eta.js vollständig
+  - Log: "InfluxDB Setup abgeschlossen: 66 aktiviert, 0 Fehler" ✓
+
+- **ETA Puffer2 "Sofort laden" analysiert**
+  - URI: /121/10601/0/0/13025, Enum: 1802=Aus, 1803=Ein
+  - POST value=1803&at=0 → ETA antwortet <success>
+  - ABER: ETA startet Pumpe nur wenn P2 Wärmebedarf hat (P2 < P1)
+    → bei P2 > P1 (unserem Szenario) keine Reaktion → Pumpe bleibt aus
+  - Ausgang (2130) und Anforderung (2130, 2133) sind read-only / ETA-intern gesteuert
+  - LÖSUNG: Shelly 1PM direkt an der Pumpe (noch offen, Koordination Heizungsbauer)
+
+- **eta_puffer2_rueckspeisung.js erstellt**
+  Trigger automatisch (P2 > P1 + 10°C, nur 9–19 Uhr, 2h Cooldown) + /p2rueck manuell
+  Solange ETA kooperiert — bei P2 > P1 keine Wirkung ohne Shelly
+
+- **puffer2_heizstab_schutz.js entfernt**
+  Shelly Pro3 hat keine Leistungsmessung → solar.puffer2.watt las falschen Wert
+  → Fehlalarme und falsche Relais-Abschaltungen
+  ETA + Heizstab-Hardware haben eigene Sicherheiten → Script redundant und fehlerhaft
+
+- **telegram.js /status erweitert**
+  P1/P2 Temperaturdifferenz (Δ) direkt sichtbar
+  Rückspeisung-Status: wann zuletzt + Grund
+  /p2rueck in /hilfe
+
+---
+
+## Offen / Nächste Sessions
+Siehe haussteuerung_todo.md für aktuelle offene Punkte.
