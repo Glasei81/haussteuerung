@@ -35,7 +35,7 @@ var SCRIPTS_MAP = {
     // deploy_listener.js NICHT hier eintragen — kann sich nicht selbst deployen
 };
 
-// --- Einzelnes Script aktualisieren ---
+// --- Einzelnes Script aktualisieren oder neu anlegen ---
 
 function deployScript(filename, scriptId, callback) {
 
@@ -50,11 +50,26 @@ function deployScript(filename, scriptId, callback) {
 
     getObject(scriptId, function(err, obj) {
 
-        if (err || !obj) {
-            return callback('Nicht in ioBroker gefunden: ' + scriptId);
+        if (!obj) {
+            // Script existiert noch nicht → neu anlegen
+            var name = scriptId.replace(/^script\.js\./, '');
+            obj = {
+                _id:    scriptId,
+                type:   'script',
+                common: {
+                    name:       name,
+                    engineType: 'Javascript/js',
+                    engine:     'system.adapter.javascript.0',
+                    source:     source,
+                    enabled:    true,
+                    debug:      false,
+                    verbose:    false
+                },
+                native: {}
+            };
+        } else {
+            obj.common.source = source;
         }
-
-        obj.common.source = source;
 
         setObject(scriptId, obj, function(setErr) {
             if (setErr) {
