@@ -143,17 +143,38 @@
   - eta_scheitholz.js: Zustand/Isoliertüre/Wärmemenge/Leistung (4 DP)
   - Alle nach gleichem Muster wie eta.js, schedule alle 5 Min
   - HINWEIS: eta.solar.leistung URI (/121/10221/14877/0/2287) noch prüfen!
+- InfluxDB komplett auf 66 Datenpunkte erweitert (13.06.2026)
+  - Alle 10 Zigbee-Geräte aufgenommen (TH02Z, ZTH05_1, TH01, BHT-002, ZHT-002)
+  - 6 Temperatursensoren + 5 Feuchtigkeitssensoren + 2 Thermostat-Temperaturen + 2 Gang-Thermostate
+  - influxdb_setup.js ersetzt influxdb_setup_eta.js vollständig
+  - Log: "InfluxDB Setup abgeschlossen: 66 aktiviert, 0 Fehler" ✓
+- Deploy-System vollständig in Betrieb (13.06.2026)
+  - HTTPS Clone (kein SSH-Key nötig), iobroker als Owner
+  - deploy_listener.js kann neue Scripts anlegen (setObject mit vollem Script-Objekt)
+  - 14 Scripts via /deploy aktualisiert: "Deploy: 14 OK, 0 Fehler" ✓
+  - Aktueller SCRIPTS_MAP Stand: wetterstation, solarmanager, eta, eta_pellets_logik,
+    telegram, influxdb_setup, eta_uri_scan, eta_zirkulation, eta_puffer2, eta_solar,
+    eta_scheitholz, zirkulation_monitor, klima_logik, eta_puffer2_rueckspeisung
+- telegram.js /status erweitert (13.06.2026)
+  - P1/P2 Temperaturdifferenz (Δ) direkt sichtbar
+  - Rückspeisung-Status: wann zuletzt + Grund
+  - /p2rueck in /hilfe eingetragen
+- puffer2_heizstab_schutz.js entfernt (13.06.2026) — siehe Heizstab Puffer 2 Abschnitt
 
 ---
 
-## Einmalige Einrichtung — Deploy (noch offen)
-- [ ] Repo auf hauspi klonen:
-      git clone git@github.com:glasei81/haussteuerung.git /home/pi/haussteuerung
-- [ ] SSH-Key für GitHub auf hauspi einrichten (als iobroker-User oder pi-User mit Zugriffsrecht)
-- [ ] deploy_listener.js einmalig manuell in ioBroker einspielen
-      → danach: /deploy per Telegram aktualisiert alle anderen Scripts automatisch
-- [ ] Script-IDs in SCRIPTS_MAP prüfen (falls ioBroker-Namen von den Dateinamen abweichen)
-      → ioBroker Admin → Skripte → Namen ablesen und mit deploy_listener.js abgleichen
+## Einmalige Einrichtung — Deploy (erledigt 13.06.2026)
+- [x] Repo auf hauspi geklont: HTTPS (nicht SSH) weil kein SSH-Key für iobroker-User
+      git clone https://github.com/glasei81/haussteuerung.git /home/pi/haussteuerung
+      sudo chown -R iobroker:iobroker /home/pi/haussteuerung
+      sudo chmod o+x /home/pi  (damit iobroker-User /home/pi traversieren darf)
+- [x] deploy_listener.js manuell in ioBroker eingespielt ✓
+- [x] ioBroker javascript.0 Einstellungen: "Enable Exec" + "setObject erlaubt" aktiviert ✓
+- [x] Deploy-System läuft: /deploy per Telegram → git pull + alle 14 Scripts aktualisiert ✓
+- [x] Script-IDs in SCRIPTS_MAP geprüft und korrigiert ✓
+- HINWEIS: git pull auf hauspi muss als iobroker laufen (Repo gehört iobroker):
+      sudo -u iobroker git -C /home/pi/haussteuerung pull
+  (nicht als pi — gibt "Keine Berechtigung" Fehler wegen Ownership)
 
 ---
 
@@ -181,14 +202,33 @@
 ### Heizstab Puffer 2 (4.5kW)
 - [x] Device-ID in Solarmanager identifiziert: 3 Relais (Shelly Pro3) ✓
 - [x] In Solarmanager Script eingebunden: solar.puffer2.watt ✓
-- [x] Schutzlogik erstellt: puffer2_heizstab_schutz.js (07.06.2026)
-      Abschaltung bei 65°C (oben/mitte), Alarm bei Leistung trotz Temperatur
-      Hohe Temps durch Holz/Solar (bis 85°C) = kein Alarm
-- [ ] Shelly Pro3 IP eintragen in puffer2_heizstab_schutz.js (CONFIG.SHELLY_IP)
-- [ ] Script in ioBroker einspielen nach IP-Eintragung
-- [ ] Heizstab Puffer 2: Drehschalter physisch auf 80°C belassen (Hardware-Regler-Grenze)
-      Software-Schutz bei 65°C via Shelly HTTP API
-      HINWEIS: Puffer selbst darf 85°C haben (Holz/Solarthermie normal)
+- [x] puffer2_heizstab_schutz.js ENTFERNT (13.06.2026)
+      GRUND: Shelly Pro3 hat keine Leistungsmessung → solar.puffer2.watt las falschen Wert
+      (vermutlich PV-Gesamtleistung statt Heizstab) → Fehlalarme + falsche Relais-Abschaltungen
+      ENTSCHEIDUNG: ETA und Heizstab haben eigene Hardware-Sicherheitsmechanismen → kein Script nötig
+      Heizstab Drehschalter physisch auf 80°C (Hardware-Grenze reicht aus)
+- [ ] solar.puffer2.watt Quelle klären: Shelly Pro3 hat keine Messung → Wert kommt woher?
+      Evtl. Solarmanager summiert PV-Überschuss als "Heizstab" ohne echte Messung
+
+### Puffer2 → Puffer1 Wärmerückspeisung (13.06.2026 analysiert)
+- [x] eta_puffer2_rueckspeisung.js erstellt ✓
+      Trigger: puffer2.oben > puffer.fuehler1 + 10°C UND p2 >= 45°C
+      Zeitfenster 9-19 Uhr, 2h Cooldown, /p2rueck Telegram manuell
+- [x] ETA REST API "Sofort laden" URI analysiert:
+      GET /user/var/121/10601/0/0/13025 → scaleFactor=1, Enum: 1802=Aus, 1803=Ein
+      POST value=1803&at=0 → ETA antwortet <success> ✓
+- [x] GRUNDPROBLEM ERKANNT: "Sofort laden" lädt P2 AUS P1 (nicht umgekehrt!)
+      ETA startet Pumpe nur wenn P2 Wärmebedarf hat (P2 < P1) → bei P2 > P1 keine Reaktion
+      Direkte Pump-Ausgänge (2130=Ausgang %, 2133=Drehzahlsteuerung) sind read-only / nicht überschreibbar
+- [ ] LÖSUNG: Shelly 1PM direkt an der Pumpe zwischen P1 und P2
+      → volle Kontrolle unabhängig von ETA-Logik
+      → echte Wattmessung (löst solar.puffer2.watt Problem)
+      → /p2ein / /p2aus Telegram Befehle
+      → Koordination mit Heizungsbauer (hat manuellen Schalter erwähnt)
+- HYDRAULIK KONTEXT: Pumpe zwischen P1 und P2 ist "Pufferladeventil/-pumpe" (/121/10601/0/11157)
+  Normale Richtung: P1 → P2 (P2 laden wenn leer)
+  Gewünschte Richtung: P2 → P1 (Wärme zurückgeben wenn P2 solar/Heizstab-heiß)
+  Physikalisch durch Zirkulation + Thermik möglich, ETA erlaubt es nicht via API
 
 ### Ladelogik Erweiterung (nach Datensammlung)
 - [ ] Temperaturschwelle definieren ab der alle Heizstäbe abschalten
@@ -201,6 +241,13 @@
 
 ### Pellets
 - [ ] Nachlaufzeit ca. 1h beim Sperren berücksichtigen (bereits bekannt)
+
+### Warmwasser-Pumpe (neu, 13.06.2026)
+- [ ] Verdacht: Zirkulationspumpe WW verkalkt
+      Symptom/Beobachtung: noch unklar — Stefan hat Hinweis gegeben, Details ausstehend
+      Mögliche Diagnose via ETA: eta.warmwasser.* Werte beobachten, Pumpen-Zustand prüfen
+      Mögliche Diagnose via ioBroker: Zirkulationslog aus eta_zirkulation.js auswerten
+      TODO: Stefan beschreibt genauer was er beobachtet hat (Geräusche? Unregelmäßig? ETA-Meldung?)
 
 ### ETA / myPV Koordination (WW Optimierung)
 - [ ] WW Soll URI bestätigt: /121/10111/0/0/12132 (warmwasser.soll bereits geloggt)
