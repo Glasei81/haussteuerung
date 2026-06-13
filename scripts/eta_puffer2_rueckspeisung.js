@@ -45,7 +45,7 @@ function safe(id, fallback) {
 }
 
 function sofortLaden() {
-    var body = 'value=1&at=0';
+    var body = 'value=1803&at=0';
     var options = {
         host:   ETA_IP,
         port:   ETA_PORT,
