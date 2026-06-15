@@ -225,6 +225,9 @@
       → echte Wattmessung (löst solar.puffer2.watt Problem)
       → /p2ein / /p2aus Telegram Befehle
       → Koordination mit Heizungsbauer (hat manuellen Schalter erwähnt)
+- Auto-Trigger in eta_puffer2_rueckspeisung.js deaktiviert (15.06.2026)
+  Script hat Telegram-Spam verursacht (alle 10 Min bei Δ=34°C) ohne Wirkung
+  Reaktivieren wenn Shelly 1PM installiert — schedule-Zeilen nur einkommentieren
 - HYDRAULIK KONTEXT: Pumpe zwischen P1 und P2 ist "Pufferladeventil/-pumpe" (/121/10601/0/11157)
   Normale Richtung: P1 → P2 (P2 laden wenn leer)
   Gewünschte Richtung: P2 → P1 (Wärme zurückgeben wenn P2 solar/Heizstab-heiß)
