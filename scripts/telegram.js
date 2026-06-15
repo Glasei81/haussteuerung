@@ -137,9 +137,55 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
                 '❄️ Klimaanlage Schlafzimmer\n' +
                 'Status: ' + statusZeile + '\n' +
                 '🌡️ Raumtemperatur: ' + (zigbeeTemp !== null ? zigbeeTemp + '°C' : '?') + '\n' +
-                '📝 Letzter Grund: ' + klimaGrund
+                '📝 Letzter Grund: ' + klimaGrund + '\n\n' +
+                '/klima ein — einschalten\n' +
+                '/klima aus — ausschalten'
             );
         }
+
+    // --- Klimaanlage Ein ---
+
+    } else if (cmd === '/klima ein') {
+
+        var MIDEA_ID = '153931628437826';
+        var pvW    = safeState('solar.pv.watt',        0);
+        var netzW  = safeState('solar.netz.watt',      0);
+        var batW   = safeState('solar.batterie.watt',  0);
+        var batSoc = safeState('solar.batterie.soc',   0);
+
+        var netzZeile = netzW > 0
+            ? '🔌 Netzbezug: ' + Math.round(netzW) + 'W'
+            : '➡️ Einspeisung: ' + Math.round(Math.abs(netzW)) + 'W';
+        var batZeile = batW >= 0
+            ? '🔋 Batterie lädt: ' + Math.round(batW) + 'W (' + batSoc + '%)'
+            : '🔋 Batterie liefert: ' + Math.round(Math.abs(batW)) + 'W (' + batSoc + '%)';
+
+        setState('midea.0.' + MIDEA_ID + '.operationalMode',   2);
+        setState('midea.0.' + MIDEA_ID + '.targetTemperature', 22);
+        setState('midea.0.' + MIDEA_ID + '.powerState',        true);
+        setState('javascript.0.klima.schlafzimmer.aktiv',       { val: true,       ack: true });
+        setState('javascript.0.klima.schlafzimmer.start_zeit',  { val: Date.now(), ack: true });
+        setState('javascript.0.klima.schlafzimmer.pause_start', { val: 0,          ack: true });
+        setState('javascript.0.klima.schlafzimmer.grund',       { val: 'Manuell EIN via Telegram', ack: true });
+
+        sendTo('telegram.0',
+            '❄️ Klimaanlage EIN (manuell)\n' +
+            'Ziel: 22°C | Modus: Kühlen\n\n' +
+            '☀️ PV: ' + Math.round(pvW) + 'W\n' +
+            netzZeile + '\n' +
+            batZeile
+        );
+
+    // --- Klimaanlage Aus ---
+
+    } else if (cmd === '/klima aus') {
+
+        var MIDEA_ID = '153931628437826';
+        setState('midea.0.' + MIDEA_ID + '.powerState', false);
+        setState('javascript.0.klima.schlafzimmer.aktiv', { val: false, ack: true });
+        setState('javascript.0.klima.schlafzimmer.grund', { val: 'Manuell AUS via Telegram', ack: true });
+
+        sendTo('telegram.0', '❄️ Klimaanlage AUS (manuell)');
 
     // --- Hilfe ---
 
@@ -149,7 +195,9 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
             '📋 Verfügbare Befehle:\n\n' +
             '/status — Heizung & Energie Überblick\n' +
             '/forecast — Wettervorschau morgen & übermorgen\n' +
-            '/klima — Klimaanlage Schlafzimmer\n' +
+            '/klima — Klimaanlage Status\n' +
+            '/klima ein — Klimaanlage einschalten\n' +
+            '/klima aus — Klimaanlage ausschalten\n' +
             '/pellets_ein — Pellets manuell freigeben\n' +
             '/pellets_aus — Pellets manuell sperren\n' +
             '/pellets_auto — Automatik (nur Empfehlungen, kein Eingriff)\n' +
