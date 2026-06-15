@@ -363,7 +363,7 @@
   - Werte werden direkt in ioBroker Datenpunkte geschrieben
   - Kein manuelles Eintragen mehr in ids_keys.md noetig
   - Vorbild: klassischer Setup-Wizard, Schritt fuer Schritt
-- [ ] ioBroker VIS-2 Dashboard (Drill-Down Konzept)
+- [ ] ioBroker VIS-2 Dashboard (Drill-Down Konzept) — Stefan spielt sich ein (15.06.2026)
   - Statusleiste oben: Außentemperatur, Wind, PV-Leistung immer sichtbar
   - Hauptnavigation: Heizung | PV | Klima
   - Heizung-View: Puffer Temp/Ladung, WW, Pellets-Status, Thermostate OG
