@@ -120,6 +120,8 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
     }
 });
 
-pruefen();
-schedule('*/10 * * * *', function() { pruefen(); });
-log('ETA Puffer2 Rückspeisung gestartet — prüft alle 10 Min | Trigger: P2 > P1 + ' + CONFIG.DELTA_EIN + '°C');
+// Automatischer Trigger deaktiviert — ETA startet Pumpe nicht wenn P2 > P1
+// Reaktivieren sobald Shelly 1PM direkt an der Pumpe installiert ist
+// pruefen();
+// schedule('*/10 * * * *', function() { pruefen(); });
+log('ETA Puffer2 Rückspeisung geladen — Auto-Trigger deaktiviert, /p2rueck für manuellen Test');
