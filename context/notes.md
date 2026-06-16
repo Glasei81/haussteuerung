@@ -1,6 +1,25 @@
 # Haussteuerung Raubling — Technischer Kontext
 
-## Infrastruktur (Stand: 07.06.2026)
+## hauspi — Systemzeit & NTP (16.06.2026)
+
+**Problem:** Moes Zigbee-Thermostate zeigten 4 verschiedene Uhrzeiten (Abweichung bis 3h+).
+**Ursache:** Raspberry Pi hat keine Hardware-RTC (`RTC time: n/a` in timedatectl).
+  Beim Booten startet ioBroker bevor NTP synchronisiert hat → Zigbee-Adapter
+  synct Thermostate mit falscher Systemzeit. Jedes Gerät verbindet zu anderem Zeitpunkt.
+
+**Fix (16.06.2026):** ioBroker wartet auf NTP-Sync:
+```bash
+sudo mkdir -p /etc/systemd/system/iobroker.service.d/
+printf '[Unit]\nAfter=time-sync.target\nWants=time-sync.target\n' | sudo tee /etc/systemd/system/iobroker.service.d/override.conf
+sudo systemctl daemon-reload
+```
+Datei: `/etc/systemd/system/iobroker.service.d/override.conf`
+
+**Langfristig:** DS3231 RTC Modul (~5€, I²C) nachrüsten falls Raspi ohne Internet bootet.
+
+---
+
+
 
 | Gerät | Rolle | IP / URL |
 |---|---|---|
