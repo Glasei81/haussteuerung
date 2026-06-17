@@ -284,6 +284,18 @@
 - Einzelne Räume: Zigbee Temperatursensoren vorhanden (nur messen, nicht schalten)
 - Temperatursensoren als Korrekturquelle nützlich (TRV-Sensor sitzt ungünstig direkt am Heizkörper)
 
+### Raumtemperaturgeführte Heizkurvenkorrektur (mittlere Priorität)
+- [ ] Zigbee Raumtemperaturen zur Korrektur des ETA Vorlauf-Sollwerts nutzen
+  - Konzept: Raumtemp > Soll + X°C → FBH/HK Vorlauf-Soll um kleine Offsets absenken (±3°C)
+  - Sonneneinstrahlung (wetter.aktuell.solar) als vorausschauender Indikator (>200 W/m² für 30+ Min)
+  - FBH und HK separat (FBH träger, 30-60 Min Reaktionszeit → konservativere Korrekturen)
+  - Nur absenken, nie aggressiv erhöhen — ETA's Witterungsführung bleibt Basis
+  - Mindest-Vorlauf FBH: ~25°C (nicht unterschreiten)
+- [ ] Voraussetzung: ETA URIs für HK-Vorlauf-Soll + FBH-Vorlauf-Soll identifizieren (curl/eta_uri_scan.js)
+- [ ] Beobachtungsphase zuerst: wie stark überhitzen Räume an sonnigen Wintertagen?
+  - Belastbare Daten erst ab Heizsaison Herbst 2026
+  - Wenn Überhitzung regelmäßig >1-2°C über Soll → Script lohnt sich
+
 ### TRVs für EG Heizkörper (niedrige Priorität)
 - [ ] Sonoff TRVZB (~20€/Stück Amazon, ~15€ AliExpress) pro Heizkörper EG
   - Zigbee2MQTT Adapter in ioBroker (gleicher Weg wie bestehende Thermometer)
