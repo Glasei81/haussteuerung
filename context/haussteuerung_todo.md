@@ -62,9 +62,10 @@
 ### Infrastruktur
 - **ETA:** IP 192.168.178.5:8080
 - **hauspi:** Raspberry Pi, ioBroker (hauspi.local)
-- **Dell Latitude 5320:** Ollama + InfluxDB Docker + Grafana Docker
+- **Dell Latitude 5320:** Ollama + InfluxDB Docker + Grafana Docker (IP 192.168.178.130)
 - **InfluxDB:** http://192.168.178.130:8086 (Bucket: wetter, Org: iobroker)
 - **Grafana:** http://192.168.178.130:3001
+- **Mac Mini M4 (geplant):** Ollama + openclaw → Dell wird damit frei für ioBroker-Umzug
 
 ---
 
@@ -344,6 +345,32 @@
   4. Heizkreis-Vorlauf -> Abkühlkurve dynamisch anpassen
   5. Anwesenheit -> Eco-Modus automatisch
   6. Alle Daten -> tägliche Zusammenfassung 18:00 per Telegram
+
+---
+
+## Hardware Upgrade — ioBroker Umzug auf Dell (geplant)
+
+**Ziel:** Mac Mini M4 übernimmt Ollama/openclaw → Dell Latitude 5320 wird frei → ioBroker von hauspi (Raspberry Pi) auf Dell umziehen.
+
+**Vorteile:** Mehr RAM, x86 = stabiler, kein Speicherproblem mehr.
+
+### Vorgehen
+- [ ] Mac Mini M4 kaufen + Ollama/openclaw umziehen
+- [ ] ioBroker frisch auf Dell installieren (NICHT 1:1 ARM→x86 Restore, native Module inkompatibel)
+- [ ] Backup via backitup auf hauspi erstellen (läuft bereits)
+- [ ] Adapter-Konfiguration aus Backup importieren
+- [ ] Scripts kommen aus Git → kein Verlust
+
+### Fallstricke
+- **Zigbee USB-Dongle** muss physisch zum Dell:
+  Persistenter Gerätepfad verwenden: `/dev/serial/by-id/usb-ITead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_...-if00-port0`
+  (steht im ioBroker-Log beim Zigbee-Adapter-Start)
+- **Shelly MQTT** — alle Shellys senden auf aktuelle hauspi-IP:
+  Nach Umzug: IP in jeder Shelly Web-UI ändern (oder Dell bekommt gleiche IP wie Pi)
+- **InfluxDB wird localhost** — Adapter-Config: `192.168.178.130:8086` → `localhost:8086`
+- **Hostname** — einfachste Lösung: Dell bekommt Hostname `hauspi` → `hauspi.local` bleibt gültig, Tailscale-Referenzen passen
+- **systemd NTP-Override** (`After=time-sync.target`) — Dell hat Hardware-RTC, wahrscheinlich nicht nötig
+- **Parallel betreiben** bis alles auf Dell bestätigt läuft, dann Pi abschalten
 
 ---
 
