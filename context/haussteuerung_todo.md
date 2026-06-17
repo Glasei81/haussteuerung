@@ -376,7 +376,13 @@
 ---
 
 ## Laengerfristig / Ideen
-- [ ] Wasserverbrauch Tracking via optische Schnittstelle (IrDA)
+- [ ] Heizstab Leistungsmessung nachrüsten (niedrige Priorität, Kosten)
+  - Puffer 2 (Shelly Pro3, 3 × 1500W): Pro3 bleibt für Schalten, 3× Shelly PM Mini Gen3 (~15€/Stück) für Messung je Phase
+    ODER: Pro3 ersetzen durch 3× Shelly Plus 1PM (Schalten + Messen in einem)
+  - Puffer 1 (myPV, 3-3.5kW): myPV schaltet selbst → 1× Shelly 1PM/EM nur für Monitoring
+  - Nutzen: solar.puffer2.watt liefert dann echte Werte (aktuell falsch/Solarmanager-Summenwert)
+  - Nutzen: puffer2_heizstab_schutz.js reaktivierbar (wurde wegen falscher Messung entfernt)
+  - Nutzen: Grafana Heizstab-Leistung sauber trackbar
   - Zähler: Diehl Metering HYDRUS Type 173, SN 3124653, Baujahr 2024
   - IrDA-Fenster am Gehäuse bestätigt ✓
   - Hardware vorhanden: ESP32-CAM (kein USB-Host, aber UART-Pins verfügbar)
