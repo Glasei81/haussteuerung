@@ -365,8 +365,9 @@
 - **Zigbee USB-Dongle** muss physisch zum Dell:
   Persistenter Gerätepfad verwenden: `/dev/serial/by-id/usb-ITead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_...-if00-port0`
   (steht im ioBroker-Log beim Zigbee-Adapter-Start)
-- **Shelly MQTT** — alle Shellys senden auf aktuelle hauspi-IP:
-  Nach Umzug: IP in jeder Shelly Web-UI ändern (oder Dell bekommt gleiche IP wie Pi)
+- **Shelly MQTT** — 7 Geräte total, noch nicht alle in MQTT eingebunden:
+  Nur eingebundene Geräte müssen nach Umzug in der Shelly Web-UI auf neue IP zeigen.
+  Einfachste Lösung: Dell bekommt gleiche statische IP wie hauspi → nichts ändern nötig.
 - **InfluxDB wird localhost** — Adapter-Config: `192.168.178.130:8086` → `localhost:8086`
 - **Hostname** — einfachste Lösung: Dell bekommt Hostname `hauspi` → `hauspi.local` bleibt gültig, Tailscale-Referenzen passen
 - **systemd NTP-Override** (`After=time-sync.target`) — Dell hat Hardware-RTC, wahrscheinlich nicht nötig
