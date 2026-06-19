@@ -228,7 +228,13 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
                 var regenHeute  = safeState('wetter.aktuell.regen_gesamt', 0);
                 var regenRate   = safeState('wetter.aktuell.regen_rate',   0);
 
-                var ersterPunkt = (tempResult.result || [])[0];
+                var ersterPunkt = null;
+                for (var ri = 0; ri < (tempResult.result || []).length; ri++) {
+                    if (tempResult.result[ri].val !== null && tempResult.result[ri].val !== undefined) {
+                        ersterPunkt = tempResult.result[ri];
+                        break;
+                    }
+                }
                 var seitTxt = '';
                 if (ersterPunkt && ersterPunkt.ts) {
                     var d = new Date(ersterPunkt.ts);
