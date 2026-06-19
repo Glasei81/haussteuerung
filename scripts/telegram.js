@@ -196,64 +196,64 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
         var siebenTageAgo  = jetzt - 7 * EIN_TAG;
         var startJahr      = new Date(new Date().getFullYear(), 0, 1).getTime();
 
-        // Regen: max pro Tag seit Jahresbeginn (regen_gesamt resettet täglich)
+        // Ersten echten Datenpunkt ermitteln
         sendTo('influxdb.0', 'getHistory', {
-            id: 'javascript.0.wetter.aktuell.regen_gesamt',
-            options: { start: startJahr, end: jetzt, aggregate: 'max', step: EIN_TAG, addId: false }
-        }, function(regenResult) {
+            id: 'javascript.0.wetter.aktuell.temperatur',
+            options: { start: new Date(2020, 0, 1).getTime(), end: jetzt, count: 1, aggregate: 'none', addId: false }
+        }, function(firstResult) {
 
-            var regen7 = 0, regenJahr = 0;
-            (regenResult.result || []).forEach(function(p) {
-                if (p.val === null || p.val === undefined) return;
-                regenJahr += p.val;
-                if (p.ts >= siebenTageAgo) regen7 += p.val;
-            });
+            var seitTxt = '';
+            if (firstResult.result && firstResult.result[0] && firstResult.result[0].ts) {
+                var d = new Date(firstResult.result[0].ts);
+                seitTxt = ' (seit ' + d.getDate() + '.' + (d.getMonth() + 1) + '.' + d.getFullYear() + ')';
+            }
 
-            // Temperatur: Ø pro Tag seit Jahresbeginn
+            // Regen: max pro Tag seit Jahresbeginn (regen_gesamt resettet täglich)
             sendTo('influxdb.0', 'getHistory', {
-                id: 'javascript.0.wetter.aktuell.temperatur',
-                options: { start: startJahr, end: jetzt, aggregate: 'average', step: EIN_TAG, addId: false }
-            }, function(tempResult) {
+                id: 'javascript.0.wetter.aktuell.regen_gesamt',
+                options: { start: startJahr, end: jetzt, aggregate: 'max', step: EIN_TAG, addId: false }
+            }, function(regenResult) {
 
-                var tSum7 = 0, tCnt7 = 0, tSumJahr = 0, tCntJahr = 0;
-                (tempResult.result || []).forEach(function(p) {
+                var regen7 = 0, regenJahr = 0;
+                (regenResult.result || []).forEach(function(p) {
                     if (p.val === null || p.val === undefined) return;
-                    tSumJahr += p.val; tCntJahr++;
-                    if (p.ts >= siebenTageAgo) { tSum7 += p.val; tCnt7++; }
+                    regenJahr += p.val;
+                    if (p.ts >= siebenTageAgo) regen7 += p.val;
                 });
-                var tempAvg7    = tCnt7    > 0 ? Math.round(tSum7    / tCnt7    * 10) / 10 : null;
-                var tempAvgJahr = tCntJahr > 0 ? Math.round(tSumJahr / tCntJahr * 10) / 10 : null;
 
-                var tempAktuell = safeState('wetter.aktuell.temperatur',  null);
-                var regenHeute  = safeState('wetter.aktuell.regen_gesamt', 0);
-                var regenRate   = safeState('wetter.aktuell.regen_rate',   0);
+                // Temperatur: Ø pro Tag seit Jahresbeginn
+                sendTo('influxdb.0', 'getHistory', {
+                    id: 'javascript.0.wetter.aktuell.temperatur',
+                    options: { start: startJahr, end: jetzt, aggregate: 'average', step: EIN_TAG, addId: false }
+                }, function(tempResult) {
 
-                var ersterPunkt = null;
-                for (var ri = 0; ri < (tempResult.result || []).length; ri++) {
-                    if (tempResult.result[ri].val !== null && tempResult.result[ri].val !== undefined) {
-                        ersterPunkt = tempResult.result[ri];
-                        break;
-                    }
-                }
-                var seitTxt = '';
-                if (ersterPunkt && ersterPunkt.ts) {
-                    var d = new Date(ersterPunkt.ts);
-                    seitTxt = ' (seit ' + d.getDate() + '.' + (d.getMonth() + 1) + '.' + d.getFullYear() + ')';
-                }
+                    var tSum7 = 0, tCnt7 = 0, tSumJahr = 0, tCntJahr = 0;
+                    (tempResult.result || []).forEach(function(p) {
+                        if (p.val === null || p.val === undefined) return;
+                        tSumJahr += p.val; tCntJahr++;
+                        if (p.ts >= siebenTageAgo) { tSum7 += p.val; tCnt7++; }
+                    });
+                    var tempAvg7    = tCnt7    > 0 ? Math.round(tSum7    / tCnt7    * 10) / 10 : null;
+                    var tempAvgJahr = tCntJahr > 0 ? Math.round(tSumJahr / tCntJahr * 10) / 10 : null;
 
-                sendTo('telegram.0',
-                    '🌧️ Wetter Raubling — eigene Station\n\n' +
-                    '📅 Heute (seit Mitternacht):\n' +
-                    '🌡️ ' + (tempAktuell !== null ? tempAktuell + '°C' : '?') +
-                        (regenRate > 0 ? '   💧 ' + regenRate + ' mm/h' : '') + '\n' +
-                    '🌧️ Regen: ' + Math.round(regenHeute * 10) / 10 + ' mm\n' +
-                    '\n📆 Letzte 7 Tage:\n' +
-                    '🌧️ Regen: ' + Math.round(regen7 * 10) / 10 + ' mm\n' +
-                    '🌡️ Ø Temperatur: ' + (tempAvg7 !== null ? tempAvg7 + '°C' : '?') + '\n' +
-                    '\n📅 ' + new Date().getFullYear() + seitTxt + ':\n' +
-                    '🌧️ Regen: ' + Math.round(regenJahr * 10) / 10 + ' mm\n' +
-                    '🌡️ Ø Temperatur: ' + (tempAvgJahr !== null ? tempAvgJahr + '°C' : '?')
-                );
+                    var tempAktuell = safeState('wetter.aktuell.temperatur',  null);
+                    var regenHeute  = safeState('wetter.aktuell.regen_gesamt', 0);
+                    var regenRate   = safeState('wetter.aktuell.regen_rate',   0);
+
+                    sendTo('telegram.0',
+                        '🌧️ Wetter Raubling — eigene Station\n\n' +
+                        '📅 Heute (seit Mitternacht):\n' +
+                        '🌡️ ' + (tempAktuell !== null ? tempAktuell + '°C' : '?') +
+                            (regenRate > 0 ? '   💧 ' + regenRate + ' mm/h' : '') + '\n' +
+                        '🌧️ Regen: ' + Math.round(regenHeute * 10) / 10 + ' mm\n' +
+                        '\n📆 Letzte 7 Tage:\n' +
+                        '🌧️ Regen: ' + Math.round(regen7 * 10) / 10 + ' mm\n' +
+                        '🌡️ Ø Temperatur: ' + (tempAvg7 !== null ? tempAvg7 + '°C' : '?') + '\n' +
+                        '\n📅 ' + new Date().getFullYear() + seitTxt + ':\n' +
+                        '🌧️ Regen: ' + Math.round(regenJahr * 10) / 10 + ' mm\n' +
+                        '🌡️ Ø Temperatur: ' + (tempAvgJahr !== null ? tempAvgJahr + '°C' : '?')
+                    );
+                });
             });
         });
 
