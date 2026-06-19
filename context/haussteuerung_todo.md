@@ -374,9 +374,17 @@
 - [ ] Scripts kommen aus Git → kein Verlust
 
 ### Fallstricke
-- **Zigbee USB-Dongle** muss physisch zum Dell:
-  Persistenter Gerätepfad verwenden: `/dev/serial/by-id/usb-ITead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_...-if00-port0`
-  (steht im ioBroker-Log beim Zigbee-Adapter-Start)
+- **Zigbee USB-Dongle — zwei Optionen:**
+  - **Option A (einfach):** Dongle physisch zum Dell mitnehmen. Persistenter Pfad:
+    `/dev/serial/by-id/usb-ITead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_...-if00-port0`
+    (steht im ioBroker-Log beim Zigbee-Adapter-Start)
+  - **Option B (besser für Signal):** Raspi bleibt als **ioBroker Multi-Host Slave** im 1. OG,
+    Dongle bleibt am Raspi. Dell = Master, Raspi = Slave mit nur `zigbee.0`.
+    Vorteil: Bessere LQI (Dongle näher an Thermostaten), Raspi bekommt neue Aufgabe.
+    Einrichtung: Admin → System → Multi-Host → auf beiden aktivieren → Raspi als Host
+    hinzufügen → zigbee.0 auf Raspi-Host verschieben.
+    Alternative zu Multi-Host: zigbee2mqtt auf Raspi + MQTT-Adapter auf Dell (robuster,
+    bessere Geräteunterstützung, aber Zigbee-Geräte müssen neu angelernt werden).
 - **Shelly MQTT** — 7 Geräte total, noch nicht alle in MQTT eingebunden:
   Nur eingebundene Geräte müssen nach Umzug in der Shelly Web-UI auf neue IP zeigen.
   Einfachste Lösung: Dell bekommt gleiche statische IP wie hauspi → nichts ändern nötig.
