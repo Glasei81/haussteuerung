@@ -4,8 +4,6 @@
 // Liest ioBroker States — unabhängig von anderen Scripts
 // ============================================
 
-var https = require('https');
-
 function safeState(id, fallback) {
     try {
         var obj = getState('javascript.0.' + id);
@@ -189,84 +187,62 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
 
         sendTo('telegram.0', '❄️ Klimaanlage AUS (manuell)');
 
-    // --- Wetter Statistik (7 Tage) ---
+    // --- Wetter Statistik (Heute / 7 Tage / Jahr aus InfluxDB) ---
 
     } else if (cmd === '/wetter') {
 
-        var wApiKey = '';
-        var wPwsId  = '';
-        try {
-            var akState = getState('javascript.0.config.wetter.api_key');
-            var pwState = getState('javascript.0.config.wetter.pws_id');
-            wApiKey = (akState && akState.val) ? akState.val : '';
-            wPwsId  = (pwState && pwState.val) ? pwState.val : '';
-        } catch(e) {}
+        var EIN_TAG        = 24 * 3600 * 1000;
+        var jetzt          = Date.now();
+        var siebenTageAgo  = jetzt - 7 * EIN_TAG;
+        var startJahr      = new Date(new Date().getFullYear(), 0, 1).getTime();
 
-        if (!wApiKey || !wPwsId) {
-            sendTo('telegram.0', '❌ Wetter API nicht konfiguriert');
-        } else {
-            var wUrl = 'https://api.weather.com/v2/pws/dailysummary/7day?stationId=' +
-                       wPwsId + '&format=json&units=m&numericPrecision=decimal&apiKey=' + wApiKey;
+        // Regen: max pro Tag seit Jahresbeginn (regen_gesamt resettet täglich)
+        sendTo('influxdb.0', 'getHistory', {
+            id: 'javascript.0.wetter.aktuell.regen_gesamt',
+            options: { start: startJahr, end: jetzt, aggregate: 'max', step: EIN_TAG, addId: false }
+        }, function(regenResult) {
 
-            https.get(wUrl, function(res) {
-                var data = '';
-                res.on('data', function(c) { data += c; });
-                res.on('end', function() {
-                    try {
-                        var json = JSON.parse(data);
-                        var summaries = json.summaries || [];
-
-                        if (summaries.length === 0) {
-                            sendTo('telegram.0', '❌ Keine historischen Wetterdaten verfügbar');
-                            return;
-                        }
-
-                        var regen7    = 0;
-                        var tempSum7  = 0;
-                        var tempCnt7  = 0;
-
-                        for (var i = 0; i < summaries.length; i++) {
-                            var m = summaries[i].metric;
-                            if (!m) continue;
-                            regen7 += (m.precipTotal || 0);
-                            if (m.tempAvg !== null && m.tempAvg !== undefined) {
-                                tempSum7 += m.tempAvg;
-                                tempCnt7++;
-                            }
-                        }
-
-                        var tempAvg7 = tempCnt7 > 0 ? Math.round(tempSum7 / tempCnt7 * 10) / 10 : null;
-
-                        var heute = summaries[summaries.length - 1];
-                        var mHeute = heute ? heute.metric : null;
-                        var tempHigh  = mHeute ? mHeute.tempHigh  : null;
-                        var tempLow   = mHeute ? mHeute.tempLow   : null;
-
-                        var tempAktuell = safeState('wetter.aktuell.temperatur', null);
-                        var regenHeute  = safeState('wetter.aktuell.regen_gesamt', 0);
-                        var regenRate   = safeState('wetter.aktuell.regen_rate', 0);
-
-                        sendTo('telegram.0',
-                            '🌧️ Wetter Raubling — eigene Station\n\n' +
-                            '📅 Heute:\n' +
-                            '🌡️ Aktuell: ' + (tempAktuell !== null ? tempAktuell + '°C' : '?') +
-                                (tempHigh !== null ? ' | Max: ' + tempHigh + '°C | Min: ' + tempLow + '°C' : '') + '\n' +
-                            '🌧️ Regen: ' + Math.round(regenHeute * 10) / 10 + ' mm' +
-                                (regenRate > 0 ? ' (' + regenRate + ' mm/h)' : '') + '\n' +
-                            '\n📆 Letzte 7 Tage:\n' +
-                            '🌧️ Regen gesamt: ' + Math.round(regen7 * 10) / 10 + ' mm\n' +
-                            (tempAvg7 !== null ? '🌡️ Ø Temperatur: ' + tempAvg7 + '°C' : '')
-                        );
-                    } catch(e) {
-                        sendTo('telegram.0', '❌ Wetter Parse Fehler: ' + e.message);
-                        log('Telegram /wetter Parse Fehler: ' + e, 'error');
-                    }
-                });
-            }).on('error', function(e) {
-                sendTo('telegram.0', '❌ Wetter API Fehler: ' + e.message);
-                log('Telegram /wetter API Fehler: ' + e.message, 'error');
+            var regen7 = 0, regenJahr = 0;
+            (regenResult.result || []).forEach(function(p) {
+                if (p.val === null || p.val === undefined) return;
+                regenJahr += p.val;
+                if (p.ts >= siebenTageAgo) regen7 += p.val;
             });
-        }
+
+            // Temperatur: Ø pro Tag seit Jahresbeginn
+            sendTo('influxdb.0', 'getHistory', {
+                id: 'javascript.0.wetter.aktuell.temperatur',
+                options: { start: startJahr, end: jetzt, aggregate: 'average', step: EIN_TAG, addId: false }
+            }, function(tempResult) {
+
+                var tSum7 = 0, tCnt7 = 0, tSumJahr = 0, tCntJahr = 0;
+                (tempResult.result || []).forEach(function(p) {
+                    if (p.val === null || p.val === undefined) return;
+                    tSumJahr += p.val; tCntJahr++;
+                    if (p.ts >= siebenTageAgo) { tSum7 += p.val; tCnt7++; }
+                });
+                var tempAvg7    = tCnt7    > 0 ? Math.round(tSum7    / tCnt7    * 10) / 10 : null;
+                var tempAvgJahr = tCntJahr > 0 ? Math.round(tSumJahr / tCntJahr * 10) / 10 : null;
+
+                var tempAktuell = safeState('wetter.aktuell.temperatur',  null);
+                var regenHeute  = safeState('wetter.aktuell.regen_gesamt', 0);
+                var regenRate   = safeState('wetter.aktuell.regen_rate',   0);
+
+                sendTo('telegram.0',
+                    '🌧️ Wetter Raubling — eigene Station\n\n' +
+                    '📅 Heute (seit Mitternacht):\n' +
+                    '🌡️ ' + (tempAktuell !== null ? tempAktuell + '°C' : '?') +
+                        (regenRate > 0 ? '   💧 ' + regenRate + ' mm/h' : '') + '\n' +
+                    '🌧️ Regen: ' + Math.round(regenHeute * 10) / 10 + ' mm\n' +
+                    '\n📆 Letzte 7 Tage:\n' +
+                    '🌧️ Regen: ' + Math.round(regen7 * 10) / 10 + ' mm\n' +
+                    '🌡️ Ø Temperatur: ' + (tempAvg7 !== null ? tempAvg7 + '°C' : '?') + '\n' +
+                    '\n📅 ' + new Date().getFullYear() + ' (bisher):\n' +
+                    '🌧️ Regen: ' + Math.round(regenJahr * 10) / 10 + ' mm\n' +
+                    '🌡️ Ø Temperatur: ' + (tempAvgJahr !== null ? tempAvgJahr + '°C' : '?')
+                );
+            });
+        });
 
     // --- Hilfe ---
 
