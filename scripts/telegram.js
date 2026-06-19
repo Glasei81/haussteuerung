@@ -228,6 +228,13 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
                 var regenHeute  = safeState('wetter.aktuell.regen_gesamt', 0);
                 var regenRate   = safeState('wetter.aktuell.regen_rate',   0);
 
+                var ersterPunkt = (tempResult.result || [])[0];
+                var seitTxt = '';
+                if (ersterPunkt && ersterPunkt.ts) {
+                    var d = new Date(ersterPunkt.ts);
+                    seitTxt = ' (seit ' + d.getDate() + '.' + (d.getMonth() + 1) + '.' + d.getFullYear() + ')';
+                }
+
                 sendTo('telegram.0',
                     '🌧️ Wetter Raubling — eigene Station\n\n' +
                     '📅 Heute (seit Mitternacht):\n' +
@@ -237,7 +244,7 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
                     '\n📆 Letzte 7 Tage:\n' +
                     '🌧️ Regen: ' + Math.round(regen7 * 10) / 10 + ' mm\n' +
                     '🌡️ Ø Temperatur: ' + (tempAvg7 !== null ? tempAvg7 + '°C' : '?') + '\n' +
-                    '\n📅 ' + new Date().getFullYear() + ' (bisher):\n' +
+                    '\n📅 ' + new Date().getFullYear() + seitTxt + ':\n' +
                     '🌧️ Regen: ' + Math.round(regenJahr * 10) / 10 + ' mm\n' +
                     '🌡️ Ø Temperatur: ' + (tempAvgJahr !== null ? tempAvgJahr + '°C' : '?')
                 );
