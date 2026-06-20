@@ -50,6 +50,16 @@ function klimaAus(grund, mitTelegram) {
     setState('javascript.0.klima.schlafzimmer.grund', { val: grund, ack: true });
     if (mitTelegram) sendTo('telegram.0', '❄️ Klimaanlage AUS\n' + grund);
     log('Klima AUS — ' + grund);
+
+    // Verifikation: nach 2 Min prüfen ob Gerät wirklich aus ist
+    setTimeout(function() {
+        var realState = getState('midea.0.' + MIDEA_ID + '.powerState');
+        if (realState && realState.val === true) {
+            log('Klima Verifikation: Abschaltbefehl nicht bestätigt — Retry', 'warn');
+            setState('midea.0.' + MIDEA_ID + '.powerState', false);
+            sendTo('telegram.0', '⚠️ Klimaanlage: Abschaltbefehl nicht bestätigt, erneuter Versuch...');
+        }
+    }, 2 * 60 * 1000);
 }
 
 function klimaLogik() {
@@ -105,6 +115,27 @@ function klimaLogik() {
 
     log('Klima Logik: ' + raumTemp + '°C Raum | ' + Math.round(netto) + 'W Netto | aktiv=' + aktiv + ' | pause=' + inPause);
 }
+
+// Echten Gerätestatus überwachen (ack:true = vom Gerät bestätigt)
+// Erkennt externes Schalten via NetHome App oder Fernbedienung
+on({id: 'midea.0.' + MIDEA_ID + '.powerState', ack: true, change: 'any'}, function(obj) {
+    var realOn    = obj.state.val;
+    var shadowOn  = safe('javascript.0.klima.schlafzimmer.aktiv', false);
+
+    if (realOn && !shadowOn) {
+        // Extern eingeschaltet — Shadow State nachziehen
+        setState('javascript.0.klima.schlafzimmer.aktiv',      { val: true,       ack: true });
+        setState('javascript.0.klima.schlafzimmer.start_zeit', { val: Date.now(), ack: true });
+        setState('javascript.0.klima.schlafzimmer.pause_start',{ val: 0,          ack: true });
+        setState('javascript.0.klima.schlafzimmer.grund',      { val: 'Extern EIN (NetHome/FB)', ack: true });
+        log('Klima: extern EIN erkannt — Shadow State korrigiert');
+    } else if (!realOn && shadowOn) {
+        // Extern ausgeschaltet — Shadow State nachziehen
+        setState('javascript.0.klima.schlafzimmer.aktiv', { val: false, ack: true });
+        setState('javascript.0.klima.schlafzimmer.grund', { val: 'Extern AUS (NetHome/FB)', ack: true });
+        log('Klima: extern AUS erkannt — Shadow State korrigiert');
+    }
+});
 
 klimaLogik();
 schedule('*/5 * * * *', function() { klimaLogik(); });
