@@ -32,7 +32,8 @@ var SCRIPTS_MAP = {
     'zirkulation_monitor.js':     'script.js.Zirkulation_monitor',
     'klima_logik.js':             'script.js.klima_logik',
     'eta_puffer2_rueckspeisung.js':    'script.js.eta_puffer2_rueckspeisung',
-    'zigbee_zeitsync.js':              'script.js.zigbee_zeitsync'
+    'zigbee_zeitsync.js':              'script.js.zigbee_zeitsync',
+    'klima_treppe.js':                 'script.js.klima_treppe'
     // deploy_listener.js NICHT hier eintragen — kann sich nicht selbst deployen
 };
 

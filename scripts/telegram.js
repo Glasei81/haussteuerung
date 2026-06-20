@@ -2,6 +2,10 @@
 // Telegram Script
 // Befehle: /status /forecast /wetter /klima /pellets_ein/aus/auto /hilfe
 // Liest ioBroker States — unabhängig von anderen Scripts
+//
+// Klimaanlagen:
+//   Schlafzimmer — Midea (midea.0.153931628437826)
+//   Treppenhaus  — Tuya  (tuya.0.0.121075124022d88f2e59, DPS 1)
 // ============================================
 
 function safeState(id, fallback) {
@@ -103,45 +107,42 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
 
     } else if (cmd === '/klima') {
 
-        var klimaStateObj = null;
-        try { klimaStateObj = getState('javascript.0.klima.schlafzimmer.aktiv'); } catch(e) {}
+        var jetzt = Date.now();
 
-        if (!klimaStateObj || klimaStateObj.val === null || klimaStateObj.val === undefined) {
-            sendTo('telegram.0', '❄️ Klimaanlage\nScript nicht aktiv.');
-        } else {
-            var klimaAktiv  = klimaStateObj.val;
-            var klimaStart  = safeState('klima.schlafzimmer.start_zeit',  0);
-            var klimaPause  = safeState('klima.schlafzimmer.pause_start', 0);
-            var klimaGrund  = safeState('klima.schlafzimmer.grund',       '-');
-
-            var zigbeeTemp = null;
-            try {
-                var zs = getState('zigbee.0.a4c1388f0b92eb71.temperature');
-                if (zs && zs.val !== null && zs.val !== undefined) zigbeeTemp = zs.val;
-            } catch(e) {}
-
-            var jetzt = Date.now();
-            var statusZeile = '';
-
-            if (klimaAktiv) {
-                var laufMin = Math.round((jetzt - klimaStart) / 60000);
-                statusZeile = '✅ AKTIV — Laufzeit: ' + laufMin + ' Min';
-            } else if (klimaPause > 0 && (jetzt - klimaPause) < 3600000) {
-                var restMin = Math.round((3600000 - (jetzt - klimaPause)) / 60000);
-                statusZeile = '⏸️ PAUSE — noch ' + restMin + ' Min';
-            } else {
-                statusZeile = '⭕ AUS';
+        function klimaStatusZeile(aktiv, startZeit, pauseStart) {
+            if (aktiv) {
+                return '✅ AKTIV — ' + Math.round((jetzt - startZeit) / 60000) + ' Min';
+            } else if (pauseStart > 0 && (jetzt - pauseStart) < 3600000) {
+                return '⏸️ PAUSE — noch ' + Math.round((3600000 - (jetzt - pauseStart)) / 60000) + ' Min';
             }
-
-            sendTo('telegram.0',
-                '❄️ Klimaanlage Schlafzimmer\n' +
-                'Status: ' + statusZeile + '\n' +
-                '🌡️ Raumtemperatur: ' + (zigbeeTemp !== null ? zigbeeTemp + '°C' : '?') + '\n' +
-                '📝 Letzter Grund: ' + klimaGrund + '\n\n' +
-                '/klima ein — einschalten\n' +
-                '/klima aus — ausschalten'
-            );
+            return '⭕ AUS';
         }
+
+        var slAktiv  = safeState('klima.schlafzimmer.aktiv',       false);
+        var slStart  = safeState('klima.schlafzimmer.start_zeit',  0);
+        var slPause  = safeState('klima.schlafzimmer.pause_start', 0);
+        var slGrund  = safeState('klima.schlafzimmer.grund',       '-');
+        var slTemp   = null;
+        try { var zs = getState('zigbee.0.a4c1388f0b92eb71.temperature'); if (zs && zs.val !== null) slTemp = zs.val; } catch(e) {}
+
+        var trAktiv  = safeState('klima.treppe.aktiv',       false);
+        var trStart  = safeState('klima.treppe.start_zeit',  0);
+        var trPause  = safeState('klima.treppe.pause_start', 0);
+        var trGrund  = safeState('klima.treppe.grund',       '-');
+        var trTemp   = null;
+        try { var zt = getState('zigbee.0.a4c138d0a5ca4495.local_temperature'); if (zt && zt.val !== null) trTemp = zt.val; } catch(e) {}
+
+        sendTo('telegram.0',
+            '❄️ Klimaanlagen Status\n\n' +
+            '🛏️ Schlafzimmer (Midea):\n' +
+            klimaStatusZeile(slAktiv, slStart, slPause) + '\n' +
+            '🌡️ ' + (slTemp !== null ? slTemp + '°C' : '?') + ' | ' + slGrund + '\n\n' +
+            '🪜 Treppenhaus (Tuya):\n' +
+            klimaStatusZeile(trAktiv, trStart, trPause) + '\n' +
+            '🌡️ ' + (trTemp !== null ? trTemp + '°C' : '?') + ' | ' + trGrund + '\n\n' +
+            '/klima ein — Schlafzimmer einschalten\n' +
+            '/klima aus — Schlafzimmer ausschalten'
+        );
 
     // --- Klimaanlage Ein ---
 
