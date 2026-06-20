@@ -123,17 +123,22 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
             return status + '\n🌡️ ' + tempTxt + grundTxt;
         }
 
-        var slAktiv  = safeState('klima.schlafzimmer.aktiv',       false);
+        // Echter Gerätestatus hat Vorrang vor Shadow State
+        var slRealOn = false;
+        try { var sr = getState('midea.0.153931628437826.powerState'); if (sr) slRealOn = !!sr.val; } catch(e) {}
+        var slAktiv  = slRealOn || safeState('klima.schlafzimmer.aktiv', false);
         var slStart  = safeState('klima.schlafzimmer.start_zeit',  0);
         var slPause  = safeState('klima.schlafzimmer.pause_start', 0);
-        var slGrund  = safeState('klima.schlafzimmer.grund',       '-');
+        var slGrund  = slRealOn && !safeState('klima.schlafzimmer.aktiv', false) ? 'Extern EIN (Shadow State veraltet)' : safeState('klima.schlafzimmer.grund', '-');
         var slTemp   = null;
         try { var zs = getState('zigbee.0.a4c1388f0b92eb71.temperature'); if (zs && zs.val !== null) slTemp = zs.val; } catch(e) {}
 
-        var trAktiv  = safeState('klima.treppe.aktiv',       false);
+        var trRealOn = false;
+        try { var tr = getState('tuya.0.0.121075124022d88f2e59.1'); if (tr) trRealOn = !!tr.val; } catch(e) {}
+        var trAktiv  = trRealOn || safeState('klima.treppe.aktiv', false);
         var trStart  = safeState('klima.treppe.start_zeit',  0);
         var trPause  = safeState('klima.treppe.pause_start', 0);
-        var trGrund  = safeState('klima.treppe.grund',       '-');
+        var trGrund  = trRealOn && !safeState('klima.treppe.aktiv', false) ? 'Extern EIN (Shadow State veraltet)' : safeState('klima.treppe.grund', '-');
         var trTemp   = null;
         try { var zt = getState('zigbee.0.a4c138d0a5ca4495.local_temperature'); if (zt && zt.val !== null) trTemp = zt.val; } catch(e) {}
 
