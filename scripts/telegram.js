@@ -46,7 +46,7 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
         var rueckZeit  = safeState('eta.puffer2rueck.letzter_transfer', 0);
         var rueckGrund = safeState('eta.puffer2rueck.grund', '');
         var rueckZeile = '';
-        if (rueckZeit > 0) {
+        if (rueckZeit > 0 && (Date.now() - rueckZeit) < 48 * 3600 * 1000) {
             var minAgo = Math.round((Date.now() - rueckZeit) / 60000);
             var zeitTxt = minAgo < 60 ? 'vor ' + minAgo + ' Min' : 'vor ' + Math.round(minAgo / 60) + ' h';
             rueckZeile = '🔄 Rückspeisung: ' + zeitTxt + ' (' + rueckGrund + ')\n';
