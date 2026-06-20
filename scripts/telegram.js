@@ -109,13 +109,18 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
 
         var jetzt = Date.now();
 
-        function klimaStatusZeile(aktiv, startZeit, pauseStart) {
+        function klimaStatus(aktiv, startZeit, pauseStart, temp, grund) {
+            var status;
             if (aktiv) {
-                return '✅ AKTIV — ' + Math.round((jetzt - startZeit) / 60000) + ' Min';
+                status = '✅ AKTIV seit ' + Math.round((jetzt - startZeit) / 60000) + ' Min';
             } else if (pauseStart > 0 && (jetzt - pauseStart) < 3600000) {
-                return '⏸️ PAUSE — noch ' + Math.round((3600000 - (jetzt - pauseStart)) / 60000) + ' Min';
+                status = '⏸ PAUSE — noch ' + Math.round((3600000 - (jetzt - pauseStart)) / 60000) + ' Min';
+            } else {
+                status = 'AUS';
             }
-            return '⭕ AUS';
+            var tempTxt = temp !== null ? (Math.round(temp * 10) / 10) + '°C' : '?';
+            var grundTxt = (grund && grund !== '-') ? '\n   ↳ ' + grund : '';
+            return status + '\n🌡️ ' + tempTxt + grundTxt;
         }
 
         var slAktiv  = safeState('klima.schlafzimmer.aktiv',       false);
@@ -133,13 +138,11 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
         try { var zt = getState('zigbee.0.a4c138d0a5ca4495.local_temperature'); if (zt && zt.val !== null) trTemp = zt.val; } catch(e) {}
 
         sendTo('telegram.0',
-            '❄️ Klimaanlagen Status\n\n' +
-            '🛏️ Schlafzimmer (Midea):\n' +
-            klimaStatusZeile(slAktiv, slStart, slPause) + '\n' +
-            '🌡️ ' + (slTemp !== null ? slTemp + '°C' : '?') + ' | ' + slGrund + '\n\n' +
-            '🪜 Treppenhaus (Tuya):\n' +
-            klimaStatusZeile(trAktiv, trStart, trPause) + '\n' +
-            '🌡️ ' + (trTemp !== null ? trTemp + '°C' : '?') + ' | ' + trGrund + '\n\n' +
+            '❄️ Klimaanlagen\n\n' +
+            '🛏 Schlafzimmer (Midea)\n' +
+            klimaStatus(slAktiv, slStart, slPause, slTemp, slGrund) + '\n\n' +
+            '🏠 Treppenhaus (Tuya)\n' +
+            klimaStatus(trAktiv, trStart, trPause, trTemp, trGrund) + '\n\n' +
             '/klima ein — Schlafzimmer einschalten\n' +
             '/klima aus — Schlafzimmer ausschalten'
         );
