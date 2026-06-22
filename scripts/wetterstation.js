@@ -62,14 +62,19 @@ states.forEach(function(s) {
 });
 
 function httpsGet(url, callback) {
-    https.get(url, function(res) {
+    var req = https.get(url, function(res) {
         var data = '';
         res.on('data', function(c) { data += c; });
         res.on('end', function() {
             try { callback(JSON.parse(data)); }
             catch(e) { log('Wetter Parse Fehler: ' + e, 'error'); }
         });
-    }).on('error', function(e) {
+    });
+    req.setTimeout(10000, function() {
+        req.destroy();
+        log('Wetter API Timeout (10s)', 'warn');
+    });
+    req.on('error', function(e) {
         log('Wetter Verbindungsfehler: ' + e.message, 'error');
     });
 }

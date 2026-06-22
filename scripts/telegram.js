@@ -189,12 +189,12 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
 
     } else if (cmd === '/klima aus') {
 
-        var MIDEA_ID = '153931628437826';
-        setState('midea.0.' + MIDEA_ID + '.powerState', false);
-        setState('javascript.0.klima.schlafzimmer.aktiv', { val: false, ack: true });
-        setState('javascript.0.klima.schlafzimmer.grund', { val: 'Manuell AUS via Telegram', ack: true });
+        setState('midea.0.153931628437826.powerState', false);
+        setState('javascript.0.klima.schlafzimmer.aktiv',       { val: false,      ack: true });
+        setState('javascript.0.klima.schlafzimmer.pause_start', { val: Date.now(), ack: true });
+        setState('javascript.0.klima.schlafzimmer.grund',       { val: 'Manuell AUS via Telegram', ack: true });
 
-        sendTo('telegram.0', '❄️ Klimaanlage AUS (manuell)');
+        sendTo('telegram.0', '❄️ Klimaanlage AUS (manuell)\n⏸ 1h Pause — keine Auto-Einschaltung');
 
     // --- Wetter Statistik (Heute / 7 Tage / Jahr aus InfluxDB) ---
 

@@ -15,7 +15,7 @@ var DATENPUNKTE = [
     ['eta.puffer2.mitte',      '/121/10601/0/11328/2002', 'Puffer2 mitte',        '°C', 'value.temperature', 'number'],
     ['eta.puffer2.unten',      '/121/10601/0/11329/2002', 'Puffer2 unten',        '°C', 'value.temperature', 'number'],
     ['eta.puffer2.ladepumpe',  '/121/10601/0/11157/2002', 'Puffer2 Ladepumpe',   '',   'text',              'string'],
-    ['eta.puffer2.ladezustand','/121/10601/0/0/12528',    'Puffer2 Ladezustand', '%',  'value',             'number'],
+    ['eta.puffer2.ladung',     '/121/10601/0/0/12528',    'Puffer2 Ladezustand', '%',  'value',             'number'],
 ];
 
 DATENPUNKTE.forEach(function(dp) {
