@@ -63,7 +63,7 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
                 (deltaT !== null ? '  Δ' + (deltaT >= 0 ? '+' : '') + deltaT + '°C' : '') + '\n' +
             rueckZeile +
             '🚿 Warmwasser: ' + safeState('eta.warmwasser.oben', '?') + '°C\n' +
-            '🌡️ Außen: ' + safeState('eta.aussen.temperatur', '?') + '°C\n\n' +
+            '🌡️ Außen: ' + (safeState('wetter.aktuell.temperatur_korrigiert', 0) || safeState('eta.aussen.temperatur', '?')) + '°C\n\n' +
             '🔥 Pellets: ' + (safeState('eta.pellets.gesperrt', false) ? 'GESPERRT' : 'FREIGEGEBEN') +
                 ' (' + safeState('eta.pellets.modus', '-') + ')\n' +
             '💡 Empfehlung: ' + (safeState('eta.pellets.empfehlung', '') || '-') + '\n\n' +

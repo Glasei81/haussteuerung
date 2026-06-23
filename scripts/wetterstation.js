@@ -39,7 +39,8 @@ var states = [
     ['wetter.aktuell.uv',            'UV Index',           'number', '',     'value.uv'],
     ['wetter.aktuell.regen_rate',    'Regenrate',          'number', 'mm/h', 'value.rain'],
     ['wetter.aktuell.regen_gesamt',  'Regen gesamt',       'number', 'mm',   'value.rain'],
-    ['wetter.aktuell.timestamp',     'Letztes Update',     'string', '',     'value'],
+    ['wetter.aktuell.timestamp',              'Letztes Update',            'string', '',  'value'],
+    ['wetter.aktuell.temperatur_korrigiert', 'Außentemperatur korrigiert', 'number', 'C', 'value.temperature'],
     // Forecast morgen
     ['wetter.forecast.morgen.max',        'Morgen Max',         'number', 'C',  'value.temperature.max'],
     ['wetter.forecast.morgen.min',        'Morgen Min',         'number', 'C',  'value.temperature.min'],
@@ -79,6 +80,29 @@ function httpsGet(url, callback) {
     });
 }
 
+function temperaturKorrigiert() {
+    var werte = [];
+
+    var s1 = getState('javascript.0.eta.aussen.temperatur');
+    if (s1 && s1.val !== null && s1.val !== undefined) werte.push(s1.val);
+
+    var s2 = getState('zigbee.0.a4c13894b001e9c9.temperature');
+    if (s2 && s2.val !== null && s2.val !== undefined) werte.push(s2.val);
+
+    var s3 = getState('javascript.0.wetter.aktuell.temperatur');
+    if (s3 && s3.val !== null && s3.val !== undefined) werte.push(s3.val);
+
+    if (werte.length === 0) return;
+
+    werte.sort(function(a, b) { return a - b; });
+    var median = werte.length % 2 === 1
+        ? werte[Math.floor(werte.length / 2)]
+        : (werte[werte.length / 2 - 1] + werte[werte.length / 2]) / 2;
+
+    setState('javascript.0.wetter.aktuell.temperatur_korrigiert', { val: Math.round(median * 10) / 10, ack: true });
+    log('Außentemp korrigiert: ' + Math.round(median * 10) / 10 + '°C (ETA/Nord/WS: ' + werte.join('/') + ')');
+}
+
 function pvPrognose(cloudCover, precipChance, uvIndex) {
     if (precipChance > 60) return 'schlecht (Regen ' + precipChance + '%)';
     if (cloudCover > 70)   return 'gering (Bewoelkung ' + cloudCover + '%)';
@@ -110,6 +134,7 @@ function aktuelleWerte() {
         setState('javascript.0.wetter.aktuell.regen_gesamt', {val: m.precipTotal || 0,    ack: true});
         setState('javascript.0.wetter.aktuell.timestamp',    {val: o.obsTimeLocal,        ack: true});
 
+        temperaturKorrigiert();
         log('Wetter: ' + m.temp + 'C, ' + o.humidity + '%, Wind ' + m.windSpeed + ' km/h, Boee ' + (m.windGust || 0) + ' km/h, Solar ' + o.solarRadiation + ' W/m2');
     });
 }
