@@ -266,6 +266,33 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
             });
         });
 
+    // --- Warmwasser Nachtverlust (Schwerkraftbremsen-Check) ---
+
+    } else if (cmd === '/wwnacht') {
+
+        var wwDatum = safeState('zirkulation.monitor.datum', '');
+        if (!wwDatum) {
+            sendTo('telegram.0', '🌙 Noch keine Nacht-Messung vorhanden.\nErste Auswertung nach 04:50 Uhr.');
+        } else {
+            var wwStartO = safeState('zirkulation.monitor.start_oben',  0);
+            var wwEndO   = safeState('zirkulation.monitor.end_oben',    0);
+            var wwStartU = safeState('zirkulation.monitor.start_unten', 0);
+            var wwEndU   = safeState('zirkulation.monitor.end_unten',   0);
+            var wwDelta  = safeState('zirkulation.monitor.delta_nacht', 0);
+            var wwRate   = safeState('zirkulation.monitor.rate_nacht',  0);
+            var wwBew    = safeState('zirkulation.monitor.bewertung',   '-');
+
+            sendTo('telegram.0',
+                '🌙 Warmwasser-Nachtverlust (' + wwDatum + ')\n' +
+                '   Zirkulation aus, 22:10 → 04:50\n\n' +
+                '🌡️ oben: ' + wwStartO + '→' + wwEndO + '°C (Δ' + wwDelta + '°C)\n' +
+                (wwStartU > 0 ? '🌡️ unten: ' + wwStartU + '→' + wwEndU + '°C\n' : '') +
+                '📉 Rate: ' + wwRate + ' °C/h\n\n' +
+                '📋 ' + wwBew + '\n\n' +
+                'Richtwert: ~0,2–0,4 °C/h = normaler Dämmverlust.'
+            );
+        }
+
     // --- Hilfe ---
 
     } else if (cmd === '/hilfe' || cmd === '/start') {
@@ -275,6 +302,7 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
             '/status — Heizung & Energie Überblick\n' +
             '/forecast — Wettervorschau morgen & übermorgen\n' +
             '/wetter — Regen & Temperatur letzte 7 Tage\n' +
+            '/wwnacht — Warmwasser-Nachtverlust (Schwerkraftbremse)\n' +
             '/klima — Klimaanlage Status\n' +
             '/klima ein — Klimaanlage einschalten\n' +
             '/klima aus — Klimaanlage ausschalten\n' +

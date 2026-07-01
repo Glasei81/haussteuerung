@@ -88,6 +88,20 @@ Chronologische Entwicklungshistorie. Jede Session mit Datum und Inhalt.
   Rückspeisung-Status: wann zuletzt + Grund
   /p2rueck in /hilfe
 
+## 01.07.2026 — Außentemperatur-Korrektur + WW-Nachtverlust-Diagnose
+- **Korrigierte Außentemperatur** (wetterstation.js)
+  Neuer State wetter.aktuell.temperatur_korrigiert = Median aus ETA / Fensterfront Nord /
+  Fensterfront Süd / Wetterstation. Median wirft Ausreißer (Süd-Sonne, Betondach-Bias der WS)
+  automatisch raus. Plausibilitätsgrenze -40..60°C gegen defekte Sensoren.
+  Fensterfront Süd war defekt (~10°C), Sensor getauscht → wieder als 4. Quelle aktiv.
+  /status "Außen" zeigt den korrigierten Wert. In InfluxDB aufgezeichnet.
+- **Schwerkraftbremsen-Diagnose Warmwasser** (zirkulation_monitor.js neu aufgebaut)
+  Beobachtung: WW fällt nachts ~60→46°C obwohl Zirkulation 22–05 aus ist.
+  Verdacht: defekte Schwerkraftbremse → Thermosiphon durch Zirkulationsleitung.
+  Monitor misst jetzt WW oben+unten 22:10→04:50 (pumpenloses Fenster), Rate °C/h + Bewertung.
+  Telegram-Warnung nur wenn Rate > 0,8 °C/h (normal ~0,2–0,4). /wwnacht für Abruf.
+  rate_nacht + delta_nacht in InfluxDB für Grafana-Trend.
+
 ---
 
 ## Offen / Nächste Sessions

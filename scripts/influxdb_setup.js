@@ -104,8 +104,13 @@ var DATENPUNKTE = [
     // =========================================================
 
     // Eigene Wetterstation IRAUBL19 (10-Min-Auflösung)
-    { id: 'javascript.0.wetter.aktuell.temperatur', opt: OPT_NORMAL  },  // Außen-Vergleich
-    { id: 'javascript.0.wetter.aktuell.solar',      opt: OPT_NORMAL  },  // W/m² → PV-Korrelation
+    { id: 'javascript.0.wetter.aktuell.temperatur',            opt: OPT_NORMAL  },  // Außen-Vergleich (roh, Betondach-Bias)
+    { id: 'javascript.0.wetter.aktuell.temperatur_korrigiert', opt: OPT_NORMAL  },  // Median ETA/Nord/Süd/WS
+    { id: 'javascript.0.wetter.aktuell.solar',                 opt: OPT_NORMAL  },  // W/m² → PV-Korrelation
+
+    // Warmwasser-Nachtverlust (Schwerkraftbremsen-Diagnose, 1×/Nacht)
+    { id: 'javascript.0.zirkulation.monitor.rate_nacht',       opt: OPT_COUNTER },  // °C/h Abkühlrate
+    { id: 'javascript.0.zirkulation.monitor.delta_nacht',      opt: OPT_COUNTER },  // °C Abfall oben
 
     // =========================================================
     // TIER 2 — Betrieb & Verschleiß (langfristig wertvoll)

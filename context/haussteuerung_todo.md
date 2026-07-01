@@ -253,6 +253,24 @@
       Mögliche Diagnose via ioBroker: Zirkulationslog aus eta_zirkulation.js auswerten
       TODO: Stefan beschreibt genauer was er beobachtet hat (Geräusche? Unregelmäßig? ETA-Meldung?)
 
+### Warmwasser Nachtverlust / Schwerkraftbremse (01.07.2026)
+- Beobachtung Stefan: WW verliert nachts viel Temperatur (Grafana ~60°C abends → ~46°C morgens).
+  Zirkulation ist 22–05 Uhr auf AUS → trotzdem starker Abfall.
+- Verdacht: defekte Schwerkraftbremse / Rückschlagklappe → Thermosiphon durch die
+  Zirkulationsleitung trotz stehender Pumpe (heiß raus oben, kalt zurück unten).
+- [x] zirkulation_monitor.js umgebaut zur Diagnose (01.07.2026):
+      Snapshot WW oben+unten 22:10 → 04:50 (echtes pumpenloses Fenster, 6,67 h),
+      Abkühlrate °C/h + Bewertung. Telegram-Warnung nur wenn Rate > 0,8 °C/h.
+      Schwellen: <0,5 normal | 0,5–0,8 erhöht | >0,8 verdächtig.
+      Richtwert reiner Dämmverlust ~0,2–0,4 °C/h.
+- [x] /wwnacht Telegram-Befehl: letzte Messung auf Abruf.
+- [x] rate_nacht + delta_nacht in InfluxDB (Trend in Grafana).
+- [ ] Ein paar Nächte Daten sammeln → wenn Rate bestätigt hoch: Schwerkraftbremse in der
+      Zirkulationsleitung + Rückschlagklappe an der WW-Ladeleitung mechanisch prüfen
+      (verklemmt/verkalkt/fehlt). Heizungsbauer ansprechen.
+- [ ] Gegenprobe möglich: eta.warmwasser.unten mit ansehen — wenn unten mitfällt/mitsteigt
+      während oben stark fällt = Umwälzung (Thermosiphon), nicht nur Dämmung.
+
 ### ETA / myPV Koordination (WW Optimierung)
 - [ ] WW Soll URI bestätigt: /121/10111/0/0/12132 (warmwasser.soll bereits geloggt)
 - [ ] Logik: wenn PV > X kW UND Batterie > 95%

@@ -81,16 +81,25 @@ function httpsGet(url, callback) {
 }
 
 function temperaturKorrigiert() {
-    var werte = [];
+    // Quellen für die korrigierte Außentemperatur.
+    // Süd (a4c138b099b0852f) im Mai 2026 defekt gewesen (~10°C) → Sensor getauscht, wieder aktiv.
+    // Median wirft ohnehin einen Ausreißer je Seite raus (Süd bekommt tags direkte Sonne).
+    var quellen = [
+        { id: 'javascript.0.eta.aussen.temperatur',        name: 'ETA'  },
+        { id: 'zigbee.0.a4c13894b001e9c9.temperature',     name: 'Nord' },
+        { id: 'zigbee.0.a4c138b099b0852f.temperature',     name: 'Süd'  },
+        { id: 'javascript.0.wetter.aktuell.temperatur',    name: 'WS'   },
+    ];
 
-    var s1 = getState('javascript.0.eta.aussen.temperatur');
-    if (s1 && s1.val !== null && s1.val !== undefined) werte.push(s1.val);
-
-    var s2 = getState('zigbee.0.a4c13894b001e9c9.temperature');
-    if (s2 && s2.val !== null && s2.val !== undefined) werte.push(s2.val);
-
-    var s3 = getState('javascript.0.wetter.aktuell.temperatur');
-    if (s3 && s3.val !== null && s3.val !== undefined) werte.push(s3.val);
+    var werte = [], debug = [];
+    quellen.forEach(function(q) {
+        var s = getState(q.id);
+        if (!s || s.val === null || s.val === undefined) return;
+        var v = parseFloat(s.val);
+        if (isNaN(v) || v < -40 || v > 60) return;   // Plausibilitätsgrenze — defekte Sensoren aussortieren
+        werte.push(v);
+        debug.push(q.name + ' ' + v);
+    });
 
     if (werte.length === 0) return;
 
@@ -100,7 +109,7 @@ function temperaturKorrigiert() {
         : (werte[werte.length / 2 - 1] + werte[werte.length / 2]) / 2;
 
     setState('javascript.0.wetter.aktuell.temperatur_korrigiert', { val: Math.round(median * 10) / 10, ack: true });
-    log('Außentemp korrigiert: ' + Math.round(median * 10) / 10 + '°C (ETA/Nord/WS: ' + werte.join('/') + ')');
+    log('Außentemp korrigiert: ' + Math.round(median * 10) / 10 + '°C (' + debug.join(' / ') + ')');
 }
 
 function pvPrognose(cloudCover, precipChance, uvIndex) {
