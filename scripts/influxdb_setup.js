@@ -222,11 +222,32 @@ log('InfluxDB Setup startet — wartet 15s auf influxdb.0...');
 setTimeout(function () {
     var ok = 0;
     var fehler = 0;
-    var offen = DATENPUNKTE.length;
 
-    log('InfluxDB Setup: prüfe und aktiviere ' + offen + ' Datenpunkte...');
-
+    // Nur States aktivieren die es auch gibt. enableHistory auf ein nicht
+    // existierendes Objekt legt sonst ein kaputtes Objekt an (type=undefined).
+    // Wichtig bei noch nicht angelernten Geräten / noch nicht laufenden Scripts
+    // (z.B. weitere TRVs, deren State erst trv_heizkoerper.js erzeugt).
+    var vorhanden = [];
     DATENPUNKTE.forEach(function (dp) {
+        if (existsObject(dp.id)) {
+            vorhanden.push(dp);
+        } else {
+            log('InfluxDB übersprungen (Objekt fehlt noch): ' + dp.id, 'warn');
+        }
+    });
+
+    var uebersprungen = DATENPUNKTE.length - vorhanden.length;
+    var offen = vorhanden.length;
+
+    log('InfluxDB Setup: aktiviere ' + offen + ' Datenpunkte' +
+        (uebersprungen ? ' (' + uebersprungen + ' übersprungen)' : '') + '...');
+
+    if (offen === 0) {
+        log('InfluxDB Setup: nichts zu aktivieren');
+        return;
+    }
+
+    vorhanden.forEach(function (dp) {
         sendTo(INFLUX, 'enableHistory', { id: dp.id, options: dp.opt }, function (result) {
             offen--;
             if (result && result.error) {
@@ -241,7 +262,8 @@ setTimeout(function () {
                 ok++;
             }
             if (offen === 0) {
-                log('InfluxDB Setup abgeschlossen: ' + ok + ' aktiviert, ' + fehler + ' Fehler');
+                log('InfluxDB Setup abgeschlossen: ' + ok + ' aktiviert, ' + fehler + ' Fehler' +
+                    (uebersprungen ? ', ' + uebersprungen + ' übersprungen' : ''));
             }
         });
     });
