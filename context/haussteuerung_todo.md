@@ -314,13 +314,29 @@
   - Belastbare Daten erst ab Heizsaison Herbst 2026
   - Wenn Überhitzung regelmäßig >1-2°C über Soll → Script lohnt sich
 
-### TRVs für EG Heizkörper (niedrige Priorität)
-- [ ] Sonoff TRVZB (~20€/Stück Amazon, ~15€ AliExpress) pro Heizkörper EG
-  - Zigbee2MQTT Adapter in ioBroker (gleicher Weg wie bestehende Thermometer)
-  - Datenpunkte: zigbee.eg.wohnzimmer.soll / ist / ventil_position
-  - Logik: Ventil zu wenn Fenster offen (Fensterkontakt-Integration)
-  - Logik: Eco-Temperatur (z.B. 18°C) wenn niemand zuhause (Anwesenheitserkennung)
-  - HINWEIS: ETA steuert Pumpen selbst -> TRV nur Ventil, nicht Pumpe!
+### TRVs für EG Heizkörper (IN UMSETZUNG seit 03.07.2026)
+- Sonoff TRVZB, insgesamt 4 Stück geplant, direkt am Zigbee-Adapter (kein z2m).
+- Adapter erstellt States automatisch → KEIN eigenes Polling-Script nötig,
+  nur enableHistory in influxdb_setup.js freischalten (wie andere Zigbee-Sensoren).
+- Benennung: jedes Gerät im Zigbee-Adapter benennen wie die anderen (Klartext, kein Alias).
+- IST-Stand 03.07.2026:
+  - #1 angelernt: 0x983268fffe97aab4 → Raum "Gang EG"
+  - #2–#4: folgen, gleiche Behandlung
+- Aufzeichnen (Tier 1) — je TRV:
+  - Ist-Temperatur (local_temperature) — Raumtemperatur
+  - Soll-Temperatur (setpoint / occupied_heating_setpoint)
+  - Ventilstellung / Heizanforderung (pi_heating_demand ODER valve_opening_degree — GENAUEN
+    State-Namen aus Objektbaum prüfen!) → GOLDWERT, echter Wärmebedarf je Raum
+  - Batterie (%) — changesOnly, Wartung
+- Ziel (später, nach Datensammlung): pi_heating_demand aller 4 Räume als Wärmebedarf-
+  Signal in die ETA-Vorlauflogik ziehen (siehe Abschnitt Heizkurvenkorrektur).
+  AKTUELL: nur beobachten, kein Eingriff.
+- [ ] Objektbaum-Screenshot von zigbee.0.983268fffe97aab4 → exakte State-IDs fixieren
+- [ ] Die 4 IDs in influxdb_setup.js eintragen (enableHistory ist fehlertolerant pro ID)
+- HINWEIS TRVZB: Interview-Warnungen "customSonoffTrvzb ... Value is not a number" sind
+  harmloses Firmware-Rauschen, solange die Kernwerte kommen.
+- HINWEIS: ETA steuert Pumpen selbst -> TRV nur Ventil, nicht Pumpe!
+- später: Ventil zu wenn Fenster offen; Eco-Temp wenn niemand zuhause (Anwesenheit)
 
 ### Fußbodenheizung OG Logik (niedrige Priorität)
 - [ ] Eco-Modus Logik für vorhandene Zigbee-Thermostate OG
