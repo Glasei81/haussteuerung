@@ -374,7 +374,7 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
 
             sendTo('telegram.0',
                 '🌙 Warmwasser-Nachtverlust (' + wwDatum + ')\n' +
-                '   Zirkulation aus, 22:10 → 04:50\n\n' +
+                '   Zirkulation aus, 21:10 → 05:40\n\n' +
                 '🌡️ oben: ' + wwStartO + '→' + wwEndO + '°C (Δ' + wwDelta + '°C)\n' +
                 (wwStartU > 0 ? '🌡️ unten: ' + wwStartU + '→' + wwEndU + '°C\n' : '') +
                 '📉 Rate: ' + wwRate + ' °C/h\n\n' +

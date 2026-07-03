@@ -258,8 +258,8 @@
   Zirkulation ist 22–05 Uhr auf AUS → trotzdem starker Abfall.
 - Verdacht: defekte Schwerkraftbremse / Rückschlagklappe → Thermosiphon durch die
   Zirkulationsleitung trotz stehender Pumpe (heiß raus oben, kalt zurück unten).
-- [x] zirkulation_monitor.js umgebaut zur Diagnose (01.07.2026):
-      Snapshot WW oben+unten 22:10 → 04:50 (echtes pumpenloses Fenster, 6,67 h),
+- [x] zirkulation_monitor.js umgebaut zur Diagnose (01.07.2026, Zeiten korrigiert 03.07.):
+      Zirkulation real aus 21:00–05:45 → Snapshot WW oben+unten 21:10 → 05:40 (8,5 h),
       Abkühlrate °C/h + Bewertung. Telegram-Warnung nur wenn Rate > 0,8 °C/h.
       Schwellen: <0,5 normal | 0,5–0,8 erhöht | >0,8 verdächtig.
       Richtwert reiner Dämmverlust ~0,2–0,4 °C/h.
