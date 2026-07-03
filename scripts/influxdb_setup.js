@@ -149,6 +149,7 @@ var DATENPUNKTE = [
     { id: 'javascript.0.wetter.aktuell.druck',           opt: OPT_NORMAL  },  // hPa → Wetterfront-Erkennung
     { id: 'javascript.0.wetter.aktuell.wind',            opt: OPT_NORMAL  },  // km/h
     { id: 'javascript.0.wetter.aktuell.windboee',        opt: OPT_NORMAL  },  // km/h → Sturmstatistik
+    { id: 'javascript.0.wetter.aktuell.windrichtung',    opt: OPT_NORMAL  },  // Grad → Windrad-Analyse (Erler Wind aus SO)
     { id: 'javascript.0.wetter.aktuell.regen_rate',      opt: OPT_NORMAL  },  // mm/h → Starkregen-Events
     { id: 'javascript.0.wetter.aktuell.regen_gesamt',    opt: OPT_COUNTER },  // mm täglich kumuliert
     { id: 'javascript.0.wetter.aktuell.uv',              opt: OPT_NORMAL  },  // UV-Index → PV-Korrelation
@@ -204,7 +205,6 @@ var DATENPUNKTE = [
 //                            → Holz-Kesseldruck nicht aussagekräftig (Naturzug)
 //   solar.switch             → boolean, kein Trend
 //   solar.puffer.temperatur  → myPV Sensor, weitgehend redundant zu eta.warmwasser
-//   wetter.aktuell.windrichtung  → interessant, aber wenig Analysewert im Heimkontext
 //   wetter.forecast.*        → Vorhersagedaten, keine Messwerte
 //   wetter.pv.prognose_morgen → Text, nicht numerisch
 //   wetter.aktuell.timestamp  → kein Messwert
