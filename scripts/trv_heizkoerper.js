@@ -27,8 +27,18 @@ var TRVS = [
 
 TRVS.forEach(function(t) {
 
-    createState('trv.' + t.raum + '.heizt', 0, {
+    var heiztId = 'trv.' + t.raum + '.heizt';
+
+    createState(heiztId, 0, {
         name: 'TRV ' + t.name + ' heizt (1/0)', type: 'number', unit: '', role: 'value', read: true, write: false
+    });
+
+    // Reparatur: falls durch einen früheren fehlerhaften enableHistory ein kaputtes
+    // Objekt (ohne common.type) existiert, hier die Definition sicher nachziehen.
+    extendObject('javascript.0.' + heiztId, {
+        type: 'state',
+        common: { type: 'number', role: 'value', read: true, write: false, unit: '', name: 'TRV ' + t.name + ' heizt (1/0)' },
+        native: {}
     });
 
     function update() {

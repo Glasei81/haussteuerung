@@ -22,6 +22,7 @@ var CONFIG = {
 
 // Modul-Status (überlebt die 5-Min-Schedules, resettet nur bei Script-Neustart)
 var energieSperreZaehler = 0;
+var tuyaOfflineGemeldet  = false;
 
 createState('klima.treppe.aktiv',       false, { name: 'Klima Treppenhaus aktiv',         type: 'boolean', role: 'switch', read: true, write: true });
 createState('klima.treppe.start_zeit',  0,     { name: 'Klima Treppenhaus Startzeit ms',  type: 'number',  role: 'value',  read: true, write: false });
@@ -34,6 +35,13 @@ function safe(id, fallback) {
         if (s && s.val !== null && s.val !== undefined) return s.val;
     } catch(e) {}
     return fallback;
+}
+
+// Prüft ob das Tuya-Gerät in ioBroker vorhanden ist (State existiert).
+// existsState wirft keine Warnung wenn der State fehlt — anders als getState.
+function tuyaVerfuegbar() {
+    try { return existsState(TUYA_POWER); }
+    catch(e) { return false; }
 }
 
 function klimaEin(raumTemp) {
@@ -55,6 +63,7 @@ function klimaAus(grund, mitTelegram) {
 
     // Verifikation nach 2 Min
     setTimeout(function() {
+        if (!tuyaVerfuegbar()) return;
         var realState = getState(TUYA_POWER);
         if (realState && realState.val === true) {
             log('Klima Treppe: Abschaltbefehl nicht bestätigt — Retry', 'warn');
@@ -65,6 +74,21 @@ function klimaAus(grund, mitTelegram) {
 }
 
 function klimaLogik() {
+    // Gerät nicht erreichbar → Automatik pausieren, einmalig melden (kein Log-Spam)
+    if (!tuyaVerfuegbar()) {
+        if (!tuyaOfflineGemeldet) {
+            tuyaOfflineGemeldet = true;
+            sendTo('telegram.0', '⚠️ Klima Treppenhaus: Tuya-Gerät nicht erreichbar.\nAutomatik pausiert bis das Gerät wieder online ist.');
+            log('Klima Treppe: Tuya-State fehlt — Automatik pausiert bis Gerät wieder da', 'warn');
+        }
+        return;
+    }
+    if (tuyaOfflineGemeldet) {
+        tuyaOfflineGemeldet = false;
+        sendTo('telegram.0', '✅ Klima Treppenhaus: Tuya wieder erreichbar — Automatik aktiv.');
+        log('Klima Treppe: Tuya wieder erreichbar — Automatik aktiv');
+    }
+
     var jetzt      = Date.now();
     var stunde     = new Date().getHours();
 
