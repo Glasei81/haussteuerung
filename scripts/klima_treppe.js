@@ -11,12 +11,17 @@ var ZIGBEE_TREPPE    = 'zigbee.0.a4c138d0a5ca4495.local_temperature';
 var CONFIG = {
     TEMP_EIN:        25,                   // Raumtemp zum Einschalten (°C)
     TEMP_AUS:        22,                   // Zieltemperatur / Ausschalten (°C)
+    MIN_LAUFZEIT_MS: 20 * 60 * 1000,      // Mindestlaufzeit bevor Energie/WW-Sperre greift
     MAX_LAUFZEIT_MS: 2 * 60 * 60 * 1000,  // 2h maximale Laufzeit
     PAUSE_MS:        1 * 60 * 60 * 1000,  // 1h Pause danach
     MAX_BATTERIE_W:  2000,                 // Batterie darf bis -2000W liefern
+    ENERGIE_SPERRE_ZYKLEN: 2,              // Energie-Sperre erst nach 2 Zyklen (entprellt Lastspitzen)
     WW_TEMP_MIN:     50,                   // WW muss bis 14:00 Uhr >= 50°C sein
     WW_STUNDE:       14,
 };
+
+// Modul-Status (überlebt die 5-Min-Schedules, resettet nur bei Script-Neustart)
+var energieSperreZaehler = 0;
 
 createState('klima.treppe.aktiv',       false, { name: 'Klima Treppenhaus aktiv',         type: 'boolean', role: 'switch', read: true, write: true });
 createState('klima.treppe.start_zeit',  0,     { name: 'Klima Treppenhaus Startzeit ms',  type: 'number',  role: 'value',  read: true, write: false });
@@ -72,9 +77,14 @@ function klimaLogik() {
     var verbWatt   = safe('javascript.0.solar.verbrauch.watt',    0);
     var wwTemp     = safe('javascript.0.eta.warmwasser.oben',     99);
 
-    var netto        = pvWatt - verbWatt;
-    var energieSperre = netto < -CONFIG.MAX_BATTERIE_W;
-    var wwSperre      = stunde >= CONFIG.WW_STUNDE && wwTemp < CONFIG.WW_TEMP_MIN;
+    var netto = pvWatt - verbWatt;
+
+    // Energie-Sperre entprellen: einzelne Lastspitzen sollen nicht sofort abschalten
+    if (netto < -CONFIG.MAX_BATTERIE_W) { energieSperreZaehler++; }
+    else                                { energieSperreZaehler = 0; }
+    var energieSperre = energieSperreZaehler >= CONFIG.ENERGIE_SPERRE_ZYKLEN;
+
+    var wwSperre = stunde >= CONFIG.WW_STUNDE && wwTemp < CONFIG.WW_TEMP_MIN;
 
     var inPause = false;
     if (pauseStart > 0) {
@@ -86,16 +96,20 @@ function klimaLogik() {
     }
 
     if (aktiv) {
-        var laufzeit = jetzt - startZeit;
+        var laufzeit    = jetzt - startZeit;
+        var minErreicht = laufzeit >= CONFIG.MIN_LAUFZEIT_MS;
 
+        // Zieltemperatur immer sofort (Komfort), Sperren erst nach Mindestlaufzeit (Anti-Takt)
         if (raumTemp > 0 && raumTemp <= CONFIG.TEMP_AUS) {
             klimaAus('Zieltemperatur ' + CONFIG.TEMP_AUS + '°C erreicht (' + raumTemp + '°C)', true);
         } else if (laufzeit >= CONFIG.MAX_LAUFZEIT_MS) {
             setState('javascript.0.klima.treppe.pause_start', { val: jetzt, ack: true });
             klimaAus('2h Laufzeit — 1h Pause', true);
-        } else if (wwSperre) {
+        } else if (minErreicht && wwSperre) {
+            setState('javascript.0.klima.treppe.pause_start', { val: jetzt, ack: true });
             klimaAus('WW-Vorrang: ' + wwTemp + '°C < ' + CONFIG.WW_TEMP_MIN + '°C nach 14:00', true);
-        } else if (energieSperre) {
+        } else if (minErreicht && energieSperre) {
+            setState('javascript.0.klima.treppe.pause_start', { val: jetzt, ack: true });
             klimaAus('Energie-Sperre: Netto ' + Math.round(netto) + 'W', false);
         }
 
@@ -103,7 +117,8 @@ function klimaLogik() {
         klimaEin(raumTemp);
     }
 
-    log('Klima Treppe: ' + raumTemp + '°C | ' + Math.round(netto) + 'W Netto | aktiv=' + aktiv + ' | pause=' + inPause);
+    log('Klima Treppe: ' + raumTemp + '°C | ' + Math.round(netto) + 'W Netto | aktiv=' + aktiv +
+        ' | pause=' + inPause + (energieSperre ? ' | ENERGIE-SPERRE' : ''));
 }
 
 // Externes Schalten erkennen (Tuya App / Fernbedienung)

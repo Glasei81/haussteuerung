@@ -101,6 +101,19 @@ Chronologische Entwicklungshistorie. Jede Session mit Datum und Inhalt.
   Monitor misst jetzt WW oben+unten 22:10→04:50 (pumpenloses Fenster), Rate °C/h + Bewertung.
   Telegram-Warnung nur wenn Rate > 0,8 °C/h (normal ~0,2–0,4). /wwnacht für Abruf.
   rate_nacht + delta_nacht in InfluxDB für Grafana-Trend.
+- **Log-Analyse 03.07.2026**: alte Monitor-Version maß 01:00=54°C → 05:40=49°C = 5°C /
+  4,67h ≈ 1,07 °C/h → bestätigt Schwerkraftbremsen-Verdacht (weit über Normal).
+
+## 03.07.2026 — klima_logik robuster (Log-Analyse)
+- **Midea offline abgefangen** (klima_logik.js)
+  Log war voll mit "State midea.0.153931628437826.powerState not found" — Gerät nicht
+  erreichbar, States fehlten. Automatik prüft jetzt existsState() und pausiert sauber,
+  meldet einmalig per Telegram (offline + wieder-online), statt alle 5 Min zu spammen.
+- **Anti-Takt** (klima_logik.js + klima_treppe.js)
+  Netto-Leistung ist als 5-Min-Momentanwert extrem verrauscht (−7700 … +8137 W durch
+  Lastspitzen). Alte Logik schaltete auf Einzelspitzen → EIN/AUS/EIN im 10-Min-Takt.
+  Neu: Energie-Sperre entprellt (erst nach 2 Zyklen), Sperren greifen erst nach 20 Min
+  Mindestlaufzeit, jede Nicht-Komfort-Abschaltung setzt 1h Pause → kein Kurztakten mehr.
 
 ---
 
