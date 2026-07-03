@@ -112,6 +112,15 @@ var DATENPUNKTE = [
     { id: 'javascript.0.zirkulation.monitor.rate_nacht',       opt: OPT_COUNTER },  // °C/h Abkühlrate
     { id: 'javascript.0.zirkulation.monitor.delta_nacht',      opt: OPT_COUNTER },  // °C Abfall oben
 
+    // TRV Heizkörperthermostate EG (Sonoff TRVZB) — Heizprofil je Raum
+    // Ist + Soll + Batterie direkt vom Gerät, heizt (1/0) aus trv_heizkoerper.js.
+    // Kein pi_heating_demand am TRVZB → running_state als Heizquote-Proxy.
+    // #1 Gang EG (0x983268fffe97aab4) — weitere TRVs hier nach gleichem Muster:
+    { id: 'zigbee.0.983268fffe97aab4.local_temperature',         opt: OPT_NORMAL  },  // Gang EG Ist
+    { id: 'zigbee.0.983268fffe97aab4.occupied_heating_setpoint', opt: OPT_COUNTER },  // Gang EG Soll (ändert selten)
+    { id: 'zigbee.0.983268fffe97aab4.battery',                   opt: OPT_COUNTER },  // Gang EG Batterie
+    { id: 'javascript.0.trv.gang_eg.heizt',                      opt: OPT_COUNTER },  // Gang EG heizt 1/0
+
     // =========================================================
     // TIER 2 — Betrieb & Verschleiß (langfristig wertvoll)
     // =========================================================
@@ -199,8 +208,10 @@ var DATENPUNKTE = [
 //   wetter.forecast.*        → Vorhersagedaten, keine Messwerte
 //   wetter.pv.prognose_morgen → Text, nicht numerisch
 //   wetter.aktuell.timestamp  → kein Messwert
-//   zigbee.*.occupied_heating_setpoint / current_heating_setpoint
-//                            → Soll-Werte der Thermostate, kein Messwert
+//   zigbee.*.occupied_heating_setpoint (OG FBH-Thermostate)
+//                            → Soll-Werte der FBH-Thermostate, kein Messwert
+//                              (AUSNAHME: EG-TRVs oben aktiv geloggt — für Regelabweichung
+//                               Ist vs. Soll + spätere ETA-Vorlauflogik)
 //   zigbee.*.battery         → Batteriestand, interessant aber niedrige Frequenz
 //                              (bei Bedarf ergänzen)
 

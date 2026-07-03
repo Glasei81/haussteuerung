@@ -319,24 +319,26 @@
 - Adapter erstellt States automatisch → KEIN eigenes Polling-Script nötig,
   nur enableHistory in influxdb_setup.js freischalten (wie andere Zigbee-Sensoren).
 - Benennung: jedes Gerät im Zigbee-Adapter benennen wie die anderen (Klartext, kein Alias).
-- IST-Stand 03.07.2026:
+- IST-Stand 03.07.2026 (States per Screenshot bestätigt):
   - #1 angelernt: 0x983268fffe97aab4 → Raum "Gang EG"
   - #2–#4: folgen, gleiche Behandlung
-- Aufzeichnen (Tier 1) — je TRV:
-  - Ist-Temperatur (local_temperature) — Raumtemperatur
-  - Soll-Temperatur (setpoint / occupied_heating_setpoint)
-  - Ventilstellung / Heizanforderung (pi_heating_demand ODER valve_opening_degree — GENAUEN
-    State-Namen aus Objektbaum prüfen!) → GOLDWERT, echter Wärmebedarf je Raum
-  - Batterie (%) — changesOnly, Wartung
-- Ziel (später, nach Datensammlung): pi_heating_demand aller 4 Räume als Wärmebedarf-
-  Signal in die ETA-Vorlauflogik ziehen (siehe Abschnitt Heizkurvenkorrektur).
-  AKTUELL: nur beobachten, kein Eingriff.
-- [ ] Objektbaum-Screenshot von zigbee.0.983268fffe97aab4 → exakte State-IDs fixieren
-- [ ] Die 4 IDs in influxdb_setup.js eintragen (enableHistory ist fehlertolerant pro ID)
+- WICHTIG: TRVZB liefert KEINEN pi_heating_demand / keinen Live-Ventilwert!
+  valve_opening_degree / valve_closing_degree (=100%) sind Konfig-Hubgrenzen, keine
+  Momentanstellung. Einziger Live-Wärmebedarf = running_state (idle/heat, Text).
+- Aufzeichnen — je TRV (erledigt für Gang EG, 03.07.2026):
+  - local_temperature — Ist (OPT_NORMAL)
+  - occupied_heating_setpoint — Soll (OPT_COUNTER, ändert selten)
+  - battery — % (OPT_COUNTER)
+  - javascript.0.trv.<raum>.heizt — 1/0 aus trv_heizkoerper.js (running_state gespiegelt)
+    → über die Saison = Heizquote je Raum (% der Zeit geheizt), Wärmebedarf-Proxy
+- trv_heizkoerper.js erstellt: spiegelt running_state (Text) auf numerisch 1/0.
+  Neuen TRV ergänzen: eine Zeile in TRVS[] (id+raum+name) + 4 IDs in influxdb_setup.js.
+- Ziel (später, nach Datensammlung): heizt-Quote aller 4 Räume als Wärmebedarf-Signal
+  in die ETA-Vorlauflogik (siehe Abschnitt Heizkurvenkorrektur). AKTUELL: nur beobachten.
 - HINWEIS TRVZB: Interview-Warnungen "customSonoffTrvzb ... Value is not a number" sind
   harmloses Firmware-Rauschen, solange die Kernwerte kommen.
 - HINWEIS: ETA steuert Pumpen selbst -> TRV nur Ventil, nicht Pumpe!
-- später: Ventil zu wenn Fenster offen; Eco-Temp wenn niemand zuhause (Anwesenheit)
+- später: Ventil zu wenn Fenster offen (open_window vorhanden); Eco-Temp bei Abwesenheit
 
 ### Fußbodenheizung OG Logik (niedrige Priorität)
 - [ ] Eco-Modus Logik für vorhandene Zigbee-Thermostate OG
