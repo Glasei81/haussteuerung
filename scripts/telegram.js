@@ -266,6 +266,96 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
             });
         });
 
+    // --- Windrose (Richtungsverteilung + Böen) ---
+
+    } else if (cmd === '/wind') {
+
+        var EIN_TAG    = 24 * 3600 * 1000;
+        var jetzt      = Date.now();
+        var start30    = jetzt - 30 * EIN_TAG;
+        var heuteAnf   = new Date(); heuteAnf.setHours(0, 0, 0, 0);
+        var heuteStart = heuteAnf.getTime();
+
+        var himmel = ['N', 'NO', 'O', 'SO', 'S', 'SW', 'W', 'NW'];
+        var padR = function(s, n) { s = String(s); while (s.length < n) s += ' '; return s; };
+        var padL = function(s, n) { s = String(s); while (s.length < n) s = ' ' + s; return s; };
+
+        // 1) Erster Windrichtungs-Datenpunkt (für "seit")
+        sendTo('influxdb.0', 'getHistory', {
+            id: 'javascript.0.wetter.aktuell.windrichtung',
+            options: { start: new Date(2026, 0, 1).getTime(), end: jetzt, count: 1, aggregate: 'none', addId: false }
+        }, function(firstRes) {
+
+            var seitTxt = '';
+            if (firstRes.result && firstRes.result[0] && firstRes.result[0].ts) {
+                var d = new Date(firstRes.result[0].ts);
+                seitTxt = 'seit ' + d.getDate() + '.' + (d.getMonth() + 1) + '.' + d.getFullYear();
+            }
+
+            // 2) Windrichtung roh (30 Tage) → Sektoren zählen
+            sendTo('influxdb.0', 'getHistory', {
+                id: 'javascript.0.wetter.aktuell.windrichtung',
+                options: { start: start30, end: jetzt, aggregate: 'none', addId: false }
+            }, function(dirRes) {
+
+                var sektor = [0, 0, 0, 0, 0, 0, 0, 0], gesamt = 0;
+                (dirRes.result || []).forEach(function(p) {
+                    if (p.val === null || p.val === undefined) return;
+                    var g = ((p.val % 360) + 360) % 360;
+                    sektor[Math.floor(((g + 22.5) % 360) / 45)]++;
+                    gesamt++;
+                });
+
+                // 3) Windgeschwindigkeit roh (30 Tage) → Ø
+                sendTo('influxdb.0', 'getHistory', {
+                    id: 'javascript.0.wetter.aktuell.wind',
+                    options: { start: start30, end: jetzt, aggregate: 'none', addId: false }
+                }, function(spdRes) {
+
+                    var sum = 0, cnt = 0;
+                    (spdRes.result || []).forEach(function(p) { if (p.val != null) { sum += p.val; cnt++; } });
+                    var avg = cnt ? Math.round(sum / cnt * 10) / 10 : null;
+
+                    // 4) Böen roh (30 Tage) → Max gesamt + Max heute
+                    sendTo('influxdb.0', 'getHistory', {
+                        id: 'javascript.0.wetter.aktuell.windboee',
+                        options: { start: start30, end: jetzt, aggregate: 'none', addId: false }
+                    }, function(gustRes) {
+
+                        var max30 = 0, maxHeute = 0;
+                        (gustRes.result || []).forEach(function(p) {
+                            if (p.val == null) return;
+                            if (p.val > max30) max30 = p.val;
+                            if (p.ts >= heuteStart && p.val > maxHeute) maxHeute = p.val;
+                        });
+
+                        if (gesamt === 0) {
+                            sendTo('telegram.0', '🌬️ Windrichtung — noch keine Daten.\nDas Logging läuft erst seit heute, die Windrose füllt sich über die nächsten Tage.');
+                            return;
+                        }
+
+                        var rose = '';
+                        for (var i = 0; i < 8; i++) {
+                            var pct  = Math.round(sektor[i] / gesamt * 100);
+                            var voll = Math.round(pct / 100 * 10);
+                            var bar  = '';
+                            for (var b = 0; b < 10; b++) bar += (b < voll ? '▓' : '░');
+                            rose += padR(himmel[i], 3) + bar + ' ' + padL(pct + '%', 4) +
+                                    (himmel[i] === 'SO' ? '  ← Erler Wind' : '') + '\n';
+                        }
+
+                        sendTo('telegram.0', {
+                            text: '🌬️ <b>Windverteilung</b> — letzte 30 Tage' + (seitTxt ? ' (' + seitTxt + ')' : '') + '\n' +
+                                  '<pre>' + rose + '</pre>' +
+                                  'Ø ' + (avg != null ? avg : '?') + ' km/h · max Böe ' + Math.round(max30) + ' km/h\n' +
+                                  '💨 Stärkste Böe heute: ' + Math.round(maxHeute) + ' km/h',
+                            parse_mode: 'HTML'
+                        });
+                    });
+                });
+            });
+        });
+
     // --- Warmwasser Nachtverlust (Schwerkraftbremsen-Check) ---
 
     } else if (cmd === '/wwnacht') {
@@ -302,6 +392,7 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
             '/status — Heizung & Energie Überblick\n' +
             '/forecast — Wettervorschau morgen & übermorgen\n' +
             '/wetter — Regen & Temperatur letzte 7 Tage\n' +
+            '/wind — Windrose & stärkste Böe (30 Tage)\n' +
             '/wwnacht — Warmwasser-Nachtverlust (Schwerkraftbremse)\n' +
             '/klima — Klimaanlage Status\n' +
             '/klima ein — Klimaanlage einschalten\n' +
