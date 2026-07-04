@@ -281,7 +281,38 @@
 ---
 
 ## Nach Datensammlung (Herbst 2026)
-- [ ] Abkuehlkurve aus InfluxDB berechnen
+
+### Wärmebedarf des Hauses ermitteln — Methodik (Konzept 03.07.2026)
+GRUNDGLEICHUNG (Energiebilanz um den Puffer, über einen Zeitraum):
+    Wärmebedarf(Haus + WW) = Wärme REIN − Änderung Pufferinhalt
+  - Wärme REIN = ETA-Kessel (Pellets + Holz) + Solarthermie + Heizstäbe (elektrisch)
+  - Pufferinhalt: 3600 L ≈ 4,2 kWh pro 1 K mittlere Puffertemperatur (V × 1,163 Wh/L·K)
+  - TRICK: über einen ganzen Tag mit gleicher Puffertemperatur morgens/abends fällt
+    der Speicherterm weg → Wärmebedarf ≈ Summe der Zuführungen.
+
+SCHON VORHANDEN (geloggt):
+  - eta.pellets.ertrag_heute + eta.holz.ertrag_heute (kWh/Tag, ETA-Wärmemengenzähler)
+  - eta.solar.ertrag_heute + eta.solar.waermemenge (kWh, Solar-WMZ)
+  - 8 Puffertemperaturen + eta.puffer.ladung (%) → Speicherinhalt
+  - wetter.aktuell.temperatur_korrigiert → Ø-Außentemperatur/Tag
+LÜCKE:
+  - Heizstäbe elektrisch (myPV Puffer/WW, Puffer2 4,5 kW) NICHT sauber gemessen
+    → schließt sich mit "Heizstab-Leistungsmessung nachrüsten" (Shelly PM Mini/1PM)
+    → in reinen ETA/Solar-Phasen (Kernwinter) stimmt die Bilanz schon jetzt.
+
+BESTE METHODE — Energie-Signatur / Gebäudekennlinie:
+  - Tages-Wärmemenge [kWh] gegen Ø-Außentemperatur [°C] auftragen → Gerade
+  - Steigung = Wärmeverlust Haus in W/K (reines Heizen)
+  - Achsenabschnitt = Warmwasser + konstante Verluste (Regression trennt WW automatisch)
+  - Hochrechnung auf Norm-Außentemp (~ −14 °C Raubling/Inntal) → Spitzenlast kW
+  - über Gradtage integriert → Jahresheizbedarf kWh (Input für Wind-/PV-Autarkie)
+GEGENPROBE (schnell, ungenauer): Puffer-Abkühlung in Phasen ohne Zufuhr = Hausbedarf
+  + Puffer-Dämmverlust; nur belastbar wenn HK/FBH-Pumpe fördert.
+- [ ] Wenn Heizstab-Messung steht: kleines Script "tägliche Wärmebilanz" → Q_in je Tag
+      + Speicheränderung → tägliche Q_verbrauch in eigenen State/InfluxDB, dann Regression.
+- [ ] Belastbare Daten erst ab Heizsaison Herbst 2026 (Sommer: keine Wärmeanforderung).
+
+- [ ] Abkuehlkurve aus InfluxDB berechnen (Teil obiger Methodik)
   - Grad/h Abkuehlung pro Aussentemperaturbereich
   - Tabelle: 0-5 / 5-10 / 10-15 / 15-20 Grad Aussen
   - ACHTUNG: Sommer-Daten nicht belastbar (keine Waermeanforderung)
