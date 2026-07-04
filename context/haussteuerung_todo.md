@@ -312,6 +312,19 @@ GEGENPROBE (schnell, ungenauer): Puffer-Abkühlung in Phasen ohne Zufuhr = Hausb
       + Speicheränderung → tägliche Q_verbrauch in eigenen State/InfluxDB, dann Regression.
 - [ ] Belastbare Daten erst ab Heizsaison Herbst 2026 (Sommer: keine Wärmeanforderung).
 
+### Brauchwasser-Verbrauch erfassen (Konzept 03.07.2026)
+Stefan: aktuell kein Überblick über Kalt- noch Warmwasserbezug.
+WICHTIG: für die Heizkennlinie NICHT nötig (WW = Achsenabschnitt der Regression).
+Nur wenn WW separat beziffert werden soll:
+  a) Kaltwasser gesamt: Impuls-/Optokopf auf vorhandenen Hauswasserzähler (~15–30€) → Liter/ioBroker
+  b) WW-Anteil: eigener Impuls-Wasserzähler am Kaltwasser-Zulauf des WW-Speichers
+     → WW-Energie = Liter × 1,163 Wh/(L·K) × (T_WW − T_kalt)
+     Bsp: 1000 L von 12→50°C = 44 kWh; Haushalt ~30–50 L warm/Person/Tag
+  c) Zero-Hardware-Schätzung: aus eta.warmwasser.oben/unten (schon geloggt) die
+     Nachladungen aufsummieren → grobe kWh/Tag. Braucht WW-Speichervolumen von Stefan.
+     WW-Verbrauch = Nachladung − Standby-Verlust (Standby aus Schwerkraftbremsen-Monitor).
+- [ ] OFFEN Stefan: WW separater Speicher? Volumen? Dann Script (c) + /ww Telegram möglich.
+
 - [ ] Abkuehlkurve aus InfluxDB berechnen (Teil obiger Methodik)
   - Grad/h Abkuehlung pro Aussentemperaturbereich
   - Tabelle: 0-5 / 5-10 / 10-15 / 15-20 Grad Aussen
