@@ -477,6 +477,18 @@ Nur wenn WW separat beziffert werden soll:
 
 ## Laengerfristig / Ideen
 - [ ] Heizstab Leistungsmessung nachrüsten (niedrige Priorität, Kosten)
+  - ANSATZ SCHALTZUSTAND (Idee Stefan 03.07.): ohmscher Stab = feste Leistung. Bei
+    Relais-Schaltung reicht Schaltzustand × bekannte kW × Zeit = kWh (Pro3 meldet
+    Relais-Zustände selbst → 0 € Hardware). Stäbe: einer 1 kW/Phase, einer 1,5 kW/Phase.
+  - HAKEN (Stefan): stab-eigener Thermostat/STB kann bei Zieltemp auftrennen, während
+    das Relais ZU bleibt → Zustandsmethode überzählt genau am Temperaturlimit.
+    → Saubere Lösung: STROM messen (0 A wenn Thermostat auf) statt nur Zustand.
+    → In der Praxis tritt der Fehler nur nahe Abschalttemp auf; beim PV-Laden nimmt die
+      Steuerung das Relais meist vorher weg → Zustandsmethode als 1. Schritt oft ok.
+  - myPV MODULIERT (0–100 %) → ein/aus sinnlos, ABER myPV misst selbst.
+    PRÜFEN: liefert der Solarmanager die myPV-Leistung bereits? Dann für die myPV-Stäbe
+    KEIN Shelly nötig → statt "6 Shellys" real nur Puffer 2 (3 Phasen).
+  - OFFEN Stefan: welche Stäbe hängen an Relais (ein/aus) vs. myPV (moduliert)?
   - Puffer 2 (Shelly Pro3, 3 × 1500W): Pro3 bleibt für Schalten, 3× Shelly PM Mini Gen3 (~15€/Stück) für Messung je Phase
     ODER: Pro3 ersetzen durch 3× Shelly Plus 1PM (Schalten + Messen in einem)
   - Puffer 1 (myPV, 3-3.5kW): myPV schaltet selbst → 1× Shelly 1PM/EM nur für Monitoring
