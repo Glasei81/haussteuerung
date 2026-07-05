@@ -19,8 +19,7 @@ var DEVICE_IDS = {
     // (die alten IDs 672cd496/672dccfd/672e09ec waren Phasen-Messgeräte)
     puffer2_relais:   ['6a245002c9ab1902873eb3ea', '6a244e4cf6a43ed2d9f1d7e8', '6a244e8ed54899b1914c1579'],
     // Heizstab Puffer 1 (3kW) — 3 Relais à 1000W
-    // KANDIDATEN: blieben im Test 05.07. durchgehend switchState=0 (Stab war aus).
-    // Bestätigen: Puffer1-Stab einschalten → müssen auf switchState=1 springen.
+    // Relais-IDs 05.07. bestätigt (Stab eingeschaltet → switchState 0→1, /status zeigte Watt).
     puffer1_relais:   ['69049eaa653f06178ad33aaa', '6907bc5b653f06178afab9a2', '6907bca9653f06178afabcad']
 };
 
