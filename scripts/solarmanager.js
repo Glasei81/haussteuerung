@@ -28,6 +28,8 @@ var states = [
     ['solar.switch',            'Virtueller Switch',       'boolean', '',    'switch'],
     ['solar.puffer.temperatur', 'Puffer Temp myPV',       'number',  '°C',  'value.temperature'],
     ['solar.puffer2.watt',      'Heizstab Puffer2 gesamt','number',  'W',   'value.power'],
+    ['solar.heizstab.puffer_watt', 'Heizstab Puffer myPV', 'number', 'W',   'value.power'],
+    ['solar.heizstab.ww_watt',     'Heizstab WW myPV',     'number', 'W',   'value.power'],
 ];
 
 states.forEach(function(s) {
@@ -82,10 +84,20 @@ function solarmanagerLesen() {
             if (d._id === DEVICE_IDS.virt_switch) {
                 setState('javascript.0.solar.switch', {val: d.switchState === 1, ack: true});
             }
-            if (d._id === DEVICE_IDS.puffer_heizstab && d.temperature !== undefined) {
-                setState('javascript.0.solar.puffer.temperatur', {val: d.temperature, ack: true});
+            // myPV Puffer-Stab: Temperatur + eigene Leistungsmessung (wattgenau)
+            if (d._id === DEVICE_IDS.puffer_heizstab) {
+                if (d.temperature !== undefined) setState('javascript.0.solar.puffer.temperatur',     {val: d.temperature, ack: true});
+                if (d.power !== undefined)       setState('javascript.0.solar.heizstab.puffer_watt', {val: d.power,       ack: true});
             }
-            // Pro3 misst keine Leistung → aus Schaltzustand: jedes Relais an = 1500W
+            // myPV WW-Stab: eigene Leistungsmessung
+            if (d._id === DEVICE_IDS.ww_heizstab && d.power !== undefined) {
+                setState('javascript.0.solar.heizstab.ww_watt', {val: d.power, ack: true});
+            }
+            // Puffer2-Stab (Pro3): aus Schaltzustand (jedes Relais an = 1500W).
+            // ACHTUNG: die aktuellen puffer2_relais-IDs liefern power ABER keinen
+            // switchState → das sind vermutlich Phasen-Messgeräte, NICHT die Relais.
+            // Echte Relais-IDs noch identifizieren (Stab einschalten, sehen welche
+            // switchState auf 1 springt), dann DEVICE_IDS.puffer2_relais korrigieren.
             if (DEVICE_IDS.puffer2_relais.indexOf(d._id) !== -1) {
                 puffer2Watt += (d.switchState === 1 ? 1500 : 0);
             }

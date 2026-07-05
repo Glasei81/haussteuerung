@@ -95,9 +95,10 @@ var DATENPUNKTE = [
     { id: 'javascript.0.solar.batterie.soc',        opt: OPT_NORMAL  },  // % Ladestand
     { id: 'javascript.0.solar.batterie.watt',       opt: OPT_NORMAL  },  // positiv = laden
 
-    // Heizstab Puffer 2 (3 Relais Shelly Pro3, summiert)
-    // → wann und wie viel PV-Überschuss in Wärme umgewandelt wird
-    { id: 'javascript.0.solar.puffer2.watt',        opt: OPT_NORMAL  },
+    // Heizstäbe (elektrische Wärmezufuhr → Term der Hauswärmebilanz)
+    { id: 'javascript.0.solar.puffer2.watt',        opt: OPT_NORMAL  },  // Puffer2 Pro3 (Relais-IDs noch prüfen)
+    { id: 'javascript.0.solar.heizstab.puffer_watt', opt: OPT_NORMAL },  // myPV Puffer (wattgenau)
+    { id: 'javascript.0.solar.heizstab.ww_watt',     opt: OPT_NORMAL },  // myPV WW (wattgenau)
 
     // =========================================================
     // TIER 1 — Wetter (für alle Korrelationsanalysen nötig)
