@@ -41,40 +41,84 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
 
     } else if (cmd === '/status') {
 
-        var p1oben     = safeState('eta.puffer.fuehler1',  safeState('eta.puffer.oben', 0));
-        var p2oben     = safeState('eta.puffer2.oben',     0);
-        var p2unten    = safeState('eta.puffer2.unten',    0);
-        var deltaT     = (p1oben > 0 && p2oben > 0) ? Math.round(p2oben - p1oben) : null;
-        var p2watt     = safeState('solar.puffer2.watt',   0);
+        var r0 = function(v) { return (typeof v === 'number') ? Math.round(v) : v; };
 
+        // Rückspeisung (nur wenn < 48h alt)
         var rueckZeit  = safeState('eta.puffer2rueck.letzter_transfer', 0);
         var rueckGrund = safeState('eta.puffer2rueck.grund', '');
         var rueckZeile = '';
         if (rueckZeit > 0 && (Date.now() - rueckZeit) < 48 * 3600 * 1000) {
             var minAgo = Math.round((Date.now() - rueckZeit) / 60000);
             var zeitTxt = minAgo < 60 ? 'vor ' + minAgo + ' Min' : 'vor ' + Math.round(minAgo / 60) + ' h';
-            rueckZeile = '🔄 Rückspeisung: ' + zeitTxt + ' (' + rueckGrund + ')\n';
+            rueckZeile = '  🔄 Rückspeisung ' + zeitTxt + ' (' + rueckGrund + ')\n';
         }
+
+        // PV / Netz / Batterie
+        var pvW    = safeState('solar.pv.watt',       0);
+        var netzW  = safeState('solar.netz.watt',     0);
+        var verbW  = safeState('solar.verbrauch.watt',0);
+        var batW   = safeState('solar.batterie.watt', 0);
+        var batSoc = safeState('solar.batterie.soc',  0);
+        var netzZeile = netzW > 0 ? '  🔌 Netzbezug: ' + r0(netzW) + ' W' : '  ➡️ Einspeisung: ' + r0(Math.abs(netzW)) + ' W';
+        var batZeile  = batW >= 0 ? '  🔋 Batterie: ' + batSoc + '% (lädt ' + r0(batW) + ' W)' : '  🔋 Batterie: ' + batSoc + '% (liefert ' + r0(Math.abs(batW)) + ' W)';
+
+        // WW-Nachtverlust
+        var wwRate = safeState('zirkulation.monitor.rate_nacht', null);
+        var wwBew  = safeState('zirkulation.monitor.bewertung', '');
+        var wwZeile = (wwRate !== null) ? '🌙 WW-Nacht: ' + wwRate + ' °C/h (' + (wwBew || '-') + ')\n\n' : '';
+
+        var aussen = safeState('wetter.aktuell.temperatur_korrigiert', 0) || safeState('eta.aussen.temperatur', '?');
 
         sendTo('telegram.0',
             '📊 Haus Status\n\n' +
-            '🌡️ P1 oben: ' + (p1oben || '?') + '°C\n' +
-            '🌡️ P2: ' + (p2oben || '?') + '°C / ' + (p2unten || '?') + '°C (oben/unten)' +
-                (deltaT !== null ? '  Δ' + (deltaT >= 0 ? '+' : '') + deltaT + '°C' : '') + '\n' +
-            rueckZeile +
-            '🚿 Warmwasser: ' + safeState('eta.warmwasser.oben', '?') + '°C\n' +
-            '🌡️ Außen: ' + (safeState('wetter.aktuell.temperatur_korrigiert', 0) || safeState('eta.aussen.temperatur', '?')) + '°C\n\n' +
-            '🔥 Pellets: ' + (safeState('eta.pellets.gesperrt', false) ? 'GESPERRT' : 'FREIGEGEBEN') +
-                ' (' + safeState('eta.pellets.modus', '-') + ')\n' +
-            '💡 Empfehlung: ' + (safeState('eta.pellets.empfehlung', '') || '-') + '\n\n' +
-            '☀️ PV: ' + safeState('solar.pv.watt', '?') + 'W\n' +
-            '🔋 Batterie: ' + safeState('solar.batterie.soc', '?') + '%\n' +
-            (p2watt > 0 ? '⚡ Heizstab P2: ' + p2watt + 'W\n' : '') +
-            '\n📅 Morgen: ' + (safeState('wetter.forecast.morgen.max', 0) || '?') + '°C | Regen ' +
-            (safeState('wetter.forecast.morgen.regen', -1) >= 0 ? safeState('wetter.forecast.morgen.regen', 0) + '%' : '?') + ' | UV ' +
-            (safeState('wetter.forecast.morgen.uv', 0) || '?') + '\n' +
-            '☀️ PV Prognose: ' + (safeState('wetter.pv.prognose_morgen', '') || '?') + '\n\n' +
-            '🧠 Entscheidung:\n' + safeState('eta.pellets.letzte_entscheidung', '-')
+
+            '🔥 Puffer 1 (3000L)\n' +
+            '  ' + safeState('eta.puffer.fuehler1','?') + ' / ' + safeState('eta.puffer.fuehler2','?') + ' / ' +
+                   safeState('eta.puffer.fuehler3','?') + ' / ' + safeState('eta.puffer.fuehler4','?') + ' / ' +
+                   safeState('eta.puffer.fuehler5','?') + ' °C\n' +
+            '  Ladung: ' + safeState('eta.puffer.ladung','?') + '%\n\n' +
+
+            '🔥 Puffer 2 (600L)\n' +
+            '  ' + safeState('eta.puffer2.oben','?') + ' / ' + safeState('eta.puffer2.mitte','?') + ' / ' +
+                   safeState('eta.puffer2.unten','?') + ' °C (o/m/u)\n' +
+            '  Ladung: ' + safeState('eta.puffer2.ladung','?') + '%\n' +
+            rueckZeile + '\n' +
+
+            '🚿 Warmwasser: ' + safeState('eta.warmwasser.oben','?') + ' / ' + safeState('eta.warmwasser.unten','?') +
+                ' °C (Soll ' + safeState('eta.warmwasser.soll','?') + ')\n' +
+            '🌡️ Außen: ' + aussen + ' °C\n\n' +
+
+            '♨️ Heizkreise\n' +
+            '  HK: ' + safeState('eta.hk.vorlauf','?') + '→' + safeState('eta.hk.ruecklauf','?') + ' °C (' + safeState('eta.hk.zustand','-') + ')\n' +
+            '  FBH: ' + safeState('eta.fbh.vorlauf','?') + '→' + safeState('eta.fbh.ruecklauf','?') + ' °C (' + safeState('eta.fbh.zustand','-') + ')\n\n' +
+
+            '🔥 Kessel\n' +
+            '  Pellets: ' + (safeState('eta.pellets.gesperrt', false) ? 'GESPERRT' : 'FREI') +
+                ' (' + safeState('eta.pellets.modus','-') + ') · ' + safeState('eta.pellets.leistung',0) + ' kW · heute ' + safeState('eta.pellets.ertrag_heute',0) + ' kWh\n' +
+            '  Scheitholz: ' + safeState('eta.holz.leistung',0) + ' kW · heute ' + safeState('eta.holz.ertrag_heute',0) + ' kWh\n' +
+            '  💡 ' + (safeState('eta.pellets.empfehlung','') || '-') + '\n\n' +
+
+            '☀️ Solarthermie: ' + safeState('eta.solar.vorlauf','?') + '→' + safeState('eta.solar.ruecklauf','?') +
+                ' °C · heute ' + safeState('eta.solar.ertrag_heute',0) + ' kWh\n\n' +
+
+            '⚡ PV & Batterie\n' +
+            '  ☀️ PV: ' + r0(pvW) + ' W (heute ' + safeState('solar.pv.today',0) + ' kWh)\n' +
+            '  🏠 Verbrauch: ' + r0(verbW) + ' W\n' +
+            netzZeile + '\n' +
+            batZeile + '\n\n' +
+
+            '🔌 Heizstäbe\n' +
+            '  Puffer 1: ' + safeState('solar.puffer1.watt',0) + ' W · Puffer 2: ' + safeState('solar.puffer2.watt',0) + ' W\n' +
+            '  myPV Puffer: ' + safeState('solar.heizstab.puffer_watt',0) + ' W · WW: ' + safeState('solar.heizstab.ww_watt',0) + ' W\n\n' +
+
+            wwZeile +
+
+            '📅 Morgen: ' + (safeState('wetter.forecast.morgen.max',0) || '?') + ' °C · Regen ' +
+                (safeState('wetter.forecast.morgen.regen',-1) >= 0 ? safeState('wetter.forecast.morgen.regen',0) + '%' : '?') + ' · UV ' +
+                (safeState('wetter.forecast.morgen.uv',0) || '?') + '\n' +
+            '☀️ PV Prognose: ' + (safeState('wetter.pv.prognose_morgen','') || '?') + '\n\n' +
+
+            '🧠 Entscheidung:\n' + safeState('eta.pellets.letzte_entscheidung','-')
         );
 
     // --- Forecast ---
