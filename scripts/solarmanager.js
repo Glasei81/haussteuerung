@@ -15,7 +15,9 @@ var DEVICE_IDS = {
     batterie1:        '672cded5a25fe6ead2b37ef6',
     batterie2:        '672e0993e05febbf44b19ff3',
     // Heizstab Puffer 2 (4,5kW Keller) — Shelly Pro3, 3 Relais à 1500W
-    puffer2_relais:   ['672cd496e4b1e4feca2e4b4c', '672dccfdc008a5373eadad23', '672e09ecbf2027621d498c3c']
+    // Relais-IDs per Einschalt-Test 05.07. identifiziert (switchState 0→1).
+    // (die alten IDs 672cd496/672dccfd/672e09ec waren Phasen-Messgeräte)
+    puffer2_relais:   ['6a245002c9ab1902873eb3ea', '6a244e4cf6a43ed2d9f1d7e8', '6a244e8ed54899b1914c1579']
 };
 
 var states = [
@@ -93,11 +95,8 @@ function solarmanagerLesen() {
             if (d._id === DEVICE_IDS.ww_heizstab && d.power !== undefined) {
                 setState('javascript.0.solar.heizstab.ww_watt', {val: d.power, ack: true});
             }
-            // Puffer2-Stab (Pro3): aus Schaltzustand (jedes Relais an = 1500W).
-            // ACHTUNG: die aktuellen puffer2_relais-IDs liefern power ABER keinen
-            // switchState → das sind vermutlich Phasen-Messgeräte, NICHT die Relais.
-            // Echte Relais-IDs noch identifizieren (Stab einschalten, sehen welche
-            // switchState auf 1 springt), dann DEVICE_IDS.puffer2_relais korrigieren.
+            // Puffer2-Stab (Pro3): aus Schaltzustand — jedes Relais an = 1500W
+            // (Pro3 misst nicht; Relais-IDs 05.07. per Einschalt-Test bestätigt)
             if (DEVICE_IDS.puffer2_relais.indexOf(d._id) !== -1) {
                 puffer2Watt += (d.switchState === 1 ? 1500 : 0);
             }
