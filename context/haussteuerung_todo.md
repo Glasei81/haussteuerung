@@ -333,11 +333,21 @@ Nur wenn WW separat beziffert werden soll:
   Bremse. NICHT die 24h-Hochrechnung × 365 (das wäre zu viel — tagsüber läuft die
   Zirkulation ohnehin gewollt). Über mehrere Nächte bestätigen.
   Monitor zeigt kWh in /wwnacht + Warnung (24h-Hochrechnung als Raten-Vergleich).
-- Gesamt-Wasserzähler-Historie (CSV, ganzes Haus): ~186 m³ (2024), ~164 m³ (2025).
-  ACHTUNG: Gesamtwasser, NICHT nur Warmwasser → nur grobe Obergrenze für WW.
+- WASSERSTATISTIK (Stand 05.07.2026, aus externer App-CSV):
+  - 3 „Zähler" (Hausanschluss Alt / Wasser / Kaltwasser) = NACHEINANDER derselbe
+    Hauptzähler (Zählerwechsel, alter Streit mit Wasserwerk), KEINE Unterzähler.
+    → weiterhin nur Gesamt-Hauswasser, KEIN separater Warmwasser-Anteil messbar.
+  - Aktueller Kaltwasser-Zähler (seit 12.02.2025): 01.07.2025 = 62,4 m³ →
+    05.07.2026 = 239,9 m³ ⇒ ~177 m³ in 369 Tagen = ~480 L/Tag ⇒ ~175 m³/Jahr.
+  - 7-Personen-Haushalt (inkl. Opa/Oma): ~69 L/Person/Tag = ~55 % des dt. Schnitts
+    (~125 L) → sehr sparsam (Landhaushalt, evtl. Brunnen für Garten/WC).
+  - Alter Zähler lag höher (~530 L/Tag), Verbrauch also leicht gesunken.
+  - NUTZUNG: nur als grobe Obergrenze für WW (WW ~⅓ vom Gesamt → grob ~160 L/Tag warm).
 - [ ] WW-Verbrauchsschätzung (Script c): aus warmwasser.oben/unten Nachladungen × 385 L
       → grober Tages-WW-Verbrauch, Standby (Datenblatt/Monitor) abziehen. /ww möglich.
       Gelegentliche manuelle Zählerablesung als Eichpunkt.
+- [ ] (optional, falls Stefan weiterverfolgt) Impulskopf/Optokopf am Hauswasserzähler
+      → Liter automatisch in ioBroker; erst dann lohnt eigenes Wasser-Tracking.
 
 - [ ] Abkuehlkurve aus InfluxDB berechnen (Teil obiger Methodik)
   - Grad/h Abkuehlung pro Aussentemperaturbereich
