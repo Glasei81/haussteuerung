@@ -333,6 +333,11 @@ Nur wenn WW separat beziffert werden soll:
   Bremse. NICHT die 24h-Hochrechnung × 365 (das wäre zu viel — tagsüber läuft die
   Zirkulation ohnehin gewollt). Über mehrere Nächte bestätigen.
   Monitor zeigt kWh in /wwnacht + Warnung (24h-Hochrechnung als Raten-Vergleich).
+- MASSNAHME 05.07.2026: Stefan hat die Rücklaufsicherung an der Zirkulationspumpe
+  ausgebaut + entkalkt. Wirkungskontrolle ab Nacht 05.→06.07. per /wwnacht:
+  VORHER-Baseline 1,18 °C/h (~59→49°C). ERWARTUNG bei Erfolg: Rate fällt Richtung
+  0,2–0,4 °C/h, Bewertung „normal". Bleibt sie hoch → zusätzlich Schwerkraftbremse
+  in der Zirkulationsleitung prüfen. Über mehrere Nächte beobachten.
 - WASSERSTATISTIK (Stand 05.07.2026, aus externer App-CSV):
   - 3 „Zähler" (Hausanschluss Alt / Wasser / Kaltwasser) = NACHEINANDER derselbe
     Hauptzähler (Zählerwechsel, alter Streit mit Wasserwerk), KEINE Unterzähler.
