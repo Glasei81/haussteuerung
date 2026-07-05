@@ -36,6 +36,9 @@ states.forEach(function(s) {
     });
 });
 
+// einmalig die Geräteliste ins Log (zeigt welche Felder myPV/Relais liefern)
+var apiGeloggt = false;
+
 function smGet(path, callback) {
     var options = { host: SM_IP, port: 80, path: path, method: 'GET' };
     var req = http.request(options, function(res) {
@@ -66,6 +69,14 @@ function solarmanagerLesen() {
         // positiv = Netzbezug, negativ = Einspeisung
         setState('javascript.0.solar.netz.watt',      {val: (data.cW || 0) + (data.bcW || 0) - (data.pW || 0) - (data.bdW || 0), ack: true});
 
+        // Geräteliste einmalig protokollieren, damit wir sehen was die API liefert
+        if (!apiGeloggt) {
+            apiGeloggt = true;
+            (data.devices || []).forEach(function(d) {
+                log('SM-Gerät ' + d._id + ': power=' + d.power + ' switchState=' + d.switchState + ' temp=' + d.temperature);
+            });
+        }
+
         var puffer2Watt = 0;
         (data.devices || []).forEach(function(d) {
             if (d._id === DEVICE_IDS.virt_switch) {
@@ -74,8 +85,9 @@ function solarmanagerLesen() {
             if (d._id === DEVICE_IDS.puffer_heizstab && d.temperature !== undefined) {
                 setState('javascript.0.solar.puffer.temperatur', {val: d.temperature, ack: true});
             }
+            // Pro3 misst keine Leistung → aus Schaltzustand: jedes Relais an = 1500W
             if (DEVICE_IDS.puffer2_relais.indexOf(d._id) !== -1) {
-                puffer2Watt += d.power || 0;
+                puffer2Watt += (d.switchState === 1 ? 1500 : 0);
             }
         });
         setState('javascript.0.solar.puffer2.watt', {val: puffer2Watt, ack: true});
