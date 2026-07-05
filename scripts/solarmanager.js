@@ -17,7 +17,11 @@ var DEVICE_IDS = {
     // Heizstab Puffer 2 (4,5kW Keller) — Shelly Pro3, 3 Relais à 1500W
     // Relais-IDs per Einschalt-Test 05.07. identifiziert (switchState 0→1).
     // (die alten IDs 672cd496/672dccfd/672e09ec waren Phasen-Messgeräte)
-    puffer2_relais:   ['6a245002c9ab1902873eb3ea', '6a244e4cf6a43ed2d9f1d7e8', '6a244e8ed54899b1914c1579']
+    puffer2_relais:   ['6a245002c9ab1902873eb3ea', '6a244e4cf6a43ed2d9f1d7e8', '6a244e8ed54899b1914c1579'],
+    // Heizstab Puffer 1 (3kW) — 3 Relais à 1000W
+    // KANDIDATEN: blieben im Test 05.07. durchgehend switchState=0 (Stab war aus).
+    // Bestätigen: Puffer1-Stab einschalten → müssen auf switchState=1 springen.
+    puffer1_relais:   ['69049eaa653f06178ad33aaa', '6907bc5b653f06178afab9a2', '6907bca9653f06178afabcad']
 };
 
 var states = [
@@ -30,6 +34,7 @@ var states = [
     ['solar.switch',            'Virtueller Switch',       'boolean', '',    'switch'],
     ['solar.puffer.temperatur', 'Puffer Temp myPV',       'number',  '°C',  'value.temperature'],
     ['solar.puffer2.watt',      'Heizstab Puffer2 gesamt','number',  'W',   'value.power'],
+    ['solar.puffer1.watt',      'Heizstab Puffer1 gesamt','number',  'W',   'value.power'],
     ['solar.heizstab.puffer_watt', 'Heizstab Puffer myPV', 'number', 'W',   'value.power'],
     ['solar.heizstab.ww_watt',     'Heizstab WW myPV',     'number', 'W',   'value.power'],
 ];
@@ -82,6 +87,7 @@ function solarmanagerLesen() {
         }
 
         var puffer2Watt = 0;
+        var puffer1Watt = 0;
         (data.devices || []).forEach(function(d) {
             if (d._id === DEVICE_IDS.virt_switch) {
                 setState('javascript.0.solar.switch', {val: d.switchState === 1, ack: true});
@@ -100,8 +106,13 @@ function solarmanagerLesen() {
             if (DEVICE_IDS.puffer2_relais.indexOf(d._id) !== -1) {
                 puffer2Watt += (d.switchState === 1 ? 1500 : 0);
             }
+            // Puffer1-Stab: aus Schaltzustand — jedes Relais an = 1000W
+            if (DEVICE_IDS.puffer1_relais.indexOf(d._id) !== -1) {
+                puffer1Watt += (d.switchState === 1 ? 1000 : 0);
+            }
         });
         setState('javascript.0.solar.puffer2.watt', {val: puffer2Watt, ack: true});
+        setState('javascript.0.solar.puffer1.watt', {val: puffer1Watt, ack: true});
     });
 }
 

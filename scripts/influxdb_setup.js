@@ -96,7 +96,8 @@ var DATENPUNKTE = [
     { id: 'javascript.0.solar.batterie.watt',       opt: OPT_NORMAL  },  // positiv = laden
 
     // Heizstäbe (elektrische Wärmezufuhr → Term der Hauswärmebilanz)
-    { id: 'javascript.0.solar.puffer2.watt',        opt: OPT_NORMAL  },  // Puffer2 Pro3 (Relais-IDs noch prüfen)
+    { id: 'javascript.0.solar.puffer2.watt',        opt: OPT_NORMAL  },  // Puffer2 Pro3 (Relais × 1500W)
+    { id: 'javascript.0.solar.puffer1.watt',        opt: OPT_NORMAL  },  // Puffer1 (Relais × 1000W)
     { id: 'javascript.0.solar.heizstab.puffer_watt', opt: OPT_NORMAL },  // myPV Puffer (wattgenau)
     { id: 'javascript.0.solar.heizstab.ww_watt',     opt: OPT_NORMAL },  // myPV WW (wattgenau)
 
