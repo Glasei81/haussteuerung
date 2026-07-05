@@ -325,10 +325,14 @@ Nur wenn WW separat beziffert werden soll:
      WW-Verbrauch = Nachladung − Standby-Verlust (Standby aus Schwerkraftbremsen-Monitor).
 - WW-Speicher bekannt (05.07.2026): Sieger WM 406 Sky, 385 L, Datenblatt-Standbyverlust
   2,5 kWh/24h, Zul. 95°C, NL nach DIN 11/3.
-- BEFUND: gemessener Nachtverlust 1,18 °C/h → hochgerechnet ~12–13 kWh/Tag = ~5× des
-  Datenblatt-Werts (2,5). Starker Beleg für defekte Schwerkraftbremse/Thermosiphon.
-  Monitor rechnet jetzt kWh mit (verlust_kwh) + zeigt es in /wwnacht und der Warnung.
-  → Jahresverlust grob 3000+ kWh; für Heizungsbauer belastbar quantifiziert.
+- BEFUND: gemessener Nachtverlust 1,18 °C/h → RATE ~12–13 kWh/Tag-äquivalent = ~5× des
+  Datenblatt-Standbys (2,5 kWh/24h). Starker Beleg für defekte Schwerkraftbremse.
+  ABER Vorsicht bei der Jahressumme: die hohe Rate gilt nur nachts (Zirkulation aus,
+  8,5 h). Tatsächlicher Verlust im Nachtfenster ~3–4,5 kWh, davon Mehrverlust (über
+  Normal-Standby) ~2,5–3,5 kWh/Nacht → grob 900–1300 kWh/Jahr Mehrverlust durch die
+  Bremse. NICHT die 24h-Hochrechnung × 365 (das wäre zu viel — tagsüber läuft die
+  Zirkulation ohnehin gewollt). Über mehrere Nächte bestätigen.
+  Monitor zeigt kWh in /wwnacht + Warnung (24h-Hochrechnung als Raten-Vergleich).
 - Gesamt-Wasserzähler-Historie (CSV, ganzes Haus): ~186 m³ (2024), ~164 m³ (2025).
   ACHTUNG: Gesamtwasser, NICHT nur Warmwasser → nur grobe Obergrenze für WW.
 - [ ] WW-Verbrauchsschätzung (Script c): aus warmwasser.oben/unten Nachladungen × 385 L
