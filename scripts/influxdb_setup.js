@@ -113,6 +113,7 @@ var DATENPUNKTE = [
     // Warmwasser-Nachtverlust (Schwerkraftbremsen-Diagnose, 1×/Nacht)
     { id: 'javascript.0.zirkulation.monitor.rate_nacht',       opt: OPT_COUNTER },  // °C/h Abkühlrate
     { id: 'javascript.0.zirkulation.monitor.delta_nacht',      opt: OPT_COUNTER },  // °C Abfall oben
+    { id: 'javascript.0.zirkulation.monitor.verlust_kwh',      opt: OPT_COUNTER },  // kWh/24h hochgerechnet
 
     // TRV Heizkörperthermostate EG (Sonoff TRVZB) — Heizprofil je Raum
     // Ist + Soll + Batterie direkt vom Gerät, heizt (1/0) aus trv_heizkoerper.js.

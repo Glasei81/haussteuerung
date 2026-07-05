@@ -323,7 +323,17 @@ Nur wenn WW separat beziffert werden soll:
   c) Zero-Hardware-Schätzung: aus eta.warmwasser.oben/unten (schon geloggt) die
      Nachladungen aufsummieren → grobe kWh/Tag. Braucht WW-Speichervolumen von Stefan.
      WW-Verbrauch = Nachladung − Standby-Verlust (Standby aus Schwerkraftbremsen-Monitor).
-- [ ] OFFEN Stefan: WW separater Speicher? Volumen? Dann Script (c) + /ww Telegram möglich.
+- WW-Speicher bekannt (05.07.2026): Sieger WM 406 Sky, 385 L, Datenblatt-Standbyverlust
+  2,5 kWh/24h, Zul. 95°C, NL nach DIN 11/3.
+- BEFUND: gemessener Nachtverlust 1,18 °C/h → hochgerechnet ~12–13 kWh/Tag = ~5× des
+  Datenblatt-Werts (2,5). Starker Beleg für defekte Schwerkraftbremse/Thermosiphon.
+  Monitor rechnet jetzt kWh mit (verlust_kwh) + zeigt es in /wwnacht und der Warnung.
+  → Jahresverlust grob 3000+ kWh; für Heizungsbauer belastbar quantifiziert.
+- Gesamt-Wasserzähler-Historie (CSV, ganzes Haus): ~186 m³ (2024), ~164 m³ (2025).
+  ACHTUNG: Gesamtwasser, NICHT nur Warmwasser → nur grobe Obergrenze für WW.
+- [ ] WW-Verbrauchsschätzung (Script c): aus warmwasser.oben/unten Nachladungen × 385 L
+      → grober Tages-WW-Verbrauch, Standby (Datenblatt/Monitor) abziehen. /ww möglich.
+      Gelegentliche manuelle Zählerablesung als Eichpunkt.
 
 - [ ] Abkuehlkurve aus InfluxDB berechnen (Teil obiger Methodik)
   - Grad/h Abkuehlung pro Aussentemperaturbereich

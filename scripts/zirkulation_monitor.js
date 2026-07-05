@@ -22,12 +22,18 @@ var FENSTER_H    = ((24 - START_STUNDE) + END_STUNDE) + (END_MIN - START_MIN) / 
 var SCHWELLE_ERHOEHT    = 0.5;   // darüber: leicht erhöht
 var SCHWELLE_VERDAECHTIG = 0.8;  // darüber: Schwerkraftbremse prüfen
 
+// WW-Speicher Sieger WM 406 Sky: 385 L, Hersteller-Standbyverlust 2,5 kWh/24h
+var WW_VOLUMEN_L       = 385;
+var WAERMEKAP_WH_L_K   = 1.163;  // Wh pro Liter und Kelvin
+var HERSTELLER_KWH_TAG = 2.5;    // Datenblatt-Standbyverlust
+
 createState('zirkulation.monitor.start_oben',  0,  { name: 'WW oben Snapshot 21:10',  type: 'number', unit: '°C', role: 'value.temperature', read: true, write: false });
 createState('zirkulation.monitor.start_unten', 0,  { name: 'WW unten Snapshot 21:10', type: 'number', unit: '°C', role: 'value.temperature', read: true, write: false });
 createState('zirkulation.monitor.end_oben',    0,  { name: 'WW oben Snapshot 05:40',  type: 'number', unit: '°C', role: 'value.temperature', read: true, write: false });
 createState('zirkulation.monitor.end_unten',   0,  { name: 'WW unten Snapshot 05:40', type: 'number', unit: '°C', role: 'value.temperature', read: true, write: false });
 createState('zirkulation.monitor.delta_nacht', 0,  { name: 'WW-Abfall oben (Nacht)',  type: 'number', unit: '°C', role: 'value', read: true, write: false });
 createState('zirkulation.monitor.rate_nacht',  0,  { name: 'WW-Abkühlrate oben',      type: 'number', unit: '°C/h', role: 'value', read: true, write: false });
+createState('zirkulation.monitor.verlust_kwh', 0,  { name: 'WW-Nachtverlust hochgerechnet', type: 'number', unit: 'kWh/24h', role: 'value', read: true, write: false });
 createState('zirkulation.monitor.bewertung',   '', { name: 'Bewertung Schwerkraftbremse', type: 'string', role: 'text', read: true, write: false });
 createState('zirkulation.monitor.datum',       '', { name: 'Datum letzte Messung',    type: 'string', role: 'text', read: true, write: false });
 
@@ -71,10 +77,15 @@ schedule('40 5 * * *', function() {
     var rate       = Math.round((deltaOben / FENSTER_H) * 100) / 100;
     var datum      = new Date().toLocaleDateString('de-DE');
 
+    // Energie: mittlerer Temperaturabfall (oben+unten) × Volumen, hochgerechnet auf 24h
+    var avgDelta   = (deltaUnten !== null) ? (deltaOben + deltaUnten) / 2 : deltaOben;
+    var verlustKwh = Math.round((avgDelta * WW_VOLUMEN_L * WAERMEKAP_WH_L_K / 1000) * (24 / FENSTER_H) * 10) / 10;
+
     setState('javascript.0.zirkulation.monitor.end_oben',    { val: endOben,  ack: true });
     setState('javascript.0.zirkulation.monitor.end_unten',   { val: endUnten !== null ? endUnten : 0, ack: true });
     setState('javascript.0.zirkulation.monitor.delta_nacht', { val: deltaOben, ack: true });
     setState('javascript.0.zirkulation.monitor.rate_nacht',  { val: rate,      ack: true });
+    setState('javascript.0.zirkulation.monitor.verlust_kwh', { val: verlustKwh, ack: true });
     setState('javascript.0.zirkulation.monitor.datum',       { val: datum,     ack: true });
 
     // Nachladung während der Nacht (Ladepumpe/Solar) verfälscht die Messung
@@ -106,9 +117,10 @@ schedule('40 5 * * *', function() {
         sendTo('telegram.0',
             '⚠️ Warmwasser-Nachtverlust auffällig\n\n' +
             '🌡️ oben: ' + startOben + '→' + endOben + '°C (Δ' + deltaOben + '°C)' + unterZeile + '\n' +
-            '📉 Rate: ' + rate + ' °C/h über ' + Math.round(FENSTER_H * 10) / 10 + ' h (Zirkulation aus)\n\n' +
-            'Normal wären ~0,2–0,4 °C/h reiner Dämmverlust.\n' +
-            'So schneller Verlust deutet auf eine defekte Schwerkraftbremse / Rückschlagklappe hin ' +
+            '📉 Rate: ' + rate + ' °C/h über ' + Math.round(FENSTER_H * 10) / 10 + ' h (Zirkulation aus)\n' +
+            '🔥 Hochgerechnet: ~' + verlustKwh + ' kWh/Tag (Hersteller-Standby: ' + HERSTELLER_KWH_TAG + ' kWh/Tag)\n\n' +
+            'Das ist das ~' + Math.round(verlustKwh / HERSTELLER_KWH_TAG) + '-fache des Datenblatt-Werts.\n' +
+            'Deutet auf eine defekte Schwerkraftbremse / Rückschlagklappe hin ' +
             '(Thermosiphon durch die Zirkulationsleitung trotz stehender Pumpe).'
         );
     }

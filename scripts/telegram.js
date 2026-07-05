@@ -414,6 +414,7 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
             var wwEndU   = safeState('zirkulation.monitor.end_unten',   0);
             var wwDelta  = safeState('zirkulation.monitor.delta_nacht', 0);
             var wwRate   = safeState('zirkulation.monitor.rate_nacht',  0);
+            var wwKwh    = safeState('zirkulation.monitor.verlust_kwh', null);
             var wwBew    = safeState('zirkulation.monitor.bewertung',   '-');
 
             sendTo('telegram.0',
@@ -421,8 +422,9 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
                 '   Zirkulation aus, 21:10 → 05:40\n\n' +
                 '🌡️ oben: ' + wwStartO + '→' + wwEndO + '°C (Δ' + wwDelta + '°C)\n' +
                 (wwStartU > 0 ? '🌡️ unten: ' + wwStartU + '→' + wwEndU + '°C\n' : '') +
-                '📉 Rate: ' + wwRate + ' °C/h\n\n' +
-                '📋 ' + wwBew + '\n\n' +
+                '📉 Rate: ' + wwRate + ' °C/h\n' +
+                (wwKwh !== null ? '🔥 ~' + wwKwh + ' kWh/Tag (Boiler-Standby laut Datenblatt: 2,5 kWh/Tag)\n' : '') +
+                '\n📋 ' + wwBew + '\n\n' +
                 'Richtwert: ~0,2–0,4 °C/h = normaler Dämmverlust.'
             );
         }
