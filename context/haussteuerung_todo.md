@@ -334,10 +334,13 @@ Nur wenn WW separat beziffert werden soll:
   Zirkulation ohnehin gewollt). Über mehrere Nächte bestätigen.
   Monitor zeigt kWh in /wwnacht + Warnung (24h-Hochrechnung als Raten-Vergleich).
 - MASSNAHME 05.07.2026: Stefan hat die Rücklaufsicherung an der Zirkulationspumpe
-  ausgebaut + entkalkt. Wirkungskontrolle ab Nacht 05.→06.07. per /wwnacht:
-  VORHER-Baseline 1,18 °C/h (~59→49°C). ERWARTUNG bei Erfolg: Rate fällt Richtung
-  0,2–0,4 °C/h, Bewertung „normal". Bleibt sie hoch → zusätzlich Schwerkraftbremse
-  in der Zirkulationsleitung prüfen. Über mehrere Nächte beobachten.
+  ausgebaut + entkalkt.
+- ERGEBNIS 06.07.2026 (erste Nacht danach): ERFOLG.
+  VORHER 05.07.: 59→49°C oben (Δ10), 1,18 °C/h, VERDÄCHTIG, ~12,6 kWh/Tag.
+  NACHHER 06.07.: 58→54°C oben (Δ4) / 36→30 unten, 0,47 °C/h, „normal", ~6,3 kWh/Tag.
+  → Rate mehr als halbiert, Speicher hält oben die Wärme → Thermosiphon gestoppt.
+  RESTBEFUND: kWh (6,3) noch über Datenblatt (2,5), aber real-world-nah; über
+  weitere Nächte beobachten ob es sich noch tiefer einpendelt.
 - WASSERSTATISTIK (Stand 05.07.2026, aus externer App-CSV):
   - 3 „Zähler" (Hausanschluss Alt / Wasser / Kaltwasser) = NACHEINANDER derselbe
     Hauptzähler (Zählerwechsel, alter Streit mit Wasserwerk), KEINE Unterzähler.
