@@ -341,6 +341,12 @@ Nur wenn WW separat beziffert werden soll:
   → Rate mehr als halbiert, Speicher hält oben die Wärme → Thermosiphon gestoppt.
   RESTBEFUND: kWh (6,3) noch über Datenblatt (2,5), aber real-world-nah; über
   weitere Nächte beobachten ob es sich noch tiefer einpendelt.
+- INTERPRETATIONS-CAVEAT (Hinweis Stefan): der 2-Schnappschuss-Monitor kann eine
+  nächtliche WW-Zapfung NICHT von Standby-Verlust unterscheiden → Zapfnächte sehen
+  schlechter aus. Zapfung macht Verlust nur größer, nie kleiner → wahrer Standby =
+  NIEDRIGSTE Nacht über mehrere Wochen (der „Boden"). Einzelnächte nicht überbewerten.
+  (Signatur einer Zapfung: unten fällt mehr als oben, da Kaltwasser unten nachströmt.)
+  Fenster bewusst NICHT auf tiefe Nacht verlegt — Stefan will es so lassen.
 - WASSERSTATISTIK (Stand 05.07.2026, aus externer App-CSV):
   - 3 „Zähler" (Hausanschluss Alt / Wasser / Kaltwasser) = NACHEINANDER derselbe
     Hauptzähler (Zählerwechsel, alter Streit mit Wasserwerk), KEINE Unterzähler.
