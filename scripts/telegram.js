@@ -440,6 +440,7 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
             '/wetter — Regen & Temperatur letzte 7 Tage\n' +
             '/wind — Windrose & stärkste Böe (30 Tage)\n' +
             '/wwnacht — Warmwasser-Nachtverlust (Schwerkraftbremse)\n' +
+            '/zaehler — Wasserzähler ablesen (Haupt Kalt Warm)\n' +
             '/klima — Klimaanlage Status\n' +
             '/klima ein — Klimaanlage einschalten\n' +
             '/klima aus — Klimaanlage ausschalten\n' +

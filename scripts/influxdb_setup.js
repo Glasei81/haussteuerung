@@ -115,6 +115,15 @@ var DATENPUNKTE = [
     { id: 'javascript.0.zirkulation.monitor.delta_nacht',      opt: OPT_COUNTER },  // °C Abfall oben
     { id: 'javascript.0.zirkulation.monitor.verlust_kwh',      opt: OPT_COUNTER },  // kWh/24h hochgerechnet
 
+    // Wasserzähler (manuelle Ablesung alle 2 Wochen via /zaehler)
+    { id: 'javascript.0.wasser.haupt',          opt: OPT_COUNTER },  // m³ Hauptzähler (kumuliert)
+    { id: 'javascript.0.wasser.kalt_familie',   opt: OPT_COUNTER },  // m³ Kalt Familie 1.OG
+    { id: 'javascript.0.wasser.warm_familie',   opt: OPT_COUNTER },  // m³ Warm Familie 1.OG
+    { id: 'javascript.0.wasser.familie_lpt',    opt: OPT_COUNTER },  // L/Tag Familie
+    { id: 'javascript.0.wasser.warm_lpt',       opt: OPT_COUNTER },  // L/Tag Warmwasser
+    { id: 'javascript.0.wasser.eg_lpt',         opt: OPT_COUNTER },  // L/Tag EG (Eltern+Pool)
+    { id: 'javascript.0.wasser.ww_kwh_tag',     opt: OPT_COUNTER },  // kWh/Tag WW-Energie Familie
+
     // TRV Heizkörperthermostate EG (Sonoff TRVZB) — Heizprofil je Raum
     // Ist + Soll + Batterie direkt vom Gerät, heizt (1/0) aus trv_heizkoerper.js.
     // Kein pi_heating_demand am TRVZB → running_state als Heizquote-Proxy.

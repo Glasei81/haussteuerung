@@ -360,8 +360,16 @@ Nur wenn WW separat beziffert werden soll:
 - [ ] WW-Verbrauchsschätzung (Script c): aus warmwasser.oben/unten Nachladungen × 385 L
       → grober Tages-WW-Verbrauch, Standby (Datenblatt/Monitor) abziehen. /ww möglich.
       Gelegentliche manuelle Zählerablesung als Eichpunkt.
-- [ ] (optional, falls Stefan weiterverfolgt) Impulskopf/Optokopf am Hauswasserzähler
-      → Liter automatisch in ioBroker; erst dann lohnt eigenes Wasser-Tracking.
+- NEU 07.07.2026: es GIBT doch Unterzähler! Familie 1.OG (Verena+Stefan+Kinder, 5 Pers.)
+  hat eigenen KALT- und WARM-Wasserzähler. Damit ist WW echt MESSBAR (nicht nur schätzen).
+  - Historie (22.02.25→31.01.26): Warm 26,7 m³ (~78 L/Tag), Kalt 52,9 m³ (~154 L/Tag),
+    WW-Anteil ~34 %, ~46 L/Person/Tag → WW-Energie Familie ~3,4 kWh/Tag ≈ ~1250 kWh/Jahr.
+  - EG (Eltern + Pool etc.) = Hauptzähler − Familie (kein Pro-Kopf, Pool inkl.).
+- wasser_zaehler.js (NEU): /zaehler <Haupt> <Kalt> <Warm> speichert Stände, rechnet
+  Verbrauch seit letzter Ablesung (Familie/EG/WW-kWh/Person), loggt in InfluxDB.
+  Erinnerung 1. + 15. jeden Monats. Baseline 07.07.2026: Haupt 241,151 / Kalt 784,743 /
+  Warm 455,608 m³. WW-Energie mit Annahme ΔT 38K (WW 50° − Kalt 12°).
+- [ ] (optional) Impulskopf/Optokopf an den Zählern → automatisch statt manuell.
 
 - [ ] Abkuehlkurve aus InfluxDB berechnen (Teil obiger Methodik)
   - Grad/h Abkuehlung pro Aussentemperaturbereich
