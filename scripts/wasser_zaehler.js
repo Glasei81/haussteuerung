@@ -34,22 +34,26 @@ createState('wasser.familie_lpt',  0,  { name: 'Familie L/Tag',             type
 createState('wasser.warm_lpt',     0,  { name: 'Warmwasser L/Tag',          type: 'number', unit: 'L/Tag',   role: 'value', read: true, write: false });
 createState('wasser.eg_lpt',       0,  { name: 'EG L/Tag',                  type: 'number', unit: 'L/Tag',   role: 'value', read: true, write: false });
 createState('wasser.ww_kwh_tag',   0,  { name: 'WW-Energie Familie kWh/Tag',type: 'number', unit: 'kWh/Tag', role: 'value', read: true, write: false });
+createState('wasser.seed_done',    false, { name: 'Wasser Baseline geseedet', type: 'boolean', role: 'indicator', read: true, write: true });
 
 function safe(id, fb) {
     try { var s = getState(id); if (s && s.val !== null && s.val !== undefined) return s.val; } catch(e) {}
     return fb;
 }
 
-// Einmalig die Baseline 31.01.2026 setzen, solange noch keine echte Ablesung da ist.
+// Baseline 31.01.2026 GENAU EINMAL setzen (per seed_done-Flag, nicht per ts).
+// Überschreibt auch eine evtl. zu früh eingegebene "Startwert"-Ablesung, damit
+// die erste echte /zaehler-Ablesung sicher das ganze Halbjahr 2026 verrechnet.
 // setTimeout, damit createState oben sicher durch ist.
 setTimeout(function() {
-    if (safe('javascript.0.wasser.ts', 0) === 0) {
-        setState('javascript.0.wasser.haupt',        { val: SEED_HAUPT, ack: true });
-        setState('javascript.0.wasser.kalt_familie', { val: SEED_KALT,  ack: true });
-        setState('javascript.0.wasser.warm_familie', { val: SEED_WARM,  ack: true });
-        setState('javascript.0.wasser.ts',           { val: SEED_TS,    ack: true });
-        setState('javascript.0.wasser.datum',        { val: '31.1.2026', ack: true });
-        log('Wasserzähler: Baseline 31.01.2026 geseedet (Haupt ' + SEED_HAUPT + ' / Kalt ' + SEED_KALT + ' / Warm ' + SEED_WARM + ')');
+    if (safe('javascript.0.wasser.seed_done', false) !== true) {
+        setState('javascript.0.wasser.haupt',        { val: SEED_HAUPT,   ack: true });
+        setState('javascript.0.wasser.kalt_familie', { val: SEED_KALT,    ack: true });
+        setState('javascript.0.wasser.warm_familie', { val: SEED_WARM,    ack: true });
+        setState('javascript.0.wasser.ts',           { val: SEED_TS,      ack: true });
+        setState('javascript.0.wasser.datum',        { val: '31.1.2026',  ack: true });
+        setState('javascript.0.wasser.seed_done',    { val: true,         ack: true });
+        log('Wasserzähler: Baseline 31.01.2026 einmalig geseedet (Haupt ' + SEED_HAUPT + ' / Kalt ' + SEED_KALT + ' / Warm ' + SEED_WARM + ')');
     }
 }, 3000);
 
