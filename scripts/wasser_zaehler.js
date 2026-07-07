@@ -17,6 +17,14 @@ var FAMILIE_PERSONEN  = 5;
 var DELTA_T_K         = 38;      // Annahme für WW-Energie: WW ~50°C − Kalt ~12°C
 var WAERMEKAP_WH_L_K  = 1.163;   // Wh pro Liter und Kelvin
 
+// Baseline 31.01.2026 aus den historischen Ablesungen (Haupt = früherer
+// "Kaltwasser"-Hauptzähler). Wird einmalig geseedet, damit die erste /zaehler-
+// Ablesung (07.07.) direkt das ganze Halbjahr 2026 verrechnet.
+var SEED_TS    = 1769817600000;  // 31.01.2026 00:00 UTC
+var SEED_HAUPT = 156.602;
+var SEED_KALT  = 756.693;
+var SEED_WARM  = 441.918;
+
 createState('wasser.haupt',        0,  { name: 'Wasser Hauptzähler',        type: 'number', unit: 'm³', role: 'value', read: true, write: false });
 createState('wasser.kalt_familie', 0,  { name: 'Wasser Kalt Familie 1.OG',  type: 'number', unit: 'm³', role: 'value', read: true, write: false });
 createState('wasser.warm_familie', 0,  { name: 'Wasser Warm Familie 1.OG',  type: 'number', unit: 'm³', role: 'value', read: true, write: false });
@@ -31,6 +39,19 @@ function safe(id, fb) {
     try { var s = getState(id); if (s && s.val !== null && s.val !== undefined) return s.val; } catch(e) {}
     return fb;
 }
+
+// Einmalig die Baseline 31.01.2026 setzen, solange noch keine echte Ablesung da ist.
+// setTimeout, damit createState oben sicher durch ist.
+setTimeout(function() {
+    if (safe('javascript.0.wasser.ts', 0) === 0) {
+        setState('javascript.0.wasser.haupt',        { val: SEED_HAUPT, ack: true });
+        setState('javascript.0.wasser.kalt_familie', { val: SEED_KALT,  ack: true });
+        setState('javascript.0.wasser.warm_familie', { val: SEED_WARM,  ack: true });
+        setState('javascript.0.wasser.ts',           { val: SEED_TS,    ack: true });
+        setState('javascript.0.wasser.datum',        { val: '31.1.2026', ack: true });
+        log('Wasserzähler: Baseline 31.01.2026 geseedet (Haupt ' + SEED_HAUPT + ' / Kalt ' + SEED_KALT + ' / Warm ' + SEED_WARM + ')');
+    }
+}, 3000);
 
 function ablesung(hauptNeu, kaltNeu, warmNeu) {
     var jetzt = Date.now();
