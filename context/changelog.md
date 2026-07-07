@@ -115,6 +115,32 @@ Chronologische Entwicklungshistorie. Jede Session mit Datum und Inhalt.
   Neu: Energie-Sperre entprellt (erst nach 2 Zyklen), Sperren greifen erst nach 20 Min
   Mindestlaufzeit, jede Nicht-Komfort-Abschaltung setzt 1h Pause → kein Kurztakten mehr.
 
+## 03.07.2026 — TRV #1, Windrichtung, korrigierte Außentemp
+- **TRV „Gang EG"** (Sonoff TRVZB) angelernt + geloggt: Ist/Soll/Batterie direkt,
+  heizt (1/0) aus neuem trv_heizkoerper.js (running_state gespiegelt, da kein
+  pi_heating_demand am TRVZB). Skaliert über TRVS[]-Array auf die 4 geplanten.
+- **Korrigierte Außentemperatur**: Median aus ETA/Nord/Süd/Wetterstation
+  (wetter.aktuell.temperatur_korrigiert), Süd-Sensor nach Tausch wieder dabei.
+- **Windrichtung** ins InfluxDB-Logging (Basis für Windrad-Analyse, Erler Wind SO).
+
+## 05.-07.07.2026 — Heizstäbe komplett, /status-Cockpit, Schwerkraftbremse, Wasserzähler
+- **Elektrische Wärmezufuhr vollständig erfasst** (Wärmebilanz-Terme komplett):
+  - myPV Puffer + WW: Leistung wattgenau aus Solarmanager-API ausgelesen
+  - Puffer 2 (Pro3) + Puffer 1: Leistung aus Relais-Schaltzustand × 1500/1000 W
+    (Relais-IDs per Einschalt-Test identifiziert; alte IDs waren Phasen-Messgeräte)
+  - alle in InfluxDB
+- **/status stark erweitert** zum vollen Cockpit (Puffer 1+2, WW, Heizkreise, Kessel,
+  Solarthermie, PV/Batterie, alle Heizstäbe, WW-Nacht, Forecast).
+- **/wind** Telegram-Windrose (8 Sektoren + Ø + stärkste Böe heute).
+- **Schwerkraftbremse WW — diagnostiziert UND repariert**:
+  - Nachtmonitor (21:10→05:40, 385L Sieger-Boiler) maß 1,18 °C/h ≈ 5× Datenblatt-Standby
+  - Stefan hat Rücklaufsicherung an Zirkulationspumpe ausgebaut + entkalkt
+  - ERGEBNIS: Rate auf 0,47 °C/h halbiert, Bewertung „normal" → Erfolg messbar belegt
+    (~800–1300 kWh/Jahr Mehrverlust beseitigt). /wwnacht zeigt jetzt auch kWh.
+- **Wasserzähler-Tool** (wasser_zaehler.js): /zaehler <Haupt> <Kalt> <Warm>, Erinnerung
+  1./15., InfluxDB. Familie 1.OG hat echte Kalt+Warm-Unterzähler → WW messbar
+  (~605 kWh Halbjahr 2026). Baseline 31.01.2026 geseedet → 2026 rückwirkend drin.
+
 ---
 
 ## Offen / Nächste Sessions
