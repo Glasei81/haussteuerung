@@ -224,12 +224,18 @@ function etaPelletsSteuerung() {
     var modus = safeState('eta.pellets.modus', 'auto');
 
     // --- Manuelle Modi: einzige verbleibende Schreibzugriffe ---
+    // Entscheidungstext hier direkt setzen — etaSchreiben() bricht bei
+    // unverändertem Sperrzustand ab und würde ihn sonst nie aktualisieren.
     if (modus === 'manuell_ein') {
+        setState('javascript.0.eta.pellets.letzte_entscheidung',
+            { val: 'Manuell FREIGEGEBEN — Automatik greift nicht ein', ack: true });
         etaSchreiben(false, 'Manuell per Telegram freigegeben');
         return;
     }
 
     if (modus === 'manuell_aus') {
+        setState('javascript.0.eta.pellets.letzte_entscheidung',
+            { val: 'Manuell GESPERRT — Automatik greift nicht ein', ack: true });
         etaSchreiben(true, 'Manuell per Telegram gesperrt');
         return;
     }
