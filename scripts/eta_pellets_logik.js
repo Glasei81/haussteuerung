@@ -144,7 +144,7 @@ function etaSchreiben(sperren, grund) {
                 var msg =
                     '🔥 ETA Pellets ' + aktion +
                     '\nGrund: ' + grund +
-                    '\nPuffer: ' + safeState('eta.puffer.oben', '?') + '°C' +
+                    '\nPuffer: ' + safeState('eta.puffer.fuehler1', '?') + '°C' +
                     '\nWarmwasser: ' + safeState('eta.warmwasser.oben', '?') + '°C' +
                     '\nAußen: ' + safeState('eta.aussen.temperatur', '?') + '°C' +
                     '\nPV: ' + safeState('solar.pv.watt', '?') + 'W';
@@ -208,7 +208,7 @@ function empfehlungSenden(sperren, grund) {
     var msg =
         (sperren ? '💡 Empfehlung: Pellets SPERREN' : '🔥 Empfehlung: Pellets FREIGEBEN') +
         '\nGrund: ' + grund +
-        '\nPuffer: ' + safeState('eta.puffer.oben', '?') + '°C' +
+        '\nPuffer: ' + safeState('eta.puffer.fuehler1', '?') + '°C' +
         '\nWarmwasser: ' + safeState('eta.warmwasser.oben', '?') + '°C' +
         '\nAußen: ' + safeState('eta.aussen.temperatur', '?') + '°C' +
         '\nPV: ' + safeState('solar.pv.watt', '?') + 'W' +
@@ -243,7 +243,7 @@ function etaPelletsSteuerung() {
         return;
     }
 
-    var puffer = safeState('eta.puffer.oben', 99);
+    var puffer = safeState('eta.puffer.fuehler1', 99);
     var ww = safeState('eta.warmwasser.oben', 99);
     var aussen = safeState('eta.aussen.temperatur', 0);
 
@@ -252,7 +252,7 @@ function etaPelletsSteuerung() {
 
     // Bei alten Daten keine Empfehlung abgeben
     var kritischeDatenAlt =
-        datenZuAlt('eta.puffer.oben') ||
+        datenZuAlt('eta.puffer.fuehler1') ||
         datenZuAlt('eta.warmwasser.oben') ||
         datenZuAlt('solar.switch');
 
@@ -283,11 +283,11 @@ function etaPelletsSteuerung() {
 
             sperren = true;
             grund =
-                'Puffer noch warm (' +
+                'Puffer noch warm: ' +
                 puffer +
-                '°C >= ' +
+                '°C (über Freigabe-Schwelle ' +
                 CONFIG.PUFFER_FREIGABE_AB +
-                '°C)';
+                '°C) → keine Pellets nötig';
         }
 
     } else {
@@ -296,11 +296,11 @@ function etaPelletsSteuerung() {
 
             sperren = true;
             grund =
-                'Puffer voll (' +
+                'Puffer voll: ' +
                 puffer +
-                '°C >= ' +
+                '°C (über Sperr-Schwelle ' +
                 CONFIG.PUFFER_SPERRE_AB +
-                '°C)';
+                '°C) → keine Pellets nötig';
         }
     }
 
