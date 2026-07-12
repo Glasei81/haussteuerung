@@ -375,11 +375,14 @@ Nur wenn WW separat beziffert werden soll:
   niedrig (~46 L/P/Tag) und EG zu hoch. AEG-Handbuch: 45–85 L/Waschgang
   (Baumwolle ~80, Pflegeleicht 50, Fein 45, Wolle 65). AEG-App kann nur
   Betriebsstunden (nicht Liter). Grobe Korrektur ~150 L/Tag (2×75).
-- ENTSCHEIDUNG Stefan: eigenen (ungeeichten) Kaltwasserzähler für WM + Pool
-  einbauen (~27€, 25mm Außengewinde). Dann kein Schätzen mehr.
-  - [ ] wenn eingebaut: /zaehler auf 4. Wert erweitern (Haupt Kalt Warm WMPool)
-        → Familie = Kalt+Warm, WM+Pool = eigener Topf, EG = Haupt − Familie − WMPool.
-        Pool-Füllung = große Sprünge (saisonal), WM = stetig → gut trennbar.
+- ENTSCHEIDUNG Stefan: ZWEI ungeeichte Kaltwasserzähler (~27€/Stk, 25mm) —
+  je einer für Waschmaschine UND Pool getrennt. WM ist das Wichtigste, Pool extra
+  für Entscheidung Brunnenwasser(+Chemie) vs. Leitung(ohne Chemie).
+  - [ ] wenn eingebaut: /zaehler auf 5 Werte (Haupt Kalt Warm WM Pool):
+        Familie-Wohnung = Kalt+Warm (+WM = Familien-Waschwasser),
+        Pool = eigener Topf (Leitungs-Anteil, für Kostenvergleich),
+        EG-Wohnung = Haupt − Familie − WM − Pool (jetzt ehrlich).
+        HINWEIS: Pool-Zähler erfasst nur LEITUNGS-Füllung, nicht Brunnen.
 
 - [ ] Abkuehlkurve aus InfluxDB berechnen (Teil obiger Methodik)
   - Grad/h Abkuehlung pro Aussentemperaturbereich
