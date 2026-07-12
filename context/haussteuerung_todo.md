@@ -370,15 +370,16 @@ Nur wenn WW separat beziffert werden soll:
   Erinnerung 1. + 15. jeden Monats. Baseline 07.07.2026: Haupt 241,151 / Kalt 784,743 /
   Warm 455,608 m³. WW-Energie mit Annahme ΔT 38K (WW 50° − Kalt 12°).
 - [ ] (optional) Impulskopf/Optokopf an den Zählern → automatisch statt manuell.
-- HAUPTZÄHLER AUTOMATISCH (Datenblatt 09.07.2026): Diehl HYDRUS, hat Impulsausgänge
-  (Open-Drain, Puls1+Puls2) + Funk 868 MHz. Auslese-Optionen:
-  1. IMPULSE (empfohlen): Pulskabel → ESP8266/ESP32 + ESPHome pulse_counter → MQTT
-     → ioBroker wasser.haupt. Braucht: Kabel am Zähler + IMPULSWERTIGKEIT (L/Impuls).
-     Verdrahtung: Puls(+) an GPIO mit Pull-up, Braun(−) GND (Open-Drain zieht auf Masse).
-  2. FUNK wM-Bus 868 MHz: ESP32+CC1101 / wmbusmeters → echter Stand drahtlos, ABER
-     Diehl meist AES-verschlüsselt → AES-Schlüssel vom Wasserwerk nötig.
-  3. M-Bus verkabelt: M-Bus-Master USB → echter Stand.
-  - [ ] OFFEN Stefan: Kabel am Zähler (Puls/M-Bus) oder nur Funkmodul? + Impulswertigkeit
+- HAUPTZÄHLER AUTOMATISCH (Zähler-Foto 09.07.2026): Diehl HYDRUS Type 173,
+  Q3 4 m³/h, DN20, R160, "868 E" (Funkvariante, verschlüsselt), SN 3124653
+  (8 DME76 8527 2487). KEIN Kabel dran → KEIN Impulsausgang! → Pulskopf/ESP-Puls
+  fällt weg. Kommuniziert per Funk.
+  WEG: Funk-Auslesung (wireless M-Bus 868 MHz):
+  - ESP32 + CC1101 (~10€) mit wmbusmeters/ESPHome → empfängt Telegramm, echter
+    m³-Stand → MQTT → ioBroker wasser.haupt. Keine Verkabelung am Zähler.
+  - HAKEN: "E" = AES-verschlüsselt → AES-SCHLÜSSEL für SN 3124653 nötig.
+  - [ ] OFFEN Stefan: bei Wasserwerk/Diehl AES-Schlüssel erfragen (SN 3124653);
+        alternativ optisches Auslesemodul. (Impulskopf passt NICHT — kein Pulsausgang.)
   - Ziel: ESP meldet wasser.haupt automatisch per MQTT → /zaehler nur noch für
     manuelle Unterzähler (Kalt/Warm/WM/Pool). MQTT-Adapter dafür nötig (prüfen ob da).
 - WASCHMASCHINE-KORREKTUR (07.07.2026): WM (OG, 2×/Tag) hängt NICHT am Familien-
