@@ -370,6 +370,16 @@ Nur wenn WW separat beziffert werden soll:
   Erinnerung 1. + 15. jeden Monats. Baseline 07.07.2026: Haupt 241,151 / Kalt 784,743 /
   Warm 455,608 m³. WW-Energie mit Annahme ΔT 38K (WW 50° − Kalt 12°).
 - [ ] (optional) Impulskopf/Optokopf an den Zählern → automatisch statt manuell.
+- WASCHMASCHINE-KORREKTUR (07.07.2026): WM (OG, 2×/Tag) hängt NICHT am Familien-
+  Kaltzähler → läuft über Haupt und landet fälschlich im EG-Topf. Macht Familie zu
+  niedrig (~46 L/P/Tag) und EG zu hoch. AEG-Handbuch: 45–85 L/Waschgang
+  (Baumwolle ~80, Pflegeleicht 50, Fein 45, Wolle 65). AEG-App kann nur
+  Betriebsstunden (nicht Liter). Grobe Korrektur ~150 L/Tag (2×75).
+- ENTSCHEIDUNG Stefan: eigenen (ungeeichten) Kaltwasserzähler für WM + Pool
+  einbauen (~27€, 25mm Außengewinde). Dann kein Schätzen mehr.
+  - [ ] wenn eingebaut: /zaehler auf 4. Wert erweitern (Haupt Kalt Warm WMPool)
+        → Familie = Kalt+Warm, WM+Pool = eigener Topf, EG = Haupt − Familie − WMPool.
+        Pool-Füllung = große Sprünge (saisonal), WM = stetig → gut trennbar.
 
 - [ ] Abkuehlkurve aus InfluxDB berechnen (Teil obiger Methodik)
   - Grad/h Abkuehlung pro Aussentemperaturbereich
