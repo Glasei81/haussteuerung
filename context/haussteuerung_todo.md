@@ -395,6 +395,10 @@ Nur wenn WW separat beziffert werden soll:
         Pool = eigener Topf (Leitungs-Anteil, für Kostenvergleich),
         EG-Wohnung = Haupt − Familie − WM − Pool (jetzt ehrlich).
         HINWEIS: Pool-Zähler erfasst nur LEITUNGS-Füllung, nicht Brunnen.
+  - STATUS: 2 Zähler besorgt (Obi, 40€) + 2 Muffen (6€) = ~46€. Zähler sind ½" nominal
+    ABER ¾" Anschlussgewinde (~26mm) → ¾"-Verschraubung/Doppelmuffe IG als Bindeglied.
+    Auslauf ¾" passt direkt an WM-Schlauch + Gardena. Einbau geplant Mittwoch.
+    Beim Einbau: Durchflusspfeil Richtung WM/Gardena beachten.
 
 - [ ] Abkuehlkurve aus InfluxDB berechnen (Teil obiger Methodik)
   - Grad/h Abkuehlung pro Aussentemperaturbereich
