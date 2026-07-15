@@ -397,6 +397,9 @@ Nur wenn WW separat beziffert werden soll:
         Getrennte Baseline WM/Pool (ts_wmpool, wmpool_seed_done), Raten je Fenster.
         Werksstände: WM 0,1775 m³ / Pool 0,292 m³. InfluxDB + /status-Block + /hilfe.
         HINWEIS: Pool-Zähler erfasst nur LEITUNGS-Füllung, nicht Brunnen.
+        BESTÄTIGT Stefan 15.07.2026: KEINE Überschneidung — jeder Zähler eigener
+        Strang, WM + Pool hängen direkt am Wasserhahn. → EG = Rest ist ehrlich,
+        kein Doppelzählen.
   - STATUS: 2 Zähler besorgt (Obi, 40€) + 2 Muffen (6€) = ~46€. Zähler sind ½" nominal
     ABER ¾" Anschlussgewinde (~26mm) → ¾"-Verschraubung/Doppelmuffe IG als Bindeglied.
     Auslauf ¾" passt direkt an WM-Schlauch + Gardena. Eingebaut Mittwoch 15.07.2026.
