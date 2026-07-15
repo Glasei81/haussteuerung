@@ -195,12 +195,12 @@ function verbrauch() {
         '📊 Verbrauch gesamt\n' +
         '   seit 31.01.2026 (' + tage + ' Tage)\n\n' +
         '🏠 Familie 1. OG (' + FAMILIE_PERSONEN + ' Pers.)\n' +
-        '  Kalt ' + kalt + ' · Warm ' + warm + (wm > 0 ? ' · WM ' + wm : '') + ' m³\n' +
         '  Gesamt: ' + fam + ' m³ → ' + famLpt + ' L/Tag (' + proPers + ' L/Pers.)\n' +
-        '  🔥 Warmwasser: ' + warm + ' m³ → ' + wwLpt + ' L/Tag ≈ ' + wwKwh + ' kWh\n\n' +
+        '  🚰 Kalt: ' + kalt + ' m³\n' +
+        '  🔥 Warmwasser: ' + warm + ' m³ → ' + wwLpt + ' L/Tag ≈ ' + wwKwh + ' kWh\n' +
+        '  🧺 Waschen: ' + wm + ' m³ → ' + wmLpt + ' L/Tag (seit Einbau ' + tageWm + ' T)\n\n' +
         '🏊 Pool/Werkstatt (seit Einbau, ' + tageWm + ' T)\n' +
-        '  ' + pool + ' m³ → ' + poolLpt + ' L/Tag\n' +
-        (wm > 0 ? '  Waschmaschine: ' + wm + ' m³ → ' + wmLpt + ' L/Tag\n' : '') + '\n' +
+        '  ' + pool + ' m³ → ' + poolLpt + ' L/Tag\n\n' +
         '🏡 EG (Eltern)\n' +
         '  ' + eg + ' m³ → ' + egLpt + ' L/Tag\n\n' +
         '🚰 Haus gesamt (Hauptzähler)\n' +
