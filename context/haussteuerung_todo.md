@@ -390,15 +390,16 @@ Nur wenn WW separat beziffert werden soll:
 - ENTSCHEIDUNG Stefan: ZWEI ungeeichte Kaltwasserzähler (~27€/Stk, 25mm) —
   je einer für Waschmaschine UND Pool getrennt. WM ist das Wichtigste, Pool extra
   für Entscheidung Brunnenwasser(+Chemie) vs. Leitung(ohne Chemie).
-  - [ ] wenn eingebaut: /zaehler auf 5 Werte (Haupt Kalt Warm WM Pool):
-        Familie-Wohnung = Kalt+Warm (+WM = Familien-Waschwasser),
+  - [x] ERLEDIGT 15.07.2026: /zaehler auf 5 Werte (Haupt Kalt Warm WM Pool):
+        Familie-Wohnung = Kalt+Warm+WM (Familien-Waschwasser),
         Pool = eigener Topf (Leitungs-Anteil, für Kostenvergleich),
-        EG-Wohnung = Haupt − Familie − WM − Pool (jetzt ehrlich).
+        EG-Wohnung = Haupt − Familie − Pool (jetzt ehrlich).
+        Getrennte Baseline WM/Pool (ts_wmpool, wmpool_seed_done), Raten je Fenster.
+        Werksstände: WM 0,1775 m³ / Pool 0,292 m³. InfluxDB + /status-Block + /hilfe.
         HINWEIS: Pool-Zähler erfasst nur LEITUNGS-Füllung, nicht Brunnen.
   - STATUS: 2 Zähler besorgt (Obi, 40€) + 2 Muffen (6€) = ~46€. Zähler sind ½" nominal
     ABER ¾" Anschlussgewinde (~26mm) → ¾"-Verschraubung/Doppelmuffe IG als Bindeglied.
-    Auslauf ¾" passt direkt an WM-Schlauch + Gardena. Einbau geplant Mittwoch.
-    Beim Einbau: Durchflusspfeil Richtung WM/Gardena beachten.
+    Auslauf ¾" passt direkt an WM-Schlauch + Gardena. Eingebaut Mittwoch 15.07.2026.
 
 - [ ] Abkuehlkurve aus InfluxDB berechnen (Teil obiger Methodik)
   - Grad/h Abkuehlung pro Aussentemperaturbereich

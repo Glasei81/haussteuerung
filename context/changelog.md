@@ -141,6 +141,23 @@ Chronologische Entwicklungshistorie. Jede Session mit Datum und Inhalt.
   1./15., InfluxDB. Familie 1.OG hat echte Kalt+Warm-Unterzähler → WW messbar
   (~605 kWh Halbjahr 2026). Baseline 31.01.2026 geseedet → 2026 rückwirkend drin.
 
+## 15.07.2026 — Wasserzähler auf 5 Werte (Waschmaschine + Pool/Werkstatt)
+- **Zwei neue Unterzähler eingebaut** (OBI, zusammen 40 € + 6 € Muffen):
+  - Waschmaschine — Werksstand 0,1775 m³
+  - Pool/Werkstatt — Werksstand 0,292 m³
+- **wasser_zaehler.js auf 5 Werte erweitert**: /zaehler <Haupt> <Kalt> <Warm> <WM> <Pool>
+  (3 Werte gehen weiter, WM/Pool bleiben dann stehen). Neue Aufteilung:
+  - Familie 1.OG = Kalt + Warm + Waschmaschine
+  - Pool/Werkstatt = eigener Topf (Poolbefüllung, Gartenschlauch, Werkstatt)
+  - EG (Eltern) = Haupt − Familie − Pool
+- **Getrennte Baseline** für WM/Pool: Werksstand + eigener Zeitstempel (ts_wmpool),
+  einmalig per wmpool_seed_done geseedet. Raten (L/Tag) werden je Zähler über das
+  eigene Fenster gerechnet → nur die erste Ablesung leicht verzerrt (von Stefan
+  akzeptiert), ab der 2. Ablesung alle Fenster gleich = sauber.
+- Neue States wasser.wm / wasser.pool / wm_lpt / pool_lpt in InfluxDB.
+- /status-Cockpit zeigt jetzt einen Wasser-Block (Familie/WW/WM/Pool/EG L/Tag).
+- /hilfe + 2-Wochen-Erinnerung auf 5 Werte aktualisiert.
+
 ---
 
 ## Offen / Nächste Sessions

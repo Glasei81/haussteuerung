@@ -113,6 +113,12 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
 
             wwZeile +
 
+            '💧 Wasser (letzte Ablesung ' + (safeState('wasser.datum','-')) + ')\n' +
+            '  Familie: ' + safeState('wasser.familie_lpt',0) + ' L/Tag · WW ' + safeState('wasser.warm_lpt',0) +
+                ' L/Tag ≈ ' + safeState('wasser.ww_kwh_tag',0) + ' kWh/Tag\n' +
+            '  WM: ' + safeState('wasser.wm_lpt',0) + ' · Pool: ' + safeState('wasser.pool_lpt',0) +
+                ' · EG: ' + safeState('wasser.eg_lpt',0) + ' L/Tag\n\n' +
+
             '📅 Morgen: ' + (safeState('wetter.forecast.morgen.max',0) || '?') + ' °C · Regen ' +
                 (safeState('wetter.forecast.morgen.regen',-1) >= 0 ? safeState('wetter.forecast.morgen.regen',0) + '%' : '?') + ' · UV ' +
                 (safeState('wetter.forecast.morgen.uv',0) || '?') + '\n' +
@@ -440,7 +446,7 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
             '/wetter — Regen & Temperatur letzte 7 Tage\n' +
             '/wind — Windrose & stärkste Böe (30 Tage)\n' +
             '/wwnacht — Warmwasser-Nachtverlust (Schwerkraftbremse)\n' +
-            '/zaehler — Wasserzähler ablesen (Haupt Kalt Warm)\n' +
+            '/zaehler — Wasserzähler ablesen (Haupt Kalt Warm WM Pool)\n' +
             '/klima — Klimaanlage Status\n' +
             '/klima ein — Klimaanlage einschalten\n' +
             '/klima aus — Klimaanlage ausschalten\n' +

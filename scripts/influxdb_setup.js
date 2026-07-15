@@ -119,9 +119,13 @@ var DATENPUNKTE = [
     { id: 'javascript.0.wasser.haupt',          opt: OPT_COUNTER },  // m³ Hauptzähler (kumuliert)
     { id: 'javascript.0.wasser.kalt_familie',   opt: OPT_COUNTER },  // m³ Kalt Familie 1.OG
     { id: 'javascript.0.wasser.warm_familie',   opt: OPT_COUNTER },  // m³ Warm Familie 1.OG
-    { id: 'javascript.0.wasser.familie_lpt',    opt: OPT_COUNTER },  // L/Tag Familie
+    { id: 'javascript.0.wasser.wm',             opt: OPT_COUNTER },  // m³ Waschmaschine
+    { id: 'javascript.0.wasser.pool',           opt: OPT_COUNTER },  // m³ Pool/Werkstatt
+    { id: 'javascript.0.wasser.familie_lpt',    opt: OPT_COUNTER },  // L/Tag Familie (Kalt+Warm+WM)
     { id: 'javascript.0.wasser.warm_lpt',       opt: OPT_COUNTER },  // L/Tag Warmwasser
-    { id: 'javascript.0.wasser.eg_lpt',         opt: OPT_COUNTER },  // L/Tag EG (Eltern+Pool)
+    { id: 'javascript.0.wasser.wm_lpt',         opt: OPT_COUNTER },  // L/Tag Waschmaschine
+    { id: 'javascript.0.wasser.pool_lpt',       opt: OPT_COUNTER },  // L/Tag Pool/Werkstatt
+    { id: 'javascript.0.wasser.eg_lpt',         opt: OPT_COUNTER },  // L/Tag EG (Eltern)
     { id: 'javascript.0.wasser.ww_kwh_tag',     opt: OPT_COUNTER },  // kWh/Tag WW-Energie Familie
 
     // TRV Heizkörperthermostate EG (Sonoff TRVZB) — Heizprofil je Raum
