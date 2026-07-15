@@ -157,6 +157,9 @@ Chronologische Entwicklungshistorie. Jede Session mit Datum und Inhalt.
 - Neue States wasser.wm / wasser.pool / wm_lpt / pool_lpt in InfluxDB.
 - /status-Cockpit zeigt jetzt einen Wasser-Block (Familie/WW/WM/Pool/EG L/Tag).
 - /hilfe + 2-Wochen-Erinnerung auf 5 Werte aktualisiert.
+- **/verbrauch** neu: kumulierter Verbrauch seit 31.01.2026 (WM/Pool seit Einbau)
+  = aktueller Stand − Baseline, unabhängig von Zwischenablesungen. Zeigt Familie/
+  WW-kWh/Pool/EG/Haus je m³ + Ø L/Tag. (/zaehler zeigt nur Delta seit letzter Ablesung.)
 
 ---
 

@@ -447,6 +447,7 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
             '/wind — Windrose & stärkste Böe (30 Tage)\n' +
             '/wwnacht — Warmwasser-Nachtverlust (Schwerkraftbremse)\n' +
             '/zaehler — Wasserzähler ablesen (Haupt Kalt Warm WM Pool)\n' +
+            '/verbrauch — Wasserverbrauch gesamt seit Jahresanfang\n' +
             '/klima — Klimaanlage Status\n' +
             '/klima ein — Klimaanlage einschalten\n' +
             '/klima aus — Klimaanlage ausschalten\n' +

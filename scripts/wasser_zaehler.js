@@ -32,6 +32,7 @@ var SEED_WARM  = 441.918;
 // die WM/Pool-Rate über ihr eigenes (kürzeres) Fenster gerechnet wird.
 var SEED_WM_START   = 0.1775;
 var SEED_POOL_START = 0.292;
+var WMPOOL_INSTALL_TS = 1784073600000;  // 15.07.2026 00:00 UTC (für kumulierten Verbrauch)
 
 createState('wasser.haupt',        0,  { name: 'Wasser Hauptzähler',        type: 'number', unit: 'm³', role: 'value', read: true, write: false });
 createState('wasser.kalt_familie', 0,  { name: 'Wasser Kalt Familie 1.OG',  type: 'number', unit: 'm³', role: 'value', read: true, write: false });
@@ -167,10 +168,55 @@ function ablesung(hauptNeu, kaltNeu, warmNeu, wmNeu, poolNeu) {
     }
 }
 
+// Kumulierter Verbrauch seit Jahres-Baseline (31.01.2026), WM/Pool seit Einbau.
+// Rechnet aktueller Zählerstand − Startwert, unabhängig von zwischenzeitlichen
+// Ablesungen (jede /zaehler-Ablesung speichert den absoluten Stand).
+function verbrauch() {
+    var jetzt = Date.now();
+    var haupt = Math.round((safe('javascript.0.wasser.haupt', SEED_HAUPT)        - SEED_HAUPT)      * 1000) / 1000;
+    var kalt  = Math.round((safe('javascript.0.wasser.kalt_familie', SEED_KALT)  - SEED_KALT)       * 1000) / 1000;
+    var warm  = Math.round((safe('javascript.0.wasser.warm_familie', SEED_WARM)  - SEED_WARM)       * 1000) / 1000;
+    var wm    = Math.round((safe('javascript.0.wasser.wm', SEED_WM_START)        - SEED_WM_START)   * 1000) / 1000;
+    var pool  = Math.round((safe('javascript.0.wasser.pool', SEED_POOL_START)    - SEED_POOL_START) * 1000) / 1000;
+    var fam   = Math.round((kalt + warm + wm) * 1000) / 1000;
+    var eg    = Math.round((haupt - fam - pool) * 1000) / 1000;
+
+    var tage   = Math.max(1, Math.round((jetzt - SEED_TS) / 86400000));
+    var tageWm = Math.max(1, Math.round((jetzt - WMPOOL_INSTALL_TS) / 86400000));
+    var famLpt = Math.round(fam  * 1000 / tage);
+    var wwLpt  = Math.round(warm * 1000 / tage);
+    var egLpt  = Math.round(eg   * 1000 / tage);
+    var wmLpt  = Math.round(wm   * 1000 / tageWm);
+    var poolLpt= Math.round(pool * 1000 / tageWm);
+    var proPers= Math.round(famLpt / FAMILIE_PERSONEN);
+    var wwKwh  = Math.round(warm * DELTA_T_K * WAERMEKAP_WH_L_K);   // m³ × 44,2 kWh/m³
+
+    sendTo('telegram.0',
+        '📊 Verbrauch gesamt\n' +
+        '   seit 31.01.2026 (' + tage + ' Tage)\n\n' +
+        '🏠 Familie 1. OG (' + FAMILIE_PERSONEN + ' Pers.)\n' +
+        '  Kalt ' + kalt + ' · Warm ' + warm + (wm > 0 ? ' · WM ' + wm : '') + ' m³\n' +
+        '  Gesamt: ' + fam + ' m³ → ' + famLpt + ' L/Tag (' + proPers + ' L/Pers.)\n' +
+        '  🔥 Warmwasser: ' + warm + ' m³ → ' + wwLpt + ' L/Tag ≈ ' + wwKwh + ' kWh\n\n' +
+        '🏊 Pool/Werkstatt (seit Einbau, ' + tageWm + ' T)\n' +
+        '  ' + pool + ' m³ → ' + poolLpt + ' L/Tag\n' +
+        (wm > 0 ? '  Waschmaschine: ' + wm + ' m³ → ' + wmLpt + ' L/Tag\n' : '') + '\n' +
+        '🏡 EG (Eltern)\n' +
+        '  ' + eg + ' m³ → ' + egLpt + ' L/Tag\n\n' +
+        '🚰 Haus gesamt (Hauptzähler)\n' +
+        '  ' + haupt + ' m³ → ' + Math.round(haupt * 1000 / tage) + ' L/Tag'
+    );
+}
+
 on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
     var msg = obj.state.val, cmd = '';
     try { cmd = JSON.parse(msg).message; } catch(e) { cmd = msg; }
     cmd = cmd.replace(/^\[.*?\]/, '').trim();
+
+    if (cmd.indexOf('/verbrauch') === 0) {
+        verbrauch();
+        return;
+    }
 
     if (cmd.indexOf('/zaehler') === 0) {
         // Zahlen extrahieren (Komma → Punkt als Dezimaltrenner)
