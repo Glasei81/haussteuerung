@@ -141,6 +141,12 @@ Chronologische Entwicklungshistorie. Jede Session mit Datum und Inhalt.
   1./15., InfluxDB. Familie 1.OG hat echte Kalt+Warm-Unterzähler → WW messbar
   (~605 kWh Halbjahr 2026). Baseline 31.01.2026 geseedet → 2026 rückwirkend drin.
 
+## 18.07.2026 — /wwnacht mit Wochen-/Monatsverlauf
+- **/wwnacht erweitert**: zeigt zusätzlich zur aktuellen Nacht einen Verlauf aus
+  InfluxDB (rate_nacht + verlust_kwh) — Ø °C/h über 7 und 30 Tage, Hochrechnung
+  kWh/Woche, kWh/Monat, kWh/Jahr. Datenbasis war schon da (jede Nacht geloggt),
+  jetzt auch ohne Grafana per Telegram abrufbar.
+
 ## 15.07.2026 — Wasserzähler auf 5 Werte (Waschmaschine + Pool/Werkstatt)
 - **Zwei neue Unterzähler eingebaut** (OBI, zusammen 40 € + 6 € Muffen):
   - Waschmaschine — Werksstand 0,1775 m³

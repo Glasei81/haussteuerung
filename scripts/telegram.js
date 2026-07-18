@@ -423,16 +423,66 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
             var wwKwh    = safeState('zirkulation.monitor.verlust_kwh', null);
             var wwBew    = safeState('zirkulation.monitor.bewertung',   '-');
 
-            sendTo('telegram.0',
+            var kopf =
                 '🌙 Warmwasser-Nachtverlust (' + wwDatum + ')\n' +
                 '   Zirkulation aus, 21:10 → 05:40\n\n' +
                 '🌡️ oben: ' + wwStartO + '→' + wwEndO + '°C (Δ' + wwDelta + '°C)\n' +
                 (wwStartU > 0 ? '🌡️ unten: ' + wwStartU + '→' + wwEndU + '°C\n' : '') +
                 '📉 Rate: ' + wwRate + ' °C/h\n' +
                 (wwKwh !== null ? '🔥 ~' + wwKwh + ' kWh/Tag (Boiler-Standby laut Datenblatt: 2,5 kWh/Tag)\n' : '') +
-                '\n📋 ' + wwBew + '\n\n' +
-                'Richtwert: ~0,2–0,4 °C/h = normaler Dämmverlust.'
-            );
+                '\n📋 ' + wwBew + '\n';
+
+            // Wochen-/Monats-Auswertung aus InfluxDB nachladen
+            var jetztWw  = Date.now();
+            var start30w = jetztWw - 30 * 86400000;
+            var grenze7  = jetztWw - 7  * 86400000;
+
+            sendTo('influxdb.0', 'getHistory', {
+                id: 'javascript.0.zirkulation.monitor.rate_nacht',
+                options: { start: start30w, end: jetztWw, aggregate: 'none', addId: false }
+            }, function(rateRes) {
+                sendTo('influxdb.0', 'getHistory', {
+                    id: 'javascript.0.zirkulation.monitor.verlust_kwh',
+                    options: { start: start30w, end: jetztWw, aggregate: 'none', addId: false }
+                }, function(kwhRes) {
+
+                    function stat(res, ab) {
+                        var s = 0, n = 0;
+                        (res.result || []).forEach(function(p) {
+                            if (p.val == null || p.ts < ab) return;
+                            s += p.val; n++;
+                        });
+                        return { avg: n ? s / n : null, sum: s, n: n };
+                    }
+
+                    var r7  = stat(rateRes, grenze7),  r30 = stat(rateRes, start30w);
+                    var k7  = stat(kwhRes,  grenze7),  k30 = stat(kwhRes,  start30w);
+
+                    var trend = '';
+                    if (r7.n > 0 || r30.n > 0) {
+                        trend = '\n📊 Verlauf (Ø je Nacht)\n';
+                        if (r7.n > 0) {
+                            trend += '  7 Tage:  ' + (Math.round(r7.avg * 100) / 100) + ' °C/h' +
+                                     (k7.avg != null ? '  →  ~' + (Math.round(k7.avg * 7 * 10) / 10) + ' kWh/Woche' : '') +
+                                     '  (' + r7.n + ' Nächte)\n';
+                        }
+                        if (r30.n > 0) {
+                            var hochJahr = k30.avg != null ? Math.round(k30.avg * 365) : null;
+                            trend += '  30 Tage: ' + (Math.round(r30.avg * 100) / 100) + ' °C/h' +
+                                     (k30.avg != null ? '  →  ~' + (Math.round(k30.avg * 30)) + ' kWh/Monat' : '') +
+                                     '  (' + r30.n + ' Nächte)\n' +
+                                     (hochJahr != null ? '  Hochrechnung: ~' + hochJahr + ' kWh/Jahr\n' : '');
+                        }
+                    } else {
+                        trend = '\n📊 Verlauf: noch keine Historie in InfluxDB.\n';
+                    }
+
+                    sendTo('telegram.0',
+                        kopf + trend +
+                        '\nRichtwert: ~0,2–0,4 °C/h = normaler Dämmverlust.'
+                    );
+                });
+            });
         }
 
     // --- Hilfe ---
@@ -445,7 +495,7 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
             '/forecast — Wettervorschau morgen & übermorgen\n' +
             '/wetter — Regen & Temperatur letzte 7 Tage\n' +
             '/wind — Windrose & stärkste Böe (30 Tage)\n' +
-            '/wwnacht — Warmwasser-Nachtverlust (Schwerkraftbremse)\n' +
+            '/wwnacht — Warmwasser-Nachtverlust + Wochen-/Monatsverlauf\n' +
             '/zaehler — Wasserzähler ablesen (Haupt Kalt Warm WM Pool)\n' +
             '/verbrauch — Wasserverbrauch gesamt seit Jahresanfang\n' +
             '/klima — Klimaanlage Status\n' +
