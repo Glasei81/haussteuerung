@@ -1,5 +1,18 @@
 # Haussteuerung Raubling — Projektliste
 
+## 🔝 Aktuell zuerst — Hydraulischer Abgleich FBH (vorbereiten)
+Reihenfolge (Stefan 18.07.2026):
+1. [ ] **SCHRITT 1 — Pumpe prüfen:** Welche Heizkreispumpe (FBH)? Fabrikat/Typ ablesen.
+       Hat sie eine Einstellung **konstanter Druck (Δp-c)**? Aktuelle Einstellung notieren.
+       → Ohne passende Pumpeneinstellung erreichen die langen Wohnzimmer-Kreise (5+)
+         evtl. den Soll-Durchfluss nicht. Das ist die Grundvoraussetzung.
+2. [ ] SCHRITT 2 — Heizlast 1. OG in Oventrop rechnen (FBH ignorieren) → PDF an Claude.
+3. [ ] SCHRITT 3 — Claude rechnet Soll-Durchfluss je Kreis (l/min) aus Raum-Heizlast.
+4. [ ] SCHRITT 4 — Am laufenden Verteiler einstellen (Pumpe an, alle Kreise offen,
+       2–3 Runden iterieren). Details siehe "Hydraulischer Abgleich FBH" unten.
+VORHANDEN: Kreislängen vom Heizungsbauer dokumentiert (Gold wert für Genauigkeit).
+Wohnzimmer hat 5+ Kreise → werden als Gruppe behandelt (Heizlast nach Länge verteilt).
+
 ## Anlage Übersicht
 
 ### Puffersystem
