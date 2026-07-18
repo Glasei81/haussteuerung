@@ -312,6 +312,29 @@ GEGENPROBE (schnell, ungenauer): Puffer-Abkühlung in Phasen ohne Zufuhr = Hausb
       + Speicheränderung → tägliche Q_verbrauch in eigenen State/InfluxDB, dann Regression.
 - [ ] Belastbare Daten erst ab Heizsaison Herbst 2026 (Sommer: keine Wärmeanforderung).
 
+### Norm-Heizlast EG (Eltern) — Rechenwert (Stefan 18.07.2026, PDF Oventrop 5.1.4)
+Vereinfachtes Verfahren DIN EN 12831, Normaußentemperatur −12,5 °C. Datei:
+"Heizlast vereinfachtes Verfahren Glas 18072026". Nur EG-Wohnung (Eltern).
+  Raum          Fläche   Tᵢ    ΦT     ΦV    Heizlast   spez.
+  Wohnzimmer    21,16    20°C  785 W  533 W  1318 W     62 W/m²
+  Küche         18,80    20°C  653 W  260 W   913 W     49 W/m²
+  Schlafzimmer  15,00    20°C  684 W  207 W   891 W     59 W/m²
+  Flur          37,30    18°C  157 W  490 W   647 W     17 W/m²
+  Bad            8,52    24°C  452 W  132 W   584 W     69 W/m²
+  Gäste-WC       2,40    20°C  327 W   33 W   360 W    150 W/m²
+  SUMME        103,18 m²                     4713 W     46 W/m²
+  (Volumen gesamt 257,95 m³, Luftwechsel 0,5 h⁻¹, Raumhöhe 2,50 m)
+NUTZEN für die Wärmebedarfs-Methodik:
+  - Verlustkoeffizient EG ≈ 4713 W / 32,5 K ≈ 145 W/K (Wohnräume 20 °C ↔ −12,5 °C).
+    → unabhängige GEGENPROBE zur gemessenen Energie-Signatur-Steigung (W/K).
+  - Grobe Jahres-Hochrechnung EG (Gradtage): 145 W/K × ~3800 Kd × 24 h / 1000
+    ≈ 13.000 kWh/Jahr Transmission+Lüftung (ohne WW, ohne solare/interne Gewinne
+    → real deutlich niedriger, dient nur als Größenordnung).
+  - Auslegungs-Vorlauf/Heizflächen: Bad ist mit 69 W/m² + 24 °C der kritische Raum.
+- [ ] Noch offen: gleiche Berechnung für 1.OG (Familie) → dann Gesamt-Norm-Heizlast
+      Haus, vergleichbar mit ETA-Kesselleistung + Puffergröße.
+- [ ] Ab Heizsaison: gemessenes W/K (Signatur) gegen 145 W/K (Rechnung) halten.
+
 ### Brauchwasser-Verbrauch erfassen (Konzept 03.07.2026)
 Stefan: aktuell kein Überblick über Kalt- noch Warmwasserbezug.
 WICHTIG: für die Heizkennlinie NICHT nötig (WW = Achsenabschnitt der Regression).

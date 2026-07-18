@@ -141,6 +141,14 @@ Chronologische Entwicklungshistorie. Jede Session mit Datum und Inhalt.
   1./15., InfluxDB. Familie 1.OG hat echte Kalt+Warm-Unterzähler → WW messbar
   (~605 kWh Halbjahr 2026). Baseline 31.01.2026 geseedet → 2026 rückwirkend drin.
 
+## 18.07.2026 — Norm-Heizlast EG (Eltern) dokumentiert
+- Stefan lieferte Heizlast-Berechnung EG (DIN EN 12831 vereinf., Oventrop 5.1.4):
+  **Summe 4713 W** bei −12,5 °C Normaußentemp, 103,18 m² (46 W/m²).
+- Verlustkoeffizient EG ≈ 145 W/K → unabhängige Gegenprobe zur gemessenen
+  Energie-Signatur-Steigung (kommt in der Heizsaison Herbst 2026).
+- Raumtabelle + Nutzen in haussteuerung_todo.md, Quell-PDF unter context/docs/.
+- Offen: gleiche Berechnung für 1.OG (Familie) → Gesamt-Norm-Heizlast Haus.
+
 ## 18.07.2026 — /wwnacht mit Wochen-/Monatsverlauf
 - **/wwnacht erweitert**: zeigt zusätzlich zur aktuellen Nacht einen Verlauf aus
   InfluxDB (rate_nacht + verlust_kwh) — Ø °C/h über 7 und 30 Tage, Hochrechnung
