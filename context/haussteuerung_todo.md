@@ -334,6 +334,10 @@ NUTZEN für die Wärmebedarfs-Methodik:
 - [ ] Noch offen: gleiche Berechnung für 1.OG (Familie) → dann Gesamt-Norm-Heizlast
       Haus, vergleichbar mit ETA-Kesselleistung + Puffergröße.
 - [ ] Ab Heizsaison: gemessenes W/K (Signatur) gegen 145 W/K (Rechnung) halten.
+- [ ] Hydraulischer Abgleich FBH (mit Stefan, wenn raumweise Heizlast vorliegt):
+      Soll-Durchfluss je Kreis ṁ = Q / (c·ΔT), Spreizung FBH ~5–7 K → l/min am
+      Verteiler-Durchflussmesser einstellen. Braucht: Heizlast/Raum (aus PDF),
+      Raum↔Verteilerkreis-Zuordnung, grobe Kreislängen, gewünschte VL-Temp/Spreizung.
 
 ### Brauchwasser-Verbrauch erfassen (Konzept 03.07.2026)
 Stefan: aktuell kein Überblick über Kalt- noch Warmwasserbezug.
