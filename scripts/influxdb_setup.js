@@ -141,6 +141,16 @@ var DATENPUNKTE = [
     { id: 'zigbee.0.449fdafffe7452a3.occupied_heating_setpoint', opt: OPT_COUNTER },  // Schlafzimmer EG Soll
     { id: 'zigbee.0.449fdafffe7452a3.battery',                   opt: OPT_COUNTER },  // Schlafzimmer EG Batterie
     { id: 'javascript.0.trv.schlafzimmer_eg.heizt',              opt: OPT_COUNTER },  // Schlafzimmer EG heizt 1/0
+    // #3 WC EG (0x983268fffe97dadd, Sonoff TRVZB)
+    { id: 'zigbee.0.983268fffe97dadd.local_temperature',         opt: OPT_NORMAL  },  // WC EG Ist
+    { id: 'zigbee.0.983268fffe97dadd.occupied_heating_setpoint', opt: OPT_COUNTER },  // WC EG Soll
+    { id: 'zigbee.0.983268fffe97dadd.battery',                   opt: OPT_COUNTER },  // WC EG Batterie
+    { id: 'javascript.0.trv.wc_eg.heizt',                        opt: OPT_COUNTER },  // WC EG heizt 1/0
+    // #4 Küche EG (0x983268fffe994d06, Sonoff TRVZB)
+    { id: 'zigbee.0.983268fffe994d06.local_temperature',         opt: OPT_NORMAL  },  // Küche EG Ist
+    { id: 'zigbee.0.983268fffe994d06.occupied_heating_setpoint', opt: OPT_COUNTER },  // Küche EG Soll
+    { id: 'zigbee.0.983268fffe994d06.battery',                   opt: OPT_COUNTER },  // Küche EG Batterie
+    { id: 'javascript.0.trv.kueche_eg.heizt',                    opt: OPT_COUNTER },  // Küche EG heizt 1/0
 
     // =========================================================
     // TIER 2 — Betrieb & Verschleiß (langfristig wertvoll)
