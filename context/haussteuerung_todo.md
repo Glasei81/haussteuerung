@@ -470,6 +470,10 @@ Nur wenn WW separat beziffert werden soll:
   - #3 WC EG           0x983268fffe97dadd (Sonoff TRVZB)
   - #4 Küche EG        0x983268fffe994d06 (Sonoff TRVZB)
   - Alle Sonoff TRVZB (versch. Produktionschargen → 2 verschiedene IEEE-Präfixe)
+  - [ ] NOCH ANLERNEN (Stefan, nach Deploy): Bad EG + 2× Wohnzimmer EG → 7 TRVs total.
+        Wohnzimmer hat 2 Heizkörper → getrennte Namen/Slugs nötig (z. B. _sued/_ost),
+        sonst kollidiert trv.wohnzimmer_eg.heizt. Je TRV nur ID + Name an Claude.
+        Damit ist jeder EG-Raum aus der Heizlast-Tabelle mit "heizt" abgedeckt.
 - Einzelne Räume: Zigbee Temperatursensoren vorhanden (nur messen, nicht schalten)
 - Temperatursensoren als Korrekturquelle nützlich (TRV-Sensor sitzt ungünstig direkt am Heizkörper)
 
