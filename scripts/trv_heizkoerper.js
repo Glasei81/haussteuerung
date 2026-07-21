@@ -20,7 +20,7 @@
 
 var TRVS = [
     { id: 'zigbee.0.983268fffe97aab4', raum: 'gang_eg',         name: 'Gang EG' },         // Sonoff TRVZB
-    { id: 'zigbee.0.449fdafffe7452a3', raum: 'schlafzimmer_eg', name: 'Schlafzimmer EG' }, // Tuya TS0601
+    { id: 'zigbee.0.449fdafffe7452a3', raum: 'schlafzimmer_eg', name: 'Schlafzimmer EG' }, // Sonoff TRVZB (neuere Firmware)
     { id: 'zigbee.0.983268fffe97dadd', raum: 'wc_eg',           name: 'WC EG' },           // Sonoff TRVZB
     { id: 'zigbee.0.983268fffe994d06', raum: 'kueche_eg',       name: 'Küche EG' },        // Sonoff TRVZB
 ];

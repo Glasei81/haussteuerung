@@ -464,11 +464,12 @@ Nur wenn WW separat beziffert werden soll:
 - 1. OG Fußbodenheizung: 2 Zigbee-Thermostate bereits in ioBroker sichtbar und schaltbar ✓
 - Heizkörper-TRVs EG (geloggt via trv_heizkoerper.js + InfluxDB) — alle 4 drin ✓ 18.07.2026:
   - #1 Gang EG         0x983268fffe97aab4 (Sonoff TRVZB)
-  - #2 Schlafzimmer EG 0x449fdafffe7452a3 (Tuya TS0601)
-    → hat external_temperature_input + temperature_sensor_select (externer Fühler
-      möglich); running_state nach Deploy prüfen (heat/idle?), sonst Mapping anpassen
+  - #2 Schlafzimmer EG 0x449fdafffe7452a3 (Sonoff TRVZB, neuere Firmware)
+    → neuere FW zeigt external_temperature_input + temperature_sensor_select
+      (externer Fühler koppelbar); running_state = heat/idle wie die anderen
   - #3 WC EG           0x983268fffe97dadd (Sonoff TRVZB)
   - #4 Küche EG        0x983268fffe994d06 (Sonoff TRVZB)
+  - Alle Sonoff TRVZB (versch. Produktionschargen → 2 verschiedene IEEE-Präfixe)
 - Einzelne Räume: Zigbee Temperatursensoren vorhanden (nur messen, nicht schalten)
 - Temperatursensoren als Korrekturquelle nützlich (TRV-Sensor sitzt ungünstig direkt am Heizkörper)
 
