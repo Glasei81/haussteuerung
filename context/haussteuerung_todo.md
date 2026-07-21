@@ -462,6 +462,13 @@ Nur wenn WW separat beziffert werden soll:
 
 ### Zigbee Raumthermostate — IST-Stand
 - 1. OG Fußbodenheizung: 2 Zigbee-Thermostate bereits in ioBroker sichtbar und schaltbar ✓
+- Heizkörper-TRVs EG (geloggt via trv_heizkoerper.js + InfluxDB):
+  - #1 Gang EG        0x983268fffe97aab4 (Sonoff TRVZB) ✓
+  - #2 Schlafzimmer EG 0x449fdafffe7452a3 (Tuya TS0601)  ✓ 18.07.2026
+    → hat external_temperature_input + temperature_sensor_select (externer Fühler
+      möglich); running_state nach Deploy prüfen (heat/idle?), sonst Mapping anpassen
+  - weitere folgen: nur ID + Raumname je TRV nötig (sichtbar: 0x983268fffe97dadd,
+    0x983268fffe994d06 — Namen von Stefan)
 - Einzelne Räume: Zigbee Temperatursensoren vorhanden (nur messen, nicht schalten)
 - Temperatursensoren als Korrekturquelle nützlich (TRV-Sensor sitzt ungünstig direkt am Heizkörper)
 

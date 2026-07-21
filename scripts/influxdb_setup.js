@@ -136,6 +136,11 @@ var DATENPUNKTE = [
     { id: 'zigbee.0.983268fffe97aab4.occupied_heating_setpoint', opt: OPT_COUNTER },  // Gang EG Soll (ändert selten)
     { id: 'zigbee.0.983268fffe97aab4.battery',                   opt: OPT_COUNTER },  // Gang EG Batterie
     { id: 'javascript.0.trv.gang_eg.heizt',                      opt: OPT_COUNTER },  // Gang EG heizt 1/0
+    // #2 Schlafzimmer EG (0x449fdafffe7452a3, Tuya TS0601)
+    { id: 'zigbee.0.449fdafffe7452a3.local_temperature',         opt: OPT_NORMAL  },  // Schlafzimmer EG Ist
+    { id: 'zigbee.0.449fdafffe7452a3.occupied_heating_setpoint', opt: OPT_COUNTER },  // Schlafzimmer EG Soll
+    { id: 'zigbee.0.449fdafffe7452a3.battery',                   opt: OPT_COUNTER },  // Schlafzimmer EG Batterie
+    { id: 'javascript.0.trv.schlafzimmer_eg.heizt',              opt: OPT_COUNTER },  // Schlafzimmer EG heizt 1/0
 
     // =========================================================
     // TIER 2 — Betrieb & Verschleiß (langfristig wertvoll)

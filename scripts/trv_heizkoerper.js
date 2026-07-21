@@ -19,8 +19,8 @@
 // ============================================
 
 var TRVS = [
-    { id: 'zigbee.0.983268fffe97aab4', raum: 'gang_eg', name: 'Gang EG' },
-    // { id: 'zigbee.0.................', raum: '........', name: '........' },
+    { id: 'zigbee.0.983268fffe97aab4', raum: 'gang_eg',        name: 'Gang EG' },        // Sonoff TRVZB
+    { id: 'zigbee.0.449fdafffe7452a3', raum: 'schlafzimmer_eg', name: 'Schlafzimmer EG' }, // Tuya TS0601
     // { id: 'zigbee.0.................', raum: '........', name: '........' },
     // { id: 'zigbee.0.................', raum: '........', name: '........' },
 ];
