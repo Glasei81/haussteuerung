@@ -474,6 +474,13 @@ Nur wenn WW separat beziffert werden soll:
         Wohnzimmer hat 2 Heizkörper → getrennte Namen/Slugs nötig (z. B. _sued/_ost),
         sonst kollidiert trv.wohnzimmer_eg.heizt. Je TRV nur ID + Name an Claude.
         Damit ist jeder EG-Raum aus der Heizlast-Tabelle mit "heizt" abgedeckt.
+  - BEKANNT/HARMLOS (24.07.2026): WC EG (dadd) + Küche EG (994d06) werfen im
+    zigbee.0-Log "customSonoffTrvzb ... Value is not a number, got undefined".
+    Ein Sonoff-Attribut ihrer Firmware kennt der installierte
+    zigbee-herdsman-converters noch nicht → nur Log-Rauschen. Kernwerte
+    (Ist/Soll/Batterie/running_state) kommen an, von Stefan bestätigt. Werte laufen.
+    Optional gegen das Rauschen: ioBroker.zigbee-Adapter updaten (keine Eile).
+    Wiederholtes "announced itself" beobachten → falls häufig, LQI/Reichweite prüfen.
 - Einzelne Räume: Zigbee Temperatursensoren vorhanden (nur messen, nicht schalten)
 - Temperatursensoren als Korrekturquelle nützlich (TRV-Sensor sitzt ungünstig direkt am Heizkörper)
 
