@@ -325,6 +325,23 @@ GEGENPROBE (schnell, ungenauer): Puffer-Abkühlung in Phasen ohne Zufuhr = Hausb
       + Speicheränderung → tägliche Q_verbrauch in eigenen State/InfluxDB, dann Regression.
 - [ ] Belastbare Daten erst ab Heizsaison Herbst 2026 (Sommer: keine Wärmeanforderung).
 
+### Raumweise Verteilung (TRV/FBH-Heizquote × Heizlast) — Methodik-Erweiterung 24.07.2026
+Ebene 1 = Haus-Gesamtbilanz (gemessen, oben). Ebene 2 = Raumverteilung (modelliert):
+  kWh_Raum ≈ Wärmebedarf_gesamt × (Heizlast_Raum × Heizquote_Raum) / Σ(alle Räume)
+  - Heizquote = % der Zeit mit heizt=1 (TRV: running_state; FBH: running_state/Relais).
+  - Braucht je Raum: Norm-Heizlast (PDF) + heizt-Signal (Zigbee).
+BONUS: Mit EG (Heizkörper) + OG (FBH) komplett fällt die OG-vs-EG-Aufteilung gratis
+  aus demselben Modell — kein separater Wärmemengenzähler nötig.
+GEGENCHECK Kreis-Ebene: eta.hk.* (Heizkörper) vs eta.fbh.* (FBH) getrennt geloggt
+  (Vor-/Rücklauf/Zustand) → trennt OG/EG grob und validiert das Modell.
+RESTPOSTEN = Wärmebedarf_gesamt − Σ(getrackte Räume) = ungetrackte Heizkörper
+  (Werkstatt, Zwischenraum) + Verteilverluste. Bewusst als "sonstige/ungetrackt" labeln.
+EHRLICHE GRENZEN: FBH träge → nur Tagesebene sauber; Raum-kWh sind modelliert, nicht
+  gemessen; exakte Zahl bleibt die Haus-Gesamtbilanz.
+- [ ] OG einbinden: OG-Heizlast-PDF (Stefan) + 4 OG-FBH-Thermostate (ID+Name+heizt-Feld
+      per Screenshot prüfen) → analog TRVs in trv_heizkoerper.js/influxdb aufnehmen.
+- [ ] Werkstatt-Heizkörper + Zwischenraum bewusst NICHT tracken (→ Restposten).
+
 ### Norm-Heizlast EG (Eltern) — Rechenwert (Stefan 18.07.2026, PDF Oventrop 5.1.4)
 Vereinfachtes Verfahren DIN EN 12831, Normaußentemperatur −12,5 °C. Datei:
 "Heizlast vereinfachtes Verfahren Glas 18072026". Nur EG-Wohnung (Eltern).
