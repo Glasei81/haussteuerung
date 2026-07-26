@@ -431,14 +431,12 @@ SPEICHER-VERTEILER (Stefan 26.07.2026) — Soll-Durchflüsse @ ΔT 7 K:
 GESAMT-FLOW (V1 12,6 + V2 6,1 + Speicher 7,3) = ~26,0 l/min (~1,56 m³/h),
   + Eingangs-HK (voll offen) → real ~1,6–2,0 m³/h Pumpenleistung nötig.
 PUMPE: Grundfos ALPHA2 L 25-60 180 (max 6 m Förderhöhe, 1", 180 mm).
-  "L" = ohne AutoAdapt (= die "keine adaptive" Beobachtung). Hat aber sehr wahrsch.
-  Druckmodi: Konstantdruck (Δp-c/CP) + Proportionaldruck (Δp-v/PP) + 3 feste Drehz.
-  → für FBH ist KONSTANTDRUCK (Δp-c) ideal. OFFEN: Stefan liest Kürzel am Display
-  (CP/PP oder nur I/II/III).
-  LEISTUNG REICHT LOCKER: ~1,6–2,0 m³/h @ ~3 m liegt gut in der Kennlinie
-  → Reserve-Hebel Spreizung↑ vorauss. NICHT nötig, bei 7 K bleiben.
-  ABGLEICH-START: CP höchste Kurve (bzw. Drehz. III) → balancen → Kurve/Stufe
-  schrittweise senken, solange krit. Kreise (Küche 2,09/Bad 1,66/Speicher) Soll halten.
+  Display bestätigt (Foto 26.07.): nur 3 Stufen I/II/III (Pfeil-Taste), KEIN CP/PP-Menü.
+  Aktuell auf Stufe II. "A"=Effizienzlabel (aufgedruckt), nicht Modus.
+  LEISTUNG REICHT LOCKER: ~1,6–2,0 m³/h @ ~3 m → Spreizung bei 7 K bleiben.
+  ABGLEICH: Stufe III (stärkste) starten → alle Kreise auf Soll balancen (2–3 Runden,
+  alle 3 Verteiler) → Stufe schrittweise senken (III→II→I), solange krit. Kreise
+  (Küche 2,09/Bad 1,66/Speicher-1,5er) Soll halten → niedrigste haltende Stufe = Endstand.
 ABLAUF ABGLEICH: Heizung an, alle Kreise/Stellantriebe auf, HK voll offen →
   je Kreis auf Soll-l/min drosseln → 2–3 Runden über alle 3 Verteiler iterieren →
   Pumpenstufe final wählen → Foto/Doku → über Heizsaison via Zigbee-Raumtemp feinjustieren.
