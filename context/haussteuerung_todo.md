@@ -344,9 +344,18 @@ RESTPOSTEN = Wärmebedarf_gesamt − Σ(getrackte Räume) = ungetrackte Heizkör
   (Werkstatt, Zwischenraum) + Verteilverluste. Bewusst als "sonstige/ungetrackt" labeln.
 EHRLICHE GRENZEN: FBH träge → nur Tagesebene sauber; Raum-kWh sind modelliert, nicht
   gemessen; exakte Zahl bleibt die Haus-Gesamtbilanz.
-- [ ] OG einbinden: OG-Heizlast-PDF (Stefan) + 4 OG-FBH-Thermostate (ID+Name+heizt-Feld
-      per Screenshot prüfen) → analog TRVs in trv_heizkoerper.js/influxdb aufnehmen.
+- [ ] OG einbinden: OG-Heizlast-PDF liegt vor (26.07.). 4 OG-FBH-Thermostate
+      (ID+Name+heizt-Feld per Screenshot prüfen) → analog TRVs in
+      trv_heizkoerper.js/influxdb aufnehmen.
 - [ ] Werkstatt-Heizkörper + Zwischenraum bewusst NICHT tracken (→ Restposten).
+- PLAN Stefan (26.07.): nach und nach ALLE alten Thermostate gegen Moes-Zigbee
+  tauschen → jeder Raum ehrlich getrackt (Wandthermostat misst echte Raumluft).
+  Nutzen: (1) raumweises Modell vollständig, kein Restposten mehr; (2) Rückkopplung
+  zum Abgleich — Raum unter Soll bei heizt~100% → Kreis-Durchfluss ↑; über Soll bei
+  niedriger heizt-Quote → ↓. (3) jeder Moes = Zigbee-Router → Mesh/Reichweite besser.
+  Pro Gerät: ID+Name an Claude → in trv_heizkoerper.js/influxdb. heizt-Feld bei Moes
+  ggf. anders als Sonoff (running_state vs. Relais/state) — am 1. Gerät klären.
+  Caveat: Moes TS0601 = Uhrzeit-Sync-Zicken + teils eigenwillige Router.
 
 ### Norm-Heizlast EG (Eltern) — Rechenwert (Stefan 18.07.2026, PDF Oventrop 5.1.4)
 Vereinfachtes Verfahren DIN EN 12831, Normaußentemperatur −12,5 °C. Datei:
