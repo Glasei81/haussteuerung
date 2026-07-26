@@ -390,9 +390,13 @@ Pumpe: KEINE Adaptivregelung (Δp), nur 3 feste Stufen → Abgleich per Durchflu
   Durchflüsse schafft.
 Formel je Kreis: ṁ [l/h] = Q_raum [W] × 0,86 / ΔT(Spreizung, Default 7 K);
   bei mehreren Kreisen/Raum nach Kreislänge aufteilen; l/min = l/h ÷ 60.
+SPEICHER (ausgeb. Attika, 3551 W) hängt an DENSELBEN Strängen/Verteiler wie OG
+  (Stefan 26.07.) → voll im Abgleich, seine Kreise in die Kreisliste. Größter
+  Flow-Verbraucher → maßgeblich für die Pumpenstufen-Wahl.
 BRAUCHE VON STEFAN (nächster Schritt):
-  1. Verteiler → Kreis → Raum-Zuordnung + Kreislänge je Kreis (hat er vom HB)
-  2. wie viele Verteiler/Pumpen (OG einer? Speicher separat?)
+  1. Verteiler → Kreis → Raum-Zuordnung + Kreislänge je Kreis (hat er vom HB),
+     inkl. Speicher-Kreise
+  2. wie viele Verteiler/Pumpen (OG+Speicher zusammen an einem?)
   3. welche Räume FBH (Werkstatt = Heizkörper, nicht am Verteiler)
   4. gewünschte Spreizung/VL (Default VL~35 °C, ΔT 7 K)
 
