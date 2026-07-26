@@ -1,17 +1,17 @@
 # Haussteuerung Raubling — Projektliste
 
-## 🔝 Aktuell zuerst — Hydraulischer Abgleich FBH (vorbereiten)
-Reihenfolge (Stefan 18.07.2026):
-1. [ ] **SCHRITT 1 — Pumpe prüfen:** Welche Heizkreispumpe (FBH)? Fabrikat/Typ ablesen.
-       Hat sie eine Einstellung **konstanter Druck (Δp-c)**? Aktuelle Einstellung notieren.
-       → Ohne passende Pumpeneinstellung erreichen die langen Wohnzimmer-Kreise (5+)
-         evtl. den Soll-Durchfluss nicht. Das ist die Grundvoraussetzung.
-2. [ ] SCHRITT 2 — Heizlast 1. OG in Oventrop rechnen (FBH ignorieren) → PDF an Claude.
-3. [ ] SCHRITT 3 — Claude rechnet Soll-Durchfluss je Kreis (l/min) aus Raum-Heizlast.
+## 🔝 Aktuell zuerst — Hydraulischer Abgleich FBH OG (läuft)
+1. [x] SCHRITT 1 — Pumpe geprüft (26.07.2026): KEINE Δp-Adaptivregelung, nur 3 feste
+       Stufen. → Abgleich per Durchflussmesser geht trotzdem; am Ende niedrigste
+       Stufe wählen, die alle Soll-Durchflüsse schafft.
+2. [x] SCHRITT 2 — Heizlast OG liegt vor (26.07.2026, siehe "Norm-Heizlast OG" unten).
+3. [ ] SCHRITT 3 — Claude rechnet Soll-Durchfluss je Kreis (l/min). BRAUCHT von Stefan:
+       Verteiler→Kreis→Raum-Zuordnung + Kreislänge je Kreis (hat er vom HB),
+       Anzahl Verteiler/Pumpen, gewünschte Spreizung (Default 7 K).
 4. [ ] SCHRITT 4 — Am laufenden Verteiler einstellen (Pumpe an, alle Kreise offen,
-       2–3 Runden iterieren). Details siehe "Hydraulischer Abgleich FBH" unten.
+       2–3 Runden iterieren, dann Pumpenstufe minimieren). Details Abschnitt unten.
 VORHANDEN: Kreislängen vom Heizungsbauer dokumentiert (Gold wert für Genauigkeit).
-Wohnzimmer hat 5+ Kreise → werden als Gruppe behandelt (Heizlast nach Länge verteilt).
+Wohnzimmer (39,6 m², 2139 W) hat mehrere Kreise → Heizlast nach Kreislänge aufteilen.
 
 ## Anlage Übersicht
 
@@ -361,13 +361,40 @@ NUTZEN für die Wärmebedarfs-Methodik:
     ≈ 13.000 kWh/Jahr Transmission+Lüftung (ohne WW, ohne solare/interne Gewinne
     → real deutlich niedriger, dient nur als Größenordnung).
   - Auslegungs-Vorlauf/Heizflächen: Bad ist mit 69 W/m² + 24 °C der kritische Raum.
-- [ ] Noch offen: gleiche Berechnung für 1.OG (Familie) → dann Gesamt-Norm-Heizlast
-      Haus, vergleichbar mit ETA-Kesselleistung + Puffergröße.
 - [ ] Ab Heizsaison: gemessenes W/K (Signatur) gegen 145 W/K (Rechnung) halten.
-- [ ] Hydraulischer Abgleich FBH (mit Stefan, wenn raumweise Heizlast vorliegt):
-      Soll-Durchfluss je Kreis ṁ = Q / (c·ΔT), Spreizung FBH ~5–7 K → l/min am
-      Verteiler-Durchflussmesser einstellen. Braucht: Heizlast/Raum (aus PDF),
-      Raum↔Verteilerkreis-Zuordnung, grobe Kreislängen, gewünschte VL-Temp/Spreizung.
+
+### Norm-Heizlast OG + Speicher (Familie) — Rechenwert (Stefan 26.07.2026)
+PDF "Heizlast vereinfachtes Verfahren Glas 26072026" (enthält EG+OG). −12,5 °C.
+Datei: context/docs/heizlast_haus_din12831_26072026.pdf
+  OG-Raum            Fläche   Tᵢ    ~Heizlast   spez.
+  Wohnzimmer         39,62    20°C   2139 W      54 W/m²
+  Kind 1             16,15    20°C   1663 W     103 W/m²  ← kritisch
+  Schlafzimmer       14,99    18°C   1364 W      91 W/m²
+  Küche              18,21    20°C   1020 W      56 W/m²
+  Bad                12,21    20°C    977 W      80 W/m²
+  Kind 2 Lorenz       9,31    20°C    745 W      80 W/m²
+  Flur Treppenhaus   18,67    20°C    579 W      31 W/m²
+  Kind 3 Eva          7,89    20°C    276 W      35 W/m²
+  Ankleide            4,77    18°C    262 W      55 W/m²
+  Flur wohnen         8,34    18°C    108 W      13 W/m²
+  Gäste WC            1,70    18°C     22 W      13 W/m²
+  Speicher (ausgeb.) 67,00    17°C   3551 W      53 W/m²  ← größter Posten
+  OG-SUMME inkl. Speicher            ~12.706 W
+GESAMT-NORM-HEIZLAST HAUS (EG 4713 + OG 12706): ~17.402 W = 17,4 kW bei −12,5 °C
+  → Vergleichsbasis für ETA-Kesselleistung + Puffer.
+- [x] OG-Heizlast liegt vor (26.07.2026). Werkstatt-Heizkörper + Zwischenraum NICHT im PDF.
+
+### Hydraulischer Abgleich FBH OG — LÄUFT (Start 26.07.2026)
+Pumpe: KEINE Adaptivregelung (Δp), nur 3 feste Stufen → Abgleich per Durchflussmesser
+  am Verteiler trotzdem möglich; am Ende niedrigste Stufe wählen, die alle Soll-
+  Durchflüsse schafft.
+Formel je Kreis: ṁ [l/h] = Q_raum [W] × 0,86 / ΔT(Spreizung, Default 7 K);
+  bei mehreren Kreisen/Raum nach Kreislänge aufteilen; l/min = l/h ÷ 60.
+BRAUCHE VON STEFAN (nächster Schritt):
+  1. Verteiler → Kreis → Raum-Zuordnung + Kreislänge je Kreis (hat er vom HB)
+  2. wie viele Verteiler/Pumpen (OG einer? Speicher separat?)
+  3. welche Räume FBH (Werkstatt = Heizkörper, nicht am Verteiler)
+  4. gewünschte Spreizung/VL (Default VL~35 °C, ΔT 7 K)
 
 ### Brauchwasser-Verbrauch erfassen (Konzept 03.07.2026)
 Stefan: aktuell kein Überblick über Kalt- noch Warmwasserbezug.
