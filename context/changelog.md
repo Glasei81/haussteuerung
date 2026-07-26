@@ -141,6 +141,16 @@ Chronologische Entwicklungshistorie. Jede Session mit Datum und Inhalt.
   1./15., InfluxDB. Familie 1.OG hat echte Kalt+Warm-Unterzähler → WW messbar
   (~605 kWh Halbjahr 2026). Baseline 31.01.2026 geseedet → 2026 rückwirkend drin.
 
+## 26.07.2026 — Hydraulischer Abgleich FBH OG durchgeführt
+- Heizlast ganzes Haus (DIN EN 12831 vereinf.): EG 4713 W + OG inkl. Speicher
+  12706 W = ~17,4 kW bei −12,5 °C. PDF context/docs/heizlast_haus_din12831_26072026.pdf.
+- Soll-Durchflüsse je FBH-Kreis berechnet (ΔT 7 K, Mehrfachkreise nach Länge):
+  3 Verteiler (V1 ~12,6 + V2 ~6,1 + Speicher ~7,3 l/min = ~26 l/min gesamt).
+- Pumpe Grundfos ALPHA2 L 25-60 (3 Stufen). Auf Stufe III balanciert (konvergierte
+  schnell), dann Stufen getestet: ENDSTAND Stufe II — hält alle Kreise, Stufe I zu
+  schwach. Eingangs-Heizkörper bleibt voll offen (Radiator am FBH-Verteiler).
+- Nachlauf: über Heizsaison via Zigbee-Raumtemp feinjustieren.
+
 ## 18.07.2026 — Norm-Heizlast EG (Eltern) dokumentiert
 - Stefan lieferte Heizlast-Berechnung EG (DIN EN 12831 vereinf., Oventrop 5.1.4):
   **Summe 4713 W** bei −12,5 °C Normaußentemp, 103,18 m² (46 W/m²).

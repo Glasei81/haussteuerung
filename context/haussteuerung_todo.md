@@ -1,17 +1,15 @@
 # Haussteuerung Raubling — Projektliste
 
-## 🔝 Aktuell zuerst — Hydraulischer Abgleich FBH OG (läuft)
-1. [x] SCHRITT 1 — Pumpe geprüft (26.07.2026): KEINE Δp-Adaptivregelung, nur 3 feste
-       Stufen. → Abgleich per Durchflussmesser geht trotzdem; am Ende niedrigste
-       Stufe wählen, die alle Soll-Durchflüsse schafft.
-2. [x] SCHRITT 2 — Heizlast OG liegt vor (26.07.2026, siehe "Norm-Heizlast OG" unten).
-3. [ ] SCHRITT 3 — Claude rechnet Soll-Durchfluss je Kreis (l/min). BRAUCHT von Stefan:
-       Verteiler→Kreis→Raum-Zuordnung + Kreislänge je Kreis (hat er vom HB),
-       Anzahl Verteiler/Pumpen, gewünschte Spreizung (Default 7 K).
-4. [ ] SCHRITT 4 — Am laufenden Verteiler einstellen (Pumpe an, alle Kreise offen,
-       2–3 Runden iterieren, dann Pumpenstufe minimieren). Details Abschnitt unten.
-VORHANDEN: Kreislängen vom Heizungsbauer dokumentiert (Gold wert für Genauigkeit).
-Wohnzimmer (39,6 m², 2139 W) hat mehrere Kreise → Heizlast nach Kreislänge aufteilen.
+## ✅ ERLEDIGT — Hydraulischer Abgleich FBH OG (26.07.2026)
+1. [x] Pumpe geprüft: Grundfos ALPHA2 L 25-60, 3 Stufen I/II/III (kein Δp-Menü).
+2. [x] Heizlast OG liegt vor (siehe "Norm-Heizlast OG" unten).
+3. [x] Soll-Durchflüsse je Kreis berechnet (ΔT 7 K), 3 Verteiler (V1/V2/Speicher).
+4. [x] Abgleich durchgeführt: auf Stufe III balanciert (konvergierte nach ~1 Runde,
+       nur 1 Kreis leicht nachgestellt), dann Stufe getestet:
+       ERGEBNIS → Stufe II hält alle Kreise auf Soll; Stufe I zu schwach (kleine
+       Kreise blieben stehen). ENDSTAND: PUMPE STUFE II, alle Kreise auf Soll.
+NACHLAUF: über Heizsaison via Zigbee-Raumtemp beobachten, ob Räume gleichmäßig warm
+  → ggf. einzelne Kreise ±feinjustieren. Foto vom eingestellten Verteiler als Doku.
 
 ## Anlage Übersicht
 
