@@ -421,7 +421,23 @@ VERTEILER 2 (Stefan 26.07.2026) — Soll-Durchflüsse @ ΔT 7 K:
 GESAMT-FLOW-Zwischenstand: OG (V1+V2) ~18,7 l/min (~1,13 m³/h);
   + Speicher (~3551 W → ~7,3 l/min) + Eingangs-HK (voll offen, unbekannt).
   → Speicher = größter Einzel-Flow, entscheidend für Pumpenstufe.
-SPEICHER-KREISE: folgt separat (Länge je Kreis). Dann Pumpenstufe festlegen.
+SPEICHER-VERTEILER (Stefan 26.07.2026) — Soll-Durchflüsse @ ΔT 7 K:
+  Speicher 1  64 m  695 W  → 1,42 l/min
+  Speicher 2  69 m  749 W  → 1,53
+  Speicher 3  59 m  640 W  → 1,31
+  Speicher 4  75 m  814 W  → 1,67
+  Speicher 5  60 m  651 W  → 1,33
+  Summe Speicher ~7,3 l/min (~0,44 m³/h)
+GESAMT-FLOW (V1 12,6 + V2 6,1 + Speicher 7,3) = ~26,0 l/min (~1,56 m³/h),
+  + Eingangs-HK (voll offen) → real ~1,6–2,0 m³/h Pumpenleistung nötig.
+PUMPENSTUFE: empirisch beim Einstellen (mittlere Stufe starten; hoch, wenn krit.
+  Kreise Soll nicht erreichen; runter, wenn alle locker + Ventile stark zu).
+  OFFEN: Pumpen-Fabrikat/Typ von Stefan → Kennlinie prüfen, Startstufe eingrenzen.
+  RESERVE-HEBEL: Spreizung 7 K → 9–10 K senkt Flow (~1,1 m³/h @ 10 K), falls Pumpe
+  zu schwach.
+ABLAUF ABGLEICH: Heizung an, alle Kreise/Stellantriebe auf, HK voll offen →
+  je Kreis auf Soll-l/min drosseln → 2–3 Runden über alle 3 Verteiler iterieren →
+  Pumpenstufe final wählen → Foto/Doku → über Heizsaison via Zigbee-Raumtemp feinjustieren.
 Spreizung Default 7 K (Stefan noch bestätigen).
 
 ### Brauchwasser-Verbrauch erfassen (Konzept 03.07.2026)
