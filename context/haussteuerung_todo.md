@@ -407,9 +407,22 @@ VERTEILER 1 (Stefan 26.07.2026) — Soll-Durchflüsse @ ΔT 7 K:
   Bad Handtuchtr. 21 m   168 W  → 0,34
   WC + Gang       41 m  ~130 W  → 0,27  (bestätigt: Gäste WC + Flur wohnen)
   Summe V1 ~12,6 l/min (~0,76 m³/h)
-VERTEILER 2: folgt (inkl. Speicher-Kreise). Danach Gesamt-Flow → Pumpenstufe wählen.
-OFFEN Stefan: welche Räume FBH (Werkstatt = Heizkörper, nicht am Verteiler);
-  Spreizung bestätigen (Default 7 K).
+VERTEILER 2 (Stefan 26.07.2026) — Soll-Durchflüsse @ ΔT 7 K:
+  Heizkörper Eingangsbereich  —     —     → VOLL OFFEN, nicht abgeglichen
+                                            (braucht max. Flow, zieht unkontrolliert)
+  Kind Eva (Kind 3)     48 m   276 W  → 0,57 l/min
+  Gang Treppenhaus      72 m   579 W  → 1,19  (= Flur Treppenhaus)
+  Wohnzimmer 1          50 m   313 W  → 0,64
+  Wohnzimmer 2          68 m   425 W  → 0,87
+  Wohnzimmer 3          70 m   438 W  → 0,90
+  Wohnzimmer 4          79 m   494 W  → 1,01
+  Wohnzimmer 5          75 m   469 W  → 0,96
+  Summe V2 (ohne HK) ~6,1 l/min (~0,37 m³/h)
+GESAMT-FLOW-Zwischenstand: OG (V1+V2) ~18,7 l/min (~1,13 m³/h);
+  + Speicher (~3551 W → ~7,3 l/min) + Eingangs-HK (voll offen, unbekannt).
+  → Speicher = größter Einzel-Flow, entscheidend für Pumpenstufe.
+SPEICHER-KREISE: folgt separat (Länge je Kreis). Dann Pumpenstufe festlegen.
+Spreizung Default 7 K (Stefan noch bestätigen).
 
 ### Brauchwasser-Verbrauch erfassen (Konzept 03.07.2026)
 Stefan: aktuell kein Überblick über Kalt- noch Warmwasserbezug.
