@@ -405,8 +405,7 @@ VERTEILER 1 (Stefan 26.07.2026) — Soll-Durchflüsse @ ΔT 7 K:
   Schlafen (b)    64 m   661 W  → 1,35
   Bad Boden      101 m   809 W  → 1,66
   Bad Handtuchtr. 21 m   168 W  → 0,34
-  WC + Gang       41 m  ~130 W  → 0,27  (Annahme Gang=Flur wohnen; falls Flur
-                                         Treppenhaus 579 W → 1,23 l/min — Stefan klären)
+  WC + Gang       41 m  ~130 W  → 0,27  (bestätigt: Gäste WC + Flur wohnen)
   Summe V1 ~12,6 l/min (~0,76 m³/h)
 VERTEILER 2: folgt (inkl. Speicher-Kreise). Danach Gesamt-Flow → Pumpenstufe wählen.
 OFFEN Stefan: welche Räume FBH (Werkstatt = Heizkörper, nicht am Verteiler);
