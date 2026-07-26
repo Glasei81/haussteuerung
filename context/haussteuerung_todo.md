@@ -10,6 +10,14 @@
        Kreise blieben stehen). ENDSTAND: PUMPE STUFE II, alle Kreise auf Soll.
 NACHLAUF: über Heizsaison via Zigbee-Raumtemp beobachten, ob Räume gleichmäßig warm
   → ggf. einzelne Kreise ±feinjustieren. Foto vom eingestellten Verteiler als Doku.
+GEDANKENSPIEL (Stefan 26.07.): vorhandene Durchflussmesser schlecht ablesbar/billig.
+  Optionen falls Aufwertung gewünscht (kein Muss, Abgleich ist eingestellt):
+  a) Qualitätsverteiler (Oventrop/Uponor/Viega/IVAR) — klare Anzeige, ggf. nur
+     Durchflussmesser-Einsätze tauschbar.
+  b) Grundfos ALPHA3 + "Grundfos GO Balance"-App = digitaler App-Abgleich (misst
+     Fluss, kein Röhrchen-Ablesen; aber kein Dauerdisplay pro Kreis).
+  c) elektronische Inline-Flusssensoren pro Kreis — teuer/übertrieben für Zuhause.
+  Merke: digitale Rückmeldung liefert ohnehin Zigbee-Raumtemp über die Saison.
 
 ## Anlage Übersicht
 
