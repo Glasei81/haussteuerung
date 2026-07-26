@@ -393,12 +393,24 @@ Formel je Kreis: ṁ [l/h] = Q_raum [W] × 0,86 / ΔT(Spreizung, Default 7 K);
 SPEICHER (ausgeb. Attika, 3551 W) hängt an DENSELBEN Strängen/Verteiler wie OG
   (Stefan 26.07.) → voll im Abgleich, seine Kreise in die Kreisliste. Größter
   Flow-Verbraucher → maßgeblich für die Pumpenstufen-Wahl.
-BRAUCHE VON STEFAN (nächster Schritt):
-  1. Verteiler → Kreis → Raum-Zuordnung + Kreislänge je Kreis (hat er vom HB),
-     inkl. Speicher-Kreise
-  2. wie viele Verteiler/Pumpen (OG+Speicher zusammen an einem?)
-  3. welche Räume FBH (Werkstatt = Heizkörper, nicht am Verteiler)
-  4. gewünschte Spreizung/VL (Default VL~35 °C, ΔT 7 K)
+Es gibt 2 Verteiler im OG. Rechnung mit ΔT 7 K, Mehrfachkreise nach Länge geteilt.
+
+VERTEILER 1 (Stefan 26.07.2026) — Soll-Durchflüsse @ ΔT 7 K:
+  Küche          101 m  1020 W  → 2,09 l/min
+  Kind 1 (a)      64 m   859 W  → 1,76
+  Kind 1 (b)      60 m   804 W  → 1,65
+  Lorenz          66 m   745 W  → 1,53
+  Ankleide        53 m   262 W  → 0,54
+  Schlafen (a)    68 m   703 W  → 1,44
+  Schlafen (b)    64 m   661 W  → 1,35
+  Bad Boden      101 m   809 W  → 1,66
+  Bad Handtuchtr. 21 m   168 W  → 0,34
+  WC + Gang       41 m  ~130 W  → 0,27  (Annahme Gang=Flur wohnen; falls Flur
+                                         Treppenhaus 579 W → 1,23 l/min — Stefan klären)
+  Summe V1 ~12,6 l/min (~0,76 m³/h)
+VERTEILER 2: folgt (inkl. Speicher-Kreise). Danach Gesamt-Flow → Pumpenstufe wählen.
+OFFEN Stefan: welche Räume FBH (Werkstatt = Heizkörper, nicht am Verteiler);
+  Spreizung bestätigen (Default 7 K).
 
 ### Brauchwasser-Verbrauch erfassen (Konzept 03.07.2026)
 Stefan: aktuell kein Überblick über Kalt- noch Warmwasserbezug.
