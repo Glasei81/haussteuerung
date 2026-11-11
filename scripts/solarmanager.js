@@ -1,12 +1,22 @@
 // ============================================
 // Solarmanager Script
-// Liest Solarmanager API jede Minute
-// Stand: Mai 2026
+// Liest Solarmanager lokale API (/v2/point) jede Minute
+// Stand: Nov 2026 — lokale API mit API-Key (Header X-API-Key)
+//
+// API-Key NICHT im Code! Wird aus ioBroker-State gelesen:
+//   javascript.0.config.solarmanager.api_key
+// → einmalig im ioBroker Admin (Objekte) eintragen.
 // ============================================
 
 var http = require('http');
 
 var SM_IP = '192.168.178.36';
+
+createState('config.solarmanager.api_key', '', { name: 'Solarmanager lokaler API Key', type: 'string', role: 'text', read: true, write: true });
+// Rohdaten der letzten Antwort (ohne Geräteliste) — zum Prüfen der Werte
+createState('solar.debug.raw', '', { name: 'SM /v2/point Rohdaten (ohne devices)', type: 'string', role: 'json', read: true, write: false });
+// interner Zähler für PV-Tagesertrag (Datum der letzten Aufsummierung)
+createState('solar.pv.today_datum', '', { name: 'PV Heute: Datum', type: 'string', role: 'text', read: true, write: false });
 
 var DEVICE_IDS = {
     puffer_heizstab:  '672f524463329ad0323012bd',
@@ -47,18 +57,57 @@ states.forEach(function(s) {
 // einmalig die Geräteliste ins Log (zeigt welche Felder myPV/Relais liefern)
 var apiGeloggt = false;
 
+function apiKey() {
+    var st = getState('javascript.0.config.solarmanager.api_key');
+    return (st && st.val) ? String(st.val).trim() : '';
+}
+
 function smGet(path, callback) {
-    var options = { host: SM_IP, port: 80, path: path, method: 'GET' };
+    var key = apiKey();
+    if (!key) { log('SM: API-Key fehlt — bitte javascript.0.config.solarmanager.api_key setzen', 'warn'); return; }
+    var options = {
+        host: SM_IP, port: 80, path: path, method: 'GET', timeout: 10000,
+        headers: { 'Accept': 'application/json', 'X-API-Key': key }
+    };
     var req = http.request(options, function(res) {
         var data = '';
         res.on('data', function(c) { data += c; });
         res.on('end', function() {
+            if (res.statusCode === 401 || res.statusCode === 403) {
+                log('SM: API-Key abgelehnt (HTTP ' + res.statusCode + ')', 'error'); return;
+            }
+            if (res.statusCode !== 200) {
+                log('SM: HTTP ' + res.statusCode + ' — ' + data.substring(0, 200), 'error'); return;
+            }
             try { callback(JSON.parse(data)); }
-            catch(e) { log('SM Parse Fehler: ' + e, 'error'); }
+            catch(e) { log('SM Parse Fehler: ' + e + ' — ' + data.substring(0, 200), 'error'); }
         });
     });
+    req.on('timeout', function() { req.destroy(new Error('Timeout')); });
     req.on('error', function(e) { log('SM Fehler: ' + e.message, 'error'); });
     req.end();
+}
+
+// PV-Tagesertrag: pWh der API ist nur die Energie des letzten Intervalls,
+// KEIN Tageswert. Daher selbst aus pW integrieren (W × Zeit), Reset um Mitternacht.
+var letzterPoll = null;   // { t: ms, pW: W }
+function pvHeuteAktualisieren(pW) {
+    var jetzt = Date.now();
+    var heute = formatDate(new Date(), 'YYYY-MM-DD');
+    var datumSt = getState('javascript.0.solar.pv.today_datum');
+    var kwh = (getState('javascript.0.solar.pv.today') || {}).val || 0;
+    if (!datumSt || datumSt.val !== heute) {
+        kwh = 0;
+        letzterPoll = null;
+        setState('javascript.0.solar.pv.today_datum', {val: heute, ack: true});
+    }
+    if (letzterPoll) {
+        var dtH = (jetzt - letzterPoll.t) / 3600000;
+        // Lücken > 5 Min (Script-Neustart, Ausfall) nicht hochrechnen
+        if (dtH > 0 && dtH <= 5 / 60) kwh += ((letzterPoll.pW + pW) / 2) * dtH / 1000;
+    }
+    letzterPoll = { t: jetzt, pW: pW };
+    setState('javascript.0.solar.pv.today', {val: Math.round(kwh * 1000) / 1000, ack: true});
 }
 
 function solarmanagerLesen() {
@@ -68,8 +117,13 @@ function solarmanagerLesen() {
             return;
         }
 
+        // Rohdaten (ohne devices) zum Abgleich mit der Solarmanager-App
+        var roh = {};
+        Object.keys(data).forEach(function(k) { if (k !== 'devices') roh[k] = data[k]; });
+        setState('javascript.0.solar.debug.raw', {val: JSON.stringify(roh), ack: true});
+
         setState('javascript.0.solar.pv.watt',        {val: data.pW  || 0, ack: true});
-        setState('javascript.0.solar.pv.today',       {val: data.pWh || 0, ack: true});
+        pvHeuteAktualisieren(data.pW || 0);
         setState('javascript.0.solar.verbrauch.watt', {val: data.cW  || 0, ack: true});
         setState('javascript.0.solar.batterie.soc',   {val: data.soc || 0, ack: true});
         // positiv = laden, negativ = entladen
@@ -80,6 +134,7 @@ function solarmanagerLesen() {
         // Geräteliste einmalig protokollieren, damit wir sehen was die API liefert
         if (!apiGeloggt) {
             apiGeloggt = true;
+            log('SM-Rohdaten: ' + JSON.stringify(roh));
             (data.devices || []).forEach(function(d) {
                 log('SM-Gerät ' + d._id + ': power=' + d.power + ' switchState=' + d.switchState + ' temp=' + d.temperature);
             });

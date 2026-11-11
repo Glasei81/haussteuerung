@@ -189,3 +189,11 @@ Chronologische Entwicklungshistorie. Jede Session mit Datum und Inhalt.
 
 ## Offen / Nächste Sessions
 Siehe haussteuerung_todo.md für aktuelle offene Punkte.
+
+## 11.11.2026 — Solarmanager lokale API mit API-Key
+- solarmanager.js: Key wird als Header `X-API-Key` gesendet, gelesen aus State
+  `javascript.0.config.solarmanager.api_key` (nicht im Code/Repo!)
+- Fehlermeldungen: Key fehlt / HTTP 401/403 abgelehnt / sonstiger HTTP-Status / Timeout 10 s
+- BUGFIX solar.pv.today: war `pWh` = Energie des letzten API-Intervalls (Wh), kein Tageswert
+  → jetzt aus pW integriert (kWh), Reset um Mitternacht
+- Neu: solar.debug.raw (Rohwerte /v2/point ohne devices) zum Abgleich mit der App
