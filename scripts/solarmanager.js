@@ -5,7 +5,8 @@
 //
 // API-Key NICHT im Code! Wird aus ioBroker-State gelesen:
 //   javascript.0.config.solarmanager.api_key
-// → einmalig im ioBroker Admin (Objekte) eintragen.
+// → im ioBroker Admin (Objekte) eintragen. Leer lassen, wenn die lokale API
+//   in der Web Platform ohne Schlüssel läuft.
 // ============================================
 
 var http  = require('http');
@@ -84,11 +85,13 @@ function apiKey() {
 }
 
 function smGet(path, callback) {
+    // Key optional: leer = lokale API ohne Schlüssel (in Web Platform so eingestellt)
     var key = apiKey();
-    if (!key) { log('SM: API-Key fehlt — bitte javascript.0.config.solarmanager.api_key setzen', 'warn'); return; }
+    var headers = { 'Accept': 'application/json' };
+    if (key) headers['X-API-Key'] = key;
     var options = {
         host: smIp(), port: smHttps() ? 443 : 80, path: path, method: 'GET', timeout: 10000,
-        headers: { 'Accept': 'application/json', 'X-API-Key': key },
+        headers: headers,
         rejectUnauthorized: false   // Solarmanager nutzt selbstsigniertes Zertifikat (wie curl -k)
     };
     var req = (smHttps() ? https : http).request(options, function(res) {
@@ -96,8 +99,9 @@ function smGet(path, callback) {
         res.on('data', function(c) { data += c; });
         res.on('end', function() {
             if (res.statusCode === 401 || res.statusCode === 403) {
-                log('SM: API-Key abgelehnt (HTTP ' + res.statusCode + ') von ' + smIp() +
-                    ' — Key-Länge ' + key.length + ', Anfang ' + key.substring(0, 4) + '… — Antwort: ' +
+                log('SM: Zugriff abgelehnt (HTTP ' + res.statusCode + ') von ' + smIp() +
+                    (key ? ' — Key-Länge ' + key.length + ', Anfang ' + key.substring(0, 4) + '…'
+                         : ' — OHNE Key gesendet (State leer), Solarmanager verlangt aber einen') + ' — Antwort: ' +
                     data.substring(0, 200), 'error'); return;
             }
             if (res.statusCode !== 200) {
