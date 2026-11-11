@@ -199,3 +199,7 @@ Siehe haussteuerung_todo.md für aktuelle offene Punkte.
 - Neu: solar.debug.raw (Rohwerte /v2/point ohne devices) zum Abgleich mit der App
 - IP-Wechsel erkannt: 192.168.178.36 gehört jetzt einem Tasmota-Gerät → solar.*-Werte waren
   schon länger eingefroren. IP jetzt per State `javascript.0.config.solarmanager.ip` einstellbar.
+- Laut offizieller Doku (lokale API): muss in Web Platform aktiviert sein (Einstellungen → lokale API),
+  http/https wählbar, Header `X-API-Key`; *Wh-Werte nur über aktuelles Intervall (~10 s).
+  → https per State `javascript.0.config.solarmanager.https` (selbstsigniert, wie curl -k)
+  → Batterie-SOC aus den Batterie-Geräten (batterie1/2, Mittelwert), da `soc` laut Doku nur dort

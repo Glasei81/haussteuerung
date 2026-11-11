@@ -8,12 +8,19 @@
 // → einmalig im ioBroker Admin (Objekte) eintragen.
 // ============================================
 
-var http = require('http');
+var http  = require('http');
+var https = require('https');
 
 // IP aus State (Fallback: alte IP). ACHTUNG: .36 gehört seit IP-Wechsel zu einem Tasmota-Gerät!
 // → neue IP in javascript.0.config.solarmanager.ip eintragen, in Fritzbox fest vergeben.
 var SM_IP_DEFAULT = '192.168.178.36';
 createState('config.solarmanager.ip', SM_IP_DEFAULT, { name: 'Solarmanager IP', type: 'string', role: 'text', read: true, write: true });
+// Protokoll wie in der Web Platform unter Einstellungen → lokale API gewählt
+createState('config.solarmanager.https', false, { name: 'Solarmanager lokale API über https', type: 'boolean', role: 'switch', read: true, write: true });
+function smHttps() {
+    var st = getState('javascript.0.config.solarmanager.https');
+    return !!(st && st.val);
+}
 function smIp() {
     var st = getState('javascript.0.config.solarmanager.ip');
     return (st && st.val) ? String(st.val).trim() : SM_IP_DEFAULT;
@@ -73,10 +80,11 @@ function smGet(path, callback) {
     var key = apiKey();
     if (!key) { log('SM: API-Key fehlt — bitte javascript.0.config.solarmanager.api_key setzen', 'warn'); return; }
     var options = {
-        host: smIp(), port: 80, path: path, method: 'GET', timeout: 10000,
-        headers: { 'Accept': 'application/json', 'X-API-Key': key }
+        host: smIp(), port: smHttps() ? 443 : 80, path: path, method: 'GET', timeout: 10000,
+        headers: { 'Accept': 'application/json', 'X-API-Key': key },
+        rejectUnauthorized: false   // Solarmanager nutzt selbstsigniertes Zertifikat (wie curl -k)
     };
-    var req = http.request(options, function(res) {
+    var req = (smHttps() ? https : http).request(options, function(res) {
         var data = '';
         res.on('data', function(c) { data += c; });
         res.on('end', function() {
@@ -134,7 +142,13 @@ function solarmanagerLesen() {
         setState('javascript.0.solar.pv.watt',        {val: data.pW  || 0, ack: true});
         pvHeuteAktualisieren(data.pW || 0);
         setState('javascript.0.solar.verbrauch.watt', {val: data.cW  || 0, ack: true});
-        setState('javascript.0.solar.batterie.soc',   {val: data.soc || 0, ack: true});
+        // SOC laut Doku nur bei Geräten vom Typ Batterie → Mittel aus batterie1/2,
+        // Fallback auf evtl. vorhandenes soc auf oberster Ebene
+        var socs = (data.devices || []).filter(function(d) {
+            return (d._id === DEVICE_IDS.batterie1 || d._id === DEVICE_IDS.batterie2) && typeof d.soc === 'number';
+        }).map(function(d) { return d.soc; });
+        var soc = socs.length ? socs.reduce(function(a, b) { return a + b; }, 0) / socs.length : (data.soc || 0);
+        setState('javascript.0.solar.batterie.soc',   {val: Math.round(soc), ack: true});
         // positiv = laden, negativ = entladen
         setState('javascript.0.solar.batterie.watt',  {val: (data.bcW || 0) - (data.bdW || 0), ack: true});
         // positiv = Netzbezug, negativ = Einspeisung
@@ -145,7 +159,7 @@ function solarmanagerLesen() {
             apiGeloggt = true;
             log('SM-Rohdaten: ' + JSON.stringify(roh));
             (data.devices || []).forEach(function(d) {
-                log('SM-Gerät ' + d._id + ': power=' + d.power + ' switchState=' + d.switchState + ' temp=' + d.temperature);
+                log('SM-Gerät ' + d._id + ': power=' + d.power + ' switchState=' + d.switchState + ' temp=' + d.temperature + ' soc=' + d.soc + ' signal=' + d.signal);
             });
         }
 
