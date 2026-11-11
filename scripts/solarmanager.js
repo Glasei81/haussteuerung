@@ -96,7 +96,9 @@ function smGet(path, callback) {
         res.on('data', function(c) { data += c; });
         res.on('end', function() {
             if (res.statusCode === 401 || res.statusCode === 403) {
-                log('SM: API-Key abgelehnt (HTTP ' + res.statusCode + ')', 'error'); return;
+                log('SM: API-Key abgelehnt (HTTP ' + res.statusCode + ') von ' + smIp() +
+                    ' — Key-Länge ' + key.length + ', Anfang ' + key.substring(0, 4) + '… — Antwort: ' +
+                    data.substring(0, 200), 'error'); return;
             }
             if (res.statusCode !== 200) {
                 log('SM: HTTP ' + res.statusCode + ' — ' + data.substring(0, 200), 'error'); return;
