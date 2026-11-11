@@ -155,17 +155,28 @@ function solarmanagerLesen() {
         setState('javascript.0.solar.pv.watt',        {val: data.pW  || 0, ack: true});
         pvHeuteAktualisieren(data.pW || 0);
         setState('javascript.0.solar.verbrauch.watt', {val: data.cW  || 0, ack: true});
-        // SOC laut Doku nur bei Geräten vom Typ Batterie → Mittel aus batterie1/2,
-        // Fallback auf evtl. vorhandenes soc auf oberster Ebene
-        var socs = (data.devices || []).filter(function(d) {
-            return (d._id === DEVICE_IDS.batterie1 || d._id === DEVICE_IDS.batterie2) && typeof d.soc === 'number';
-        }).map(function(d) { return d.soc; });
-        var soc = socs.length ? socs.reduce(function(a, b) { return a + b; }, 0) / socs.length : (data.soc || 0);
+        // SOC: Gesamtwert des Solarmanagers (kapazitätsgewichtet, fw 4.0.22 liefert ihn),
+        // Fallback: Mittel aus batterie1/2
+        var soc = data.soc;
+        if (typeof soc !== 'number') {
+            var socs = (data.devices || []).filter(function(d) {
+                return (d._id === DEVICE_IDS.batterie1 || d._id === DEVICE_IDS.batterie2) && typeof d.soc === 'number';
+            }).map(function(d) { return d.soc; });
+            soc = socs.length ? socs.reduce(function(a, b) { return a + b; }, 0) / socs.length : 0;
+        }
         setState('javascript.0.solar.batterie.soc',   {val: Math.round(soc), ack: true});
         // positiv = laden, negativ = entladen
         setState('javascript.0.solar.batterie.watt',  {val: (data.bcW || 0) - (data.bdW || 0), ack: true});
         // positiv = Netzbezug, negativ = Einspeisung
-        setState('javascript.0.solar.netz.watt',      {val: (data.cW || 0) + (data.bcW || 0) - (data.pW || 0) - (data.bdW || 0), ack: true});
+        // Gemessen aus Import/Export-Wh des Intervalls (iv = Sekunden, typ. 10),
+        // Fallback: Bilanz aus Verbrauch/PV/Batterie
+        var netz;
+        if (typeof data.iWh === 'number' && typeof data.eWh === 'number' && data.iv > 0) {
+            netz = (data.iWh - data.eWh) * 3600 / data.iv;
+        } else {
+            netz = (data.cW || 0) + (data.bcW || 0) - (data.pW || 0) - (data.bdW || 0);
+        }
+        setState('javascript.0.solar.netz.watt',      {val: Math.round(netz), ack: true});
 
         // Geräteliste einmalig protokollieren, damit wir sehen was die API liefert
         if (!apiGeloggt) {

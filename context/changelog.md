@@ -204,3 +204,7 @@ Siehe haussteuerung_todo.md für aktuelle offene Punkte.
   → https per State `javascript.0.config.solarmanager.https` (selbstsigniert, wie curl -k)
   → Batterie-SOC aus den Batterie-Geräten (batterie1/2, Mittelwert), da `soc` laut Doku nur dort
 - Neue Solarmanager-IP: 192.168.178.44 (Default im Script, überschreibbar per State)
+- 11:42 erste echte Daten von .44 (lokale API http, OHNE Key; mit Key kam HTTP 403), fw 4.0.22, iv=10 s
+  - Vorher: .36 (Tasmota) antwortete "File Not Found" → Parse-Fehler, Werte eingefroren
+  - netz.watt jetzt GEMESSEN aus (iWh − eWh) × 3600 / iv statt Bilanzrechnung
+  - batterie.soc jetzt Gesamt-SOC vom Solarmanager (38 % bei Einzel-SOC 52 % / 29 %)
