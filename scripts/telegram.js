@@ -59,6 +59,12 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
         var verbW  = safeState('solar.verbrauch.watt',0);
         var batW   = safeState('solar.batterie.watt', 0);
         var batSoc = safeState('solar.batterie.soc',  0);
+        // Alter der Solarmanager-Daten (wird jede Minute aktualisiert)
+        var pvSt = getState('javascript.0.solar.pv.watt');
+        var pvAlterMin = (pvSt && pvSt.ts) ? Math.round((Date.now() - pvSt.ts) / 60000) : -1;
+        var pvAlt = (pvAlterMin < 0 || pvAlterMin > 5)
+            ? '  ⚠️ Solarmanager-Daten VERALTET' + (pvSt && pvSt.ts ? ' (Stand ' + formatDate(new Date(pvSt.ts), 'DD.MM. hh:mm') + ')' : '') + '\n'
+            : '';
         var netzZeile = netzW > 0 ? '  🔌 Netzbezug: ' + r0(netzW) + ' W' : '  ➡️ Einspeisung: ' + r0(Math.abs(netzW)) + ' W';
         var batZeile  = batW >= 0 ? '  🔋 Batterie: ' + batSoc + '% (lädt ' + r0(batW) + ' W)' : '  🔋 Batterie: ' + batSoc + '% (liefert ' + r0(Math.abs(batW)) + ' W)';
 
@@ -101,7 +107,7 @@ on({id: 'telegram.0.communicate.request', change: 'any'}, function(obj) {
             '☀️ Solarthermie: ' + safeState('eta.solar.vorlauf','?') + '→' + safeState('eta.solar.ruecklauf','?') +
                 ' °C · heute ' + safeState('eta.solar.ertrag_heute',0) + ' kWh\n\n' +
 
-            '⚡ PV & Batterie\n' +
+            '⚡ PV & Batterie\n' + pvAlt +
             '  ☀️ PV: ' + r0(pvW) + ' W (heute ' + safeState('solar.pv.today',0) + ' kWh)\n' +
             '  🏠 Verbrauch: ' + r0(verbW) + ' W\n' +
             netzZeile + '\n' +
