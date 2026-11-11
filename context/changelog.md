@@ -197,3 +197,5 @@ Siehe haussteuerung_todo.md für aktuelle offene Punkte.
 - BUGFIX solar.pv.today: war `pWh` = Energie des letzten API-Intervalls (Wh), kein Tageswert
   → jetzt aus pW integriert (kWh), Reset um Mitternacht
 - Neu: solar.debug.raw (Rohwerte /v2/point ohne devices) zum Abgleich mit der App
+- IP-Wechsel erkannt: 192.168.178.36 gehört jetzt einem Tasmota-Gerät → solar.*-Werte waren
+  schon länger eingefroren. IP jetzt per State `javascript.0.config.solarmanager.ip` einstellbar.

@@ -10,7 +10,14 @@
 
 var http = require('http');
 
-var SM_IP = '192.168.178.36';
+// IP aus State (Fallback: alte IP). ACHTUNG: .36 gehört seit IP-Wechsel zu einem Tasmota-Gerät!
+// → neue IP in javascript.0.config.solarmanager.ip eintragen, in Fritzbox fest vergeben.
+var SM_IP_DEFAULT = '192.168.178.36';
+createState('config.solarmanager.ip', SM_IP_DEFAULT, { name: 'Solarmanager IP', type: 'string', role: 'text', read: true, write: true });
+function smIp() {
+    var st = getState('javascript.0.config.solarmanager.ip');
+    return (st && st.val) ? String(st.val).trim() : SM_IP_DEFAULT;
+}
 
 createState('config.solarmanager.api_key', '', { name: 'Solarmanager lokaler API Key', type: 'string', role: 'text', read: true, write: true });
 // Rohdaten der letzten Antwort (ohne Geräteliste) — zum Prüfen der Werte
@@ -66,7 +73,7 @@ function smGet(path, callback) {
     var key = apiKey();
     if (!key) { log('SM: API-Key fehlt — bitte javascript.0.config.solarmanager.api_key setzen', 'warn'); return; }
     var options = {
-        host: SM_IP, port: 80, path: path, method: 'GET', timeout: 10000,
+        host: smIp(), port: 80, path: path, method: 'GET', timeout: 10000,
         headers: { 'Accept': 'application/json', 'X-API-Key': key }
     };
     var req = http.request(options, function(res) {
@@ -79,12 +86,14 @@ function smGet(path, callback) {
             if (res.statusCode !== 200) {
                 log('SM: HTTP ' + res.statusCode + ' — ' + data.substring(0, 200), 'error'); return;
             }
-            try { callback(JSON.parse(data)); }
-            catch(e) { log('SM Parse Fehler: ' + e + ' — ' + data.substring(0, 200), 'error'); }
+            var json;
+            try { json = JSON.parse(data); }
+            catch(e) { log('SM Parse Fehler (' + smIp() + ', falsches Gerät?): ' + e + ' — ' + data.substring(0, 200), 'error'); return; }
+            callback(json);
         });
     });
     req.on('timeout', function() { req.destroy(new Error('Timeout')); });
-    req.on('error', function(e) { log('SM Fehler: ' + e.message, 'error'); });
+    req.on('error', function(e) { log('SM Fehler (' + smIp() + '): ' + e.message, 'error'); });
     req.end();
 }
 
@@ -113,7 +122,7 @@ function pvHeuteAktualisieren(pW) {
 function solarmanagerLesen() {
     smGet('/v2/point', function(data) {
         if (!data || typeof data.pW === 'undefined') {
-            log('SM: Ungültige Antwort', 'warn');
+            log('SM: Ungültige Antwort von ' + smIp() + ' (kein pW — falsches Gerät?)', 'warn');
             return;
         }
 

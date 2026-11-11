@@ -70,7 +70,7 @@ GEDANKENSPIEL (Stefan 26.07.): vorhandene Durchflussmesser schlecht ablesbar/bil
 - **PV:** ca. 17 kWp (Erweiterung auf ca. 30 kWp geplant 2029)
 - **Solarthermie:** 3m2, Wärmemengenzähler kommt, lesbar via ETA REST API
 - **Batterie:** Victron LiFePO4
-- **Solarmanager:** Version 1, IP 192.168.178.36
+- **Solarmanager:** Version 1, IP NEU ermitteln (192.168.178.36 ist seit Nov 2026 ein Tasmota-Gerät) → State javascript.0.config.solarmanager.ip; IP in Fritzbox fest vergeben
 
 ### Sensoren (nach Umbau)
 - Puffer 1a/1b: 5 Temperatursensoren (Schichtung sichtbar)

@@ -26,7 +26,7 @@ Datei: `/etc/systemd/system/iobroker.service.d/override.conf`
 | ETA eSH 27 | Pellets + Scheitholz Kombiheizung | 192.168.178.5:8080 |
 | hauspi | Raspberry Pi — ioBroker | hauspi.local |
 | Dell Latitude 5320 | Ollama + InfluxDB Docker + Grafana Docker | 192.168.178.130 |
-| Solarmanager v1 | PV-Überschusssteuerung | 192.168.178.36 |
+| Solarmanager v1 | PV-Überschusssteuerung | NEU — .36 ist jetzt Tasmota (IP-Wechsel, Nov 2026) |
 
 ### InfluxDB
 - URL: http://192.168.178.130:8086
