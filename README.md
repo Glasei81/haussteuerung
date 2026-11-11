@@ -65,7 +65,7 @@ sudo -u iobroker git -C /home/pi/haussteuerung pull
 | ETA eSH 27 | Heizung (Pellets + Scheitholz) | 192.168.178.5:8080 |
 | hauspi | Raspberry Pi — ioBroker | hauspi.local:8081 |
 | Dell Latitude 5320 | InfluxDB + Grafana (Docker) | 192.168.178.130 |
-| Solarmanager v1 | PV-Überschusssteuerung | NEU — .36 ist jetzt Tasmota (IP-Wechsel, Nov 2026) |
+| Solarmanager v1 | PV-Überschusssteuerung | 192.168.178.44 (bis Nov 2026 .36, die ist jetzt Tasmota) |
 
 ## Stand
 Erstellt: 26.05.2026

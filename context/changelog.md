@@ -203,3 +203,4 @@ Siehe haussteuerung_todo.md für aktuelle offene Punkte.
   http/https wählbar, Header `X-API-Key`; *Wh-Werte nur über aktuelles Intervall (~10 s).
   → https per State `javascript.0.config.solarmanager.https` (selbstsigniert, wie curl -k)
   → Batterie-SOC aus den Batterie-Geräten (batterie1/2, Mittelwert), da `soc` laut Doku nur dort
+- Neue Solarmanager-IP: 192.168.178.44 (Default im Script, überschreibbar per State)

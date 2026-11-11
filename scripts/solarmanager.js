@@ -11,10 +11,17 @@
 var http  = require('http');
 var https = require('https');
 
-// IP aus State (Fallback: alte IP). ACHTUNG: .36 gehört seit IP-Wechsel zu einem Tasmota-Gerät!
-// → neue IP in javascript.0.config.solarmanager.ip eintragen, in Fritzbox fest vergeben.
-var SM_IP_DEFAULT = '192.168.178.36';
-createState('config.solarmanager.ip', SM_IP_DEFAULT, { name: 'Solarmanager IP', type: 'string', role: 'text', read: true, write: true });
+// IP aus State (Fallback: .44, seit Nov 2026 — vorher .36, die gehört jetzt einem Tasmota-Gerät)
+// Bei IP-Wechsel: javascript.0.config.solarmanager.ip anpassen. IP in Fritzbox fest vergeben!
+var SM_IP_DEFAULT = '192.168.178.44';
+createState('config.solarmanager.ip', SM_IP_DEFAULT, { name: 'Solarmanager IP', type: 'string', role: 'text', read: true, write: true }, function() {
+    // State wurde evtl. schon mit der alten .36 angelegt → einmalig auf neue IP umstellen
+    var st = getState('javascript.0.config.solarmanager.ip');
+    if (st && st.val === '192.168.178.36') {
+        setState('javascript.0.config.solarmanager.ip', SM_IP_DEFAULT);
+        log('SM: IP-State von .36 (jetzt Tasmota) auf ' + SM_IP_DEFAULT + ' umgestellt');
+    }
+});
 // Protokoll wie in der Web Platform unter Einstellungen → lokale API gewählt
 createState('config.solarmanager.https', false, { name: 'Solarmanager lokale API über https', type: 'boolean', role: 'switch', read: true, write: true });
 function smHttps() {
