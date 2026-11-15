@@ -35,7 +35,8 @@ var SCRIPTS_MAP = {
     'zigbee_zeitsync.js':              'script.js.zigbee_zeitsync',
     'klima_treppe.js':                 'script.js.klima_treppe',
     'trv_heizkoerper.js':              'script.js.trv_heizkoerper',
-    'wasser_zaehler.js':               'script.js.wasser_zaehler'
+    'wasser_zaehler.js':               'script.js.wasser_zaehler',
+    'zigbee_inventar.js':              'script.js.zigbee_inventar'
     // deploy_listener.js NICHT hier eintragen — kann sich nicht selbst deployen
 };
 
