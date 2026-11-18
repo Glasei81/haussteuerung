@@ -399,6 +399,34 @@ GESAMT-NORM-HEIZLAST HAUS (EG 4713 + OG 12706): ~17.402 W = 17,4 kW bei −12,5 
   → Vergleichsbasis für ETA-Kesselleistung + Puffer.
 - [x] OG-Heizlast liegt vor (26.07.2026). Werkstatt-Heizkörper + Zwischenraum NICHT im PDF.
 
+UPDATE 18.11.2026 — Neuberechnung + Prüfung negativer Lüftungswärmeverlust
+PDF context/docs/heizlast_haus_din12831_18112026.pdf (Oventrop 5.1.5). Einzige Änderung
+  ggü. 26.07.: Speicher + Innenwand (IW 52,5 m², fx 0,3) → ΦHL 3552 → 3568 W.
+  SUMME HAUS jetzt 17.418 W (= 17,4 kW, praktisch unverändert).
+AUFFÄLLIG: ΦV NEGATIV in 4 Räumen (physikalisch unmöglich, ΦV = 0,34·V·n·ΔT ≥ 0):
+  Raum              ΦT     ΦV(PDF)  ΦV(0,34·V·n·ΔT)  ΦHL(PDF)  ΦT+ΦV(rechnerisch)
+  Flur Treppenhaus  1095   −516      258              579      1353
+  Wohnzimmer OG     2850   −714      547             2136      3397
+  Kind 3 Eva         388   −115      109              274       497
+  Speicher          8286  −4718     1008             3568      9294
+  (+ Wohnzimmer EG: ΦV 533 statt rechnerisch 292 → ΦHL 1318 statt 1077, klein)
+  Alle übrigen 13 Räume: ΦV = 0,34·V·n·ΔT exakt.
+DEUTUNG (Stefan bestätigt Eingaben als richtig, 18.11.2026):
+  - Tabelle zeigt feste Standard-U-Werte (AW 1,40 / DE 2,10 / FB 1,00), Dämmung im Tool
+    NICHT eingebbar (nur Fenster-U) → ΦT in der Tabelle für gedämmte Räume viel zu hoch.
+  - Tool rechnet ΦHL offenbar über anderen Weg (Baualter/„Speicher neu“, W/m²) und bucht
+    die Differenz als negativen ΦV → negativer ΦV = KORREKTURPOSTEN, kein Rechenfehler.
+    Beleg: Speicher-IW kam dazu (ΦT +929 W), ΦV sank um −913 W, ΦHL blieb ~3550 W.
+  - Speicher = laut Stefan bestgedämmter Raum; Tool zeigt 53,3 W/m².
+    Gegenprobe (U-Wand ~0,25, U-Dach ~0,2, IW wie Tool, Lüftung 0,5 h⁻¹): ~2,5 kW,
+    mit Wärmebrücken/Zuschlägen ~3–3,5 kW → 3568 W PLAUSIBEL (eher konservativ).
+  - Treppenhaus / Wohnzimmer OG / Eva: Stefan geht davon aus, korrekt angegeben.
+  → GÜLTIG BLEIBEN die ΦHL-Werte aus dem PDF (Summe 17,4 kW); Abgleich FBH OG unverändert.
+  → Spalte ΦT/ΦV des Tools NICHT einzeln verwenden (z. B. für W/K-Aufteilung), nur ΦHL.
+- [ ] Ab Heizsaison gegenprüfen: Treppenhaus-Kreis, Eva, Wohnzimmer OG 1–5 → erreichen
+      die Räume Soll bei normaler heizt-Quote? Falls dauerhaft heizt~100 % und unter Soll:
+      Heizlast war doch unterschätzt (ohne Korrektur: 1353 / 497 / 3397 W, Summe ~19,4 kW).
+
 ### Hydraulischer Abgleich FBH OG — LÄUFT (Start 26.07.2026)
 Pumpe: KEINE Adaptivregelung (Δp), nur 3 feste Stufen → Abgleich per Durchflussmesser
   am Verteiler trotzdem möglich; am Ende niedrigste Stufe wählen, die alle Soll-

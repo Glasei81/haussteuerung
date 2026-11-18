@@ -208,3 +208,14 @@ Siehe haussteuerung_todo.md für aktuelle offene Punkte.
   - Vorher: .36 (Tasmota) antwortete "File Not Found" → Parse-Fehler, Werte eingefroren
   - netz.watt jetzt GEMESSEN aus (iWh − eWh) × 3600 / iv statt Bilanzrechnung
   - batterie.soc jetzt Gesamt-SOC vom Solarmanager (38 % bei Einzel-SOC 52 % / 29 %)
+
+## 18.11.2026 — Heizlast neu gerechnet, negativer Lüftungswärmeverlust geklärt
+- Stefan hat Heizlast neu gerechnet (Oventrop 5.1.5): Speicher + Innenwand → 3568 W,
+  Summe Haus 17.418 W. PDF: context/docs/heizlast_haus_din12831_18112026.pdf
+- Auffällig: ΦV negativ bei Flur Treppenhaus, Wohnzimmer OG, Kind 3 Eva, Speicher
+  (auch schon im PDF vom 26.07.). Deutung: Tool rechnet ΦT mit festen Standard-U-Werten
+  (Dämmung nicht eingebbar) und korrigiert die Heizlast über einen negativen ΦV.
+- Speicher (bestgedämmt, 53,3 W/m²) per Gegenrechnung plausibel (~2,5–3,5 kW).
+- Entscheidung: ΦHL-Werte aus dem PDF gelten, Abgleich FBH OG bleibt. Gegencheck
+  Treppenhaus/Eva/Wohnzimmer OG in der Heizsaison über Zigbee-Raumtemperaturen.
+  Details: haussteuerung_todo.md → „Norm-Heizlast OG + Speicher“, Update 18.11.2026.
